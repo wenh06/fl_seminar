@@ -1,0 +1,239 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Beamer Presentation
+% LaTeX Template
+% Version 1.0 (10/11/12)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND THEMES
+%----------------------------------------------------------------------------------------
+
+\documentclass[UTF8, 10pt]{beamer}
+
+\mode<presentation> {
+
+% The Beamer class comes with a number of default slide themes
+% which change the colors and layouts of slides. Below this is a list
+% of all the themes, uncomment each in turn to see what they look like.
+
+%\usetheme{default}
+%\usetheme{AnnArbor}
+%\usetheme{Antibes}
+%\usetheme{Bergen}
+\usetheme{Berkeley} % upper left corner
+%\usetheme{Berlin}
+%\usetheme{Boadilla} % vacant upper space
+%\usetheme{CambridgeUS} %red
+%\usetheme{Copenhagen} %pseudo-flat, round
+%\usetheme{Darmstadt}
+%\usetheme{Dresden}
+%\usetheme{Frankfurt}
+%\usetheme{Goettingen}
+%\usetheme{Hannover} %left column
+%\usetheme{Ilmenau}
+%\usetheme{JuanLesPins}
+%\usetheme{Luebeck} %flat, square
+%\usetheme{Madrid}
+%\usetheme{Malmoe} %brief, triangle
+%\usetheme{Marburg} %right column
+%\usetheme{Montpellier} %brief, upper column
+%\usetheme{PaloAlto} %right column
+%\usetheme{Pittsburgh}
+%\usetheme{Rochester}
+%\usetheme{Singapore}
+%\usetheme{Szeged}
+%\usetheme{Warsaw} %upper column
+
+% As well as themes, the Beamer class has a number of color themes
+% for any slide theme. Uncomment each of these in turn to see how it
+% changes the colors of your current slide theme.
+
+%\usecolortheme{albatross}
+%\usecolortheme{beaver}
+%\usecolortheme{beetle}
+%\usecolortheme{crane}
+%\usecolortheme{dolphin}
+%\usecolortheme{dove}
+%\usecolortheme{fly}
+%\usecolortheme{lily}
+%\usecolortheme{orchid}
+%\usecolortheme{rose}
+%\usecolortheme{seagull}
+%\usecolortheme{seahorse}
+%\usecolortheme{whale}
+%\usecolortheme{wolverine}
+
+\definecolor{tsinghua}{rgb}{.434,.09,.531}
+\definecolor{pale}{rgb}{.9,.9,.9}
+% \usecolortheme[named=tsinghua]{structure}
+%\usecolortheme[named=cyan]{structure}
+%\usecolortheme[named=violet]{structure}
+
+\definecolor{jdhblue}{RGB}{2,93,186}
+
+\definecolor{zkblue}{RGB}{88,135,175}
+\definecolor{zkbackground}{RGB}{230,232,234}
+
+
+\usecolortheme[named=zkblue]{structure}
+
+\setbeamercolor{section in head/foot}{fg=white}
+% \setbeamercolor{subsection in toc}{fg=tsinghua!35}
+% \setbeamercolor{frametitle}{fg=tsinghua,bg=tsinghua!20}
+% \setbeamercolor{block body}{bg=tsinghua!5,fg=tsinghua}
+% \setbeamercolor{author}{fg=tsinghua}
+% \setbeamercolor{institute}{fg=tsinghua}
+% \setbeamercolor{date}{fg=tsinghua}
+% \setbeamercolor{normal text}{fg=tsinghua}
+\setbeamercolor{subsection in toc}{fg=zkblue!35}
+\setbeamercolor{frametitle}{fg=white,bg=zkblue}
+\setbeamercolor{block body}{bg=zkblue!25,fg=zkblue}
+\setbeamercolor{author}{fg=zkblue}
+\setbeamercolor{institute}{fg=zkblue}
+\setbeamercolor{date}{fg=zkblue}
+\setbeamercolor{normal text}{fg=zkblue}
+\setbeamercolor{background canvas}{bg=zkbackground}
+
+\usefonttheme[onlymath]{serif}
+
+%\setbeamertemplate{footline} % To remove the footer line in all slides uncomment this line
+%\setbeamertemplate{footline}[page number] % To replace the footer line in all slides with a simple slide count uncomment this line
+
+%\setbeamertemplate{navigation symbols}{} % To remove the navigation symbols from the bottom of all slides uncomment this line
+}
+
+\usepackage{graphicx} % Allows including images
+\usepackage{pst-func}
+\usepackage{float}
+\usepackage[justification = centering]{caption}
+
+\usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables
+
+% \usepackage[UTF8]{ctex}
+% \usepackage{fontspec}
+
+\usepackage[slantfont,boldfont]{xeCJK}
+\usepackage{fontspec}
+
+% set font
+\setmainfont[Path = fonts/, BoldFont = timesbd.ttf, ItalicFont= timesi.ttf]{times.ttf}
+\setsansfont[Path = fonts/, BoldFont = timesbd.ttf, ItalicFont= timesi.ttf]{times.ttf}
+
+% set chn font
+% \setCJKmainfont[Path = fonts/, BoldFont = simhei.ttf]{simfang.ttf}
+% \setCJKsansfont[Path = fonts/, BoldFont = simhei.ttf]{simfang.ttf}
+
+\setCJKmainfont[Path = fonts/, BoldFont = JDLangZhengTi.ttf]{simfang.ttf}
+\setCJKsansfont[Path = fonts/, BoldFont = JDLangZhengTi.ttf]{simfang.ttf}
+
+\usepackage{latexsym,amscd,color}
+\usepackage{amsmath,amsfonts,amssymb,mathrsfs}
+\usepackage{enumerate,euscript}
+\usepackage{amssymb,url,xspace}
+\usepackage{tikz-cd}
+\usepackage[all,cmtip]{xy}
+\usepackage{dashbox}
+\usepackage{tikz}
+\usetikzlibrary{trees,arrows,decorations.pathmorphing,shapes,backgrounds,positioning,calc}
+\usepackage{xcolor}
+\usepackage{hyperref}
+% \usepackage[cmintegrals,cmbraces]{newtxmath}
+% \usepackage{ebgaramond-maths}
+
+\usepackage{datetime2}
+
+% \newcommand{\tikzmark}[1]{\tikz[baseline,remember picture] \coordinate (#1) {};}
+
+\newcommand*\circled[1]{\tikz[baseline=(char.base)]{ \node[shape=circle,draw,inner sep=2pt] (char) {#1};}}
+
+
+\newcommand{\fieldc}{\mathbb{C}}
+\newcommand{\fieldr}{\mathbb{R}}
+\newcommand{\fieldq}{\mathbb{Q}}
+\newcommand{\ringz}{\mathbb{Z}}
+\newcommand{\fp}[1]{\mathbb{F}_{{#1}}}
+\newcommand{\vs}{vector space}
+\newcommand{\sheafl}{\mathscr{L}}
+\newcommand{\GL}{\operatorname{GL}}
+\newcommand{\SL}{\operatorname{SL}}
+\newcommand{\gl}{\operatorname{\mathfrak{g}\mathfrak{l}}}
+\newcommand{\End}{\operatorname{End}}
+\newcommand{\Spec}{\operatorname{Spec}}
+\newcommand{\Ind}{\operatorname{Ind}}
+\newcommand{\Res}{\operatorname{Res}}
+\newcommand{\Hom}{\operatorname{Hom}}
+\newcommand{\Irr}{\operatorname{Irr}}
+\newcommand{\Inf}{\operatorname{Inf}}
+
+\DeclareMathOperator{\spec}{Spec}
+\DeclareMathOperator{\SPEC}{\mathbf{Spec}}
+\DeclareMathOperator{\proj}{Proj}
+\DeclareMathOperator{\PROJ}{\mathbf{Proj}}
+
+
+\newtheorem{thm}{定理}[section]
+\newtheorem{prop}[thm]{命题}
+\newtheorem{Def}[thm]{定义}
+\newtheorem{lem}[thm]{引理}
+\newtheorem{conj}[thm]{猜想}
+\newtheorem{cor}[thm]{推论}
+\newtheorem{remark}[thm]{注记}
+\newtheorem{eg}[thm]{例}
+\newtheorem{recall}[thm]{回忆}
+\newtheorem{question}[thm]{问题}
+\newtheorem{observation}[thm]{观察}
+\newtheorem*{convention}{约定}
+
+\setlength\parindent{1em}
+\addtobeamertemplate{frametitle}{\setlength{\parindent}{0em}}{}
+\addtobeamertemplate{block begin}{\setlength{\parindent}{0em}}{\setlength\parindent{1em}}
+
+\newif\ifshowtoc
+\showtoctrue % toggles to show the toc
+
+\AtBeginSection{%
+\ifshowtoc
+\begin{frame}
+    \tableofcontents[currentsection, subsectionstyle=show/hide/hide]
+\end{frame}
+\fi
+}
+
+% \makeatletter
+% \newcommand\insertlogoii{}
+% \newcommand\logoii[1]{\renewcommand\insertlogoii{#1}}
+% \setbeamertemplate{headline}
+%   {%
+%     \begin{beamercolorbox}[wd=\paperwidth]{frametitle}
+%       \ifx\beamer@sidebarside\beamer@lefttext%
+%       \else%
+%         \hfill%
+%       \fi%
+%       \ifdim\beamer@sidebarwidth>0pt%  
+%         \usebeamercolor[bg]{logo}%
+%         \vrule width\beamer@sidebarwidth height \beamer@headheight%
+%         \hskip-\beamer@sidebarwidth%
+%         \hbox to \beamer@sidebarwidth{\hss\vbox to
+%           \beamer@headheight{\vss\hbox{\color{fg}\insertlogo}\vss}\hss}%
+%         \hfill%
+%         \vrule width\beamer@sidebarwidth height \beamer@headheight%
+%         \hskip-\beamer@sidebarwidth%
+%         \hbox to \beamer@sidebarwidth{\hss\vbox to
+%           \beamer@headheight{\vss\hbox{\color{fg}\insertlogoii}\vss}\hss}%
+%       \else%
+%         \vrule width0pt height \beamer@headheight%  
+%       \fi%
+%     \end{beamercolorbox}
+% }
+% \makeatother
+
+
+\allowdisplaybreaks
+

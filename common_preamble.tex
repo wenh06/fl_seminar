@@ -1,0 +1,110 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Beamer Presentation
+% LaTeX Template
+% Version 1.0 (10/11/12)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND THEMES
+%----------------------------------------------------------------------------------------
+
+\documentclass[UTF8, 12pt]{article}
+
+\usepackage{graphicx} % Allows including images
+\usepackage{pst-func}
+\usepackage{float}
+\usepackage[justification = centering]{caption}
+
+\usepackage{booktabs} % Allows the use of \toprule, \midrule and \bottomrule in tables
+
+% \usepackage[UTF8]{ctex}
+% \usepackage{fontspec}
+
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+}
+
+\usepackage[slantfont,boldfont]{xeCJK}
+\usepackage{fontspec}
+
+% set font
+\setmainfont[Path = fonts/, BoldFont = timesbd.ttf, ItalicFont= timesi.ttf]{times.ttf}
+\setsansfont[Path = fonts/, BoldFont = timesbd.ttf, ItalicFont= timesi.ttf]{times.ttf}
+
+% set chn font
+% \setCJKmainfont[Path = fonts/, BoldFont = simhei.ttf]{simfang.ttf}
+% \setCJKsansfont[Path = fonts/, BoldFont = simhei.ttf]{simfang.ttf}
+
+\setCJKmainfont[Path = fonts/, BoldFont = JDLangZhengTi.ttf]{simfang.ttf}
+\setCJKsansfont[Path = fonts/, BoldFont = JDLangZhengTi.ttf]{simfang.ttf}
+
+\usepackage{latexsym,amscd,color}
+\usepackage{amsmath,amsfonts,amssymb,mathrsfs}
+\usepackage{enumerate,euscript}
+\usepackage{amssymb,url,xspace}
+\usepackage{tikz-cd}
+\usepackage[all,cmtip]{xy}
+\usepackage{dashbox}
+\usepackage{tikz}
+\usetikzlibrary{trees,arrows,decorations.pathmorphing,shapes,backgrounds,positioning,calc}
+\usepackage{xcolor}
+\usepackage{hyperref}
+% \usepackage[cmintegrals,cmbraces]{newtxmath}
+% \usepackage{ebgaramond-maths}
+
+\usepackage{datetime2}
+
+% \newcommand{\tikzmark}[1]{\tikz[baseline,remember picture] \coordinate (#1) {};}
+
+\newcommand*\circled[1]{\tikz[baseline=(char.base)]{ \node[shape=circle,draw,inner sep=2pt] (char) {#1};}}
+
+
+\newcommand{\fieldc}{\mathbb{C}}
+\newcommand{\fieldr}{\mathbb{R}}
+\newcommand{\fieldq}{\mathbb{Q}}
+\newcommand{\ringz}{\mathbb{Z}}
+\newcommand{\fp}[1]{\mathbb{F}_{{#1}}}
+\newcommand{\vs}{vector space}
+\newcommand{\sheafl}{\mathscr{L}}
+\newcommand{\GL}{\operatorname{GL}}
+\newcommand{\SL}{\operatorname{SL}}
+\newcommand{\gl}{\operatorname{\mathfrak{g}\mathfrak{l}}}
+\newcommand{\End}{\operatorname{End}}
+\newcommand{\Spec}{\operatorname{Spec}}
+\newcommand{\Ind}{\operatorname{Ind}}
+\newcommand{\Res}{\operatorname{Res}}
+\newcommand{\Hom}{\operatorname{Hom}}
+\newcommand{\Irr}{\operatorname{Irr}}
+\newcommand{\Inf}{\operatorname{Inf}}
+
+\DeclareMathOperator{\spec}{Spec}
+\DeclareMathOperator{\SPEC}{\mathbf{Spec}}
+\DeclareMathOperator{\proj}{Proj}
+\DeclareMathOperator{\PROJ}{\mathbf{Proj}}
+
+
+\newtheorem{thm}{定理}[section]
+\newtheorem{prop}[thm]{命题}
+\newtheorem{Def}[thm]{定义}
+\newtheorem{lem}[thm]{引理}
+\newtheorem{conj}[thm]{猜想}
+\newtheorem{cor}[thm]{推论}
+\newtheorem{remark}[thm]{注记}
+\newtheorem{eg}[thm]{例}
+\newtheorem{recall}[thm]{回忆}
+\newtheorem{question}[thm]{问题}
+\newtheorem{observation}[thm]{观察}
+
+\allowdisplaybreaks
+
