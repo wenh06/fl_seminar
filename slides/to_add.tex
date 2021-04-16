@@ -2,12 +2,12 @@
 %	TITLE PAGE
 %----------------------------------------------------------------------------------------
 
-\title[FL]{\huge{联邦学习}  \\
+\title[联邦学习]{\huge{联邦学习}  \\
 \medskip
 \small{Federated Learning}
 } % The short title appears at the bottom of every slide, the full title is only on the title page
 
-\author[文豪]{文豪} % Your name
+% \author[文豪]{文豪} % Your name
 
 % \institute[北京航空航天大学] % Your institution as it will appear on the bottom of every slide, may be shorthand to save space
 % {
@@ -21,7 +21,7 @@
 % \logo{\includegraphics[height=1.5cm]{logo}}
 % \logoii{\includegraphics[height=1cm]{logo2}}
 
-\date{\footnotesize 2021年4月13日} % Date, can be changed to a custom date
+% \date{\footnotesize 2021年4月13日} % Date, can be changed to a custom date
 
 \setlength{\belowdisplayskip}{5pt} \setlength{\belowdisplayshortskip}{5pt}
 \setlength{\abovedisplayskip}{5pt} \setlength{\abovedisplayshortskip}{5pt}
@@ -46,9 +46,12 @@
 %------------------------------------------------
 
 
+% PPT version (read only share link): https://www.kdocs.cn/l/cigmbsd3uAI4
+
+
 %------------------------------------------------
 
-\section{TO ADD}
+\section{引言}
 
 %------------------------------------------------
 % Page 1
@@ -56,19 +59,32 @@
 \begin{frame}
 % \frametitle{教育\&工作背景}
 
-% \begin{itemize}
-% \item<2-> 2019.01 - 2021.02 \newline
-% {\bfseries 博士后}，清华大学计算机系，京东健康
-% \vspace{1em}
-% \item<3-> 2010.09 - 2018.01 \newline
-% {\bfseries 理学博士}，数学，清华大学
-% \vspace{1em}
-% \item<4-> 2006.08 - 2010.07 \newline
-% {\bfseries 理学学士}，数学物理基础科学班，清华大学
-% \end{itemize}
+联邦学习（Federated Learning）来源于机器（深度）学习模型分布式（Distributed）训练的需求
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth,keepaspectratio]{images/fl_overview.png}
+\end{figure}
+
+{\footnotesize
+图片来源：Kairouz et al., Advances and open problems in federated learning, 2019
+}
 
 \end{frame}
 
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+
+Federated Learning这个名词首次由Google的研究人员McMahan等人在文章 \emph{Communication-Efficient Learning of Deep Networks from Decentralized Data} (2017)  中提出。
+
+\vspace{3em}
+\pause
+
+相关的分布式的模型训练（优化）方法则可以追溯到更早的时间，例如Boyd等人的 \emph{Distributed Optimization and Statistical Learning via the Alternating Direction Method of Multipliers} (2010)
+
+\end{frame}
 
 %------------------------------------------------
 % Page 15
