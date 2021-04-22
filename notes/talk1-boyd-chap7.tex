@@ -1,0 +1,67 @@
+
+\title{Talk 1: Distributed Optimization and Statistical Learning via ADMM (I)}
+\date{}
+\author{}
+
+\maketitle
+
+{\bfseries Main Resource: Chapter 7 of \cite{boyd2011distributed}}
+
+\section{Recall of basic ADMM}
+
+A general ADMM optimization problem is formulated as
+\begin{align*}
+    & \text{minimize} \quad f(x) + g(z) \\
+    & \text{subject to} \quad Ax + Bz = c
+\end{align*}
+The augmented Lagrangian of this problem is given by
+$$\mathcal{L}_{\rho}(x,z,y) = f(x) + g(z) + \langle y, Ax+Bz-c \rangle + \dfrac{1}{\rho}\lVert Ax+Bz-c \rVert^2.$$
+The iterations are given by
+\begin{align*}
+    x^{k+1} & = \argmin_{x} \left\{ \mathcal{L}_{\rho}(x,z^k,y^k) \right\} \\
+    z^{k+1} & = \argmin_{z} \left\{ \mathcal{L}_{\rho}(x^{k+1},z,y^k) \right\} \\
+    y^{k+1} & = y^{k} + \rho (Ax^{k+1}+Bz^{k+1}-c)
+\end{align*}
+
+Convergence of ADMM: under the conditions
+\begin{itemize}
+    \item $f,g$ convex, closed, proper;
+    \item $\mathcal{L}_{\rho}(x,z,y)$ has a saddle point,
+\end{itemize}
+then as $k\rightarrow\infty$ one has
+\begin{itemize}
+    \item feasibility: $Ax^k + By^k - c \rightarrow 0$
+    \item objective: $f(x^k) + g(y^k) \rightarrow p^*$
+    \item dual: $y^k \rightarrow y^*$
+\end{itemize}
+
+\section{Consensus Problem}
+
+Assume we have global variable $x$ and ``split'' (or distributed) objective function
+$$f(x) = \sum\limits_{i=1}^N f_i(x)$$
+e.g. $x$ can be (global) model parameters, DNN weights (and biases, etc.), $f_i$ can be the loss function associated with the $i$-th block of data. The optimization problem is
+\begin{align*}
+    & \text{minimize} \quad \sum\limits_{i=1}^N f_i(x)
+\end{align*}
+
+Problem: $f$ is NOT block-separable.
+
+Solution: add a common global variable $z$, so that the optimization problem is (equivalently) formulated as
+\begin{align*}
+    & \text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) \\
+    & \text{subject to} \quad x_i - z = 0, \quad i=1,\cdots,N
+\end{align*}
+which is called a {\bfseries consensus problem}. One has the augmented Lagrangian
+$$\mathcal{L}_{\rho}(x_1,\cdots,x_N,z,y) = \sum\limits_{i=1}^N \left[ f_i(x_i) + \langle y_i, x_i-z \rangle + \dfrac{\rho}{2} \lVert x_i-z \rVert^2 \right],$$
+and iterations
+\begin{align*}
+    \phantom{\leadsto} & \left( x = (x_1^T,\cdots,x_N^T)^T, x^{k+1} = \argmin_x \left\{ \sum\limits_{i=1}^N \left[ f_i(x_i) + \langle y^k_i, x_i-z^k \rangle + \dfrac{\rho}{2} \lVert x_i-z^k \rVert^2 \right] \right\} \right) \\
+    \leadsto \quad & x_i^{k+1} = \argmin_{x_i} \left\{ f_i(x_i) + \langle y^k_i, x_i-z^k \rangle + \dfrac{\rho}{2} \lVert x_i-z^k \rVert^2 \right\} \\
+    & z^{k+1} = \argmin_{z} \left\{ \sum\limits_{i=1}^N \left[ f_i(x_i^{k+1}) + \langle y^k_i, x_i^{k+1}-z \rangle + \dfrac{\rho}{2} \lVert x_i^{k+1}-z \rVert^2 \right] \right\} \\
+    & \phantom{z^{k+1}} = \argmin_{z} \left\{ \dfrac{N\rho}{2} \lVert z \rVert^2 - \langle z, \sum\limits_{i=1}^N (y_i^k+\rho x_i^{k+1}) \rangle + \cdots \right\} \\
+    & \phantom{z^{k+1}} = \dfrac{1}{N} \sum\limits_{i=1}^N \left( \dfrac{y_i^{k}}{\rho} + x_i^{k+1} \right) \\
+    & y^{k+1} = y_i^k + \rho (x_i^{k+1} + z^{k+1})
+\end{align*}
+
+\bibliographystyle{plain}
+\bibliography{references}
