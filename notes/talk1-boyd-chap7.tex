@@ -98,7 +98,17 @@ $$
 {\bfseries Statistical Interpretation} for the ADMM iterations for consensus problem: at iteration $k+1$, assume $x_i$ has prior distribution
 $$x_i \sim N(\overline{x}^k-u_i^k, \rho I_n)$$
 or equivalently
-$$p(x_i) = \det(2\pi\rho I)^{-1/2} \exp\left(-\dfrac{1}{2} \right)$$
+$$p(x_i) = \det(2\pi\rho I)^{-1/2} \exp\left(-\dfrac{1}{2} \lVert x_i - \overline{x}^k + u_i^k \rVert_{\rho I}^2 \right)$$
+Let
+$$f_i(x_i) = -\operatorname{NLL}(x_i) = -\log\operatorname{LH}(x_i)$$
+be the negative log likelihood function of $x_i$ (w.r.t. the data at the $i$-th ``client''). Then the max a posteriori estimates of $x_i$ are
+\begin{align*}
+    \operatorname{MAP}(x_i) & = \argmax_{x_i} \left\{ p(x_i) \operatorname{LH(x_i)} \right\} \\
+    & = \argmax_{x_i} \left\{ \exp(-f_i(x_i)) \cdot \det(2\pi\rho I)^{-1/2} \cdot \exp\left( -\dfrac{\rho}{2} \lVert x_i - \overline{x}_i + u_i^k \rVert^2 \right) \right\} \\
+    & = \argmin_{x_i} \left\{ f_i(x_i) + \dfrac{\rho}{2} \lVert x_i - \overline{x}_i + u_i^k \rVert^2 \right\} \\
+    & = x_i^{k+1}
+\end{align*}
+
 
 \bibliographystyle{plain}
 \bibliography{references}
