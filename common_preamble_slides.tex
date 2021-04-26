@@ -23,12 +23,15 @@
 % which change the colors and layouts of slides. Below this is a list
 % of all the themes, uncomment each in turn to see what they look like.
 
+% for an overview of all themes and colors, ref.
+% https://deic-web.uab.cat/~iblanes/beamer_gallery/index.html
+
 %\usetheme{default}
 %\usetheme{AnnArbor}
 %\usetheme{Antibes}
 %\usetheme{Bergen}
 \usetheme{Berkeley} % upper left corner
-%\usetheme{Berlin}
+% \usetheme{Berlin}
 %\usetheme{Boadilla} % vacant upper space
 %\usetheme{CambridgeUS} %red
 %\usetheme{Copenhagen} %pseudo-flat, round
@@ -76,6 +79,14 @@
 %\usecolortheme[named=cyan]{structure}
 %\usecolortheme[named=violet]{structure}
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% custom color settings
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 \definecolor{jdhblue}{RGB}{2,93,186}
 
 \definecolor{zkblue}{RGB}{88,135,175}
@@ -108,6 +119,14 @@
 
 %\setbeamertemplate{navigation symbols}{} % To remove the navigation symbols from the bottom of all slides uncomment this line
 }
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% packages used
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 \usepackage{graphicx} % Allows including images
 \usepackage{pst-func}
@@ -150,6 +169,13 @@
 \usepackage{datetime2}
 
 % \newcommand{\tikzmark}[1]{\tikz[baseline,remember picture] \coordinate (#1) {};}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% custom commands
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \newcommand*\circled[1]{\tikz[baseline=(char.base)]{ \node[shape=circle,draw,inner sep=2pt] (char) {#1};}}
 
