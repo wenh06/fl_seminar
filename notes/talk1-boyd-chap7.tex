@@ -1,4 +1,9 @@
 
+\usepackage{empheq}
+\usepackage{cancel}
+
+\begin{document}
+
 \title{Talk 1: Distributed Optimization and Statistical Learning via ADMM (I)}
 \date{}
 \author{}
@@ -28,7 +33,7 @@ Convergence of ADMM: under the conditions
     \item $f,g$ closed, proper convex;
     \item $\mathcal{L}_{\rho}(x,z,y)$ has a saddle point,
 \end{itemize}
-then as $k\rightarrow\infty$ one has
+as $k\rightarrow\infty$ one has
 \begin{itemize}
     \item feasibility: $Ax^k + By^k - c \rightarrow 0$
     \item objective: $f(x^k) + g(y^k) \rightarrow p^*$
@@ -71,44 +76,249 @@ $$
 \end{cases}
 $$
 then one has the following observations
-\begin{itemize}
-    \item $$\displaystyle z^{k+1} = \dfrac{1}{N\rho} \sum\limits_{i=1}^N y_i^k + \dfrac{1}{N} \sum\limits_{i=1}^N x_i^{k+1} = \dfrac{\overline{y}^k}{\rho} + \overline{x}^{k+1}$$
-    \item \begin{align*}
-        & y^{k+1}_i = y_i^k + \rho(x_i^{k+1}-z^{k+1}) = y_i^k + \rho(x_i^{k+1}-\dfrac{\overline{y}^k}{\rho} - \overline{x}^{k+1}) = 0 \\
-        \Rightarrow & \overline{z}^{k+1} = \dfrac{0}{\rho} + \overline{x}^{k+1} = \overline{x}^{k+1} \\
-    \end{align*}
-\end{itemize}
+$$\displaystyle z^{k+1} = \dfrac{1}{N\rho} \sum\limits_{i=1}^N y_i^k + \dfrac{1}{N} \sum\limits_{i=1}^N x_i^{k+1} = \dfrac{\overline{y}^k}{\rho} + \overline{x}^{k+1}$$
+and
+\begin{align*}
+    & y^{k+1}_i = y_i^k + \rho(x_i^{k+1}-z^{k+1}) = y_i^k + \rho(x_i^{k+1}-\dfrac{\overline{y}^k}{\rho} - \overline{x}^{k+1}) = 0 \\
+    \Rightarrow \quad & \overline{z}^{k+1} = \dfrac{0}{\rho} + \overline{x}^{k+1} = \overline{x}^{k+1} \\
+\end{align*}
 Then one can rewrite the iterations as
-$$
-\begin{cases}
-x^{k+1}_i = \argmin\limits_{x_i} \left\{ f_i(x_i) + \langle y_i^k, x_i-\overline{x}^k \rangle + \dfrac{\rho}{2}\lVert x_i-\overline{x}^k \rVert^2 \right\} \\
-(z^{k+1} = \overline{x}^{k+1}) \\
-y_i^{k+1} = y_i^k + \rho(x^{k+1}_i-\overline{x}^{k+1})
-\end{cases}
-$$
+\begin{align*}
+x^{k+1}_i & = \argmin\limits_{x_i} \left\{ f_i(x_i) + \langle y_i^k, x_i-\overline{x}^k \rangle + \dfrac{\rho}{2}\lVert x_i-\overline{x}^k \rVert^2 \right\} \\
+(z^{k+1} & = \overline{x}^{k+1}) \\
+y_i^{k+1} & = y_i^k + \rho(x^{k+1}_i-\overline{x}^{k+1})
+\end{align*}
 This can be further simplified by setting $u_i = \dfrac{y_i}{\rho}$:
-$$
-\begin{cases}
-x^{k+1}_i = \argmin\limits_{x_i} \left\{ f_i(x_i) + \dfrac{\rho}{2}\lVert x_i-\overline{x}^k + u_i^k \rVert^2 \right\} = \operatorname{prox}_{f_i,\rho}(\overline{x}^k - u_i^k) \\
-(z^{k+1} = \overline{x}^{k+1}) \\
-u_i^{k+1} = u_i^k + (x^{k+1}_i-\overline{x}^{k+1})
-\end{cases}
-$$
+\begin{align*}
+x^{k+1}_i & = \argmin\limits_{x_i} \left\{ f_i(x_i) + \dfrac{\rho}{2}\lVert x_i-\overline{x}^k + u_i^k \rVert^2 \right\} = \operatorname{prox}_{f_i,\rho}(\overline{x}^k - u_i^k) \\
+(z^{k+1} & = \overline{x}^{k+1}) \\
+u_i^{k+1} & = u_i^k + (x^{k+1}_i-\overline{x}^{k+1})
+\end{align*}
 
 {\bfseries Statistical Interpretation} for the ADMM iterations for consensus problem: at iteration $k+1$, assume $x_i$ has prior distribution
 $$x_i \sim N(\overline{x}^k-u_i^k, \rho I_n)$$
 or equivalently
 $$p(x_i) = \det(2\pi\rho I)^{-1/2} \exp\left(-\dfrac{1}{2} \lVert x_i - \overline{x}^k + u_i^k \rVert_{\rho I}^2 \right)$$
 Let
-$$f_i(x_i) = -\operatorname{NLL}(x_i) = -\log\operatorname{LH}(x_i)$$
-be the negative log likelihood function of $x_i$ (w.r.t. the data at the $i$-th ``client''). Then the max a posteriori estimates of $x_i$ are
+$$f_i(x_i) = \operatorname{NLL}(x_i) = -\log\operatorname{LH}(x_i)$$
+be the negative log likelihood function of $x_i$ (w.r.t. the data (or observations) at the $i$-th ``client''). Then the max a posteriori estimates (MAP) of the parameters $x_i$ are
 \begin{align*}
-    \operatorname{MAP}(x_i) & = \argmax_{x_i} \left\{ p(x_i) \operatorname{LH(x_i)} \right\} \\
-    & = \argmax_{x_i} \left\{ \exp(-f_i(x_i)) \cdot \det(2\pi\rho I)^{-1/2} \cdot \exp\left( -\dfrac{\rho}{2} \lVert x_i - \overline{x}_i + u_i^k \rVert^2 \right) \right\} \\
-    & = \argmin_{x_i} \left\{ f_i(x_i) + \dfrac{\rho}{2} \lVert x_i - \overline{x}_i + u_i^k \rVert^2 \right\} \\
+    \operatorname{MAP}(x_i) & = \argmax_{x_i} \left\{ p(x_i) \cdot \operatorname{LH(x_i)} \right\} \\
+    & = \argmax_{x_i} \left\{ \exp(-f_i(x_i)) \cdot \det(2\pi\rho I)^{-1/2} \cdot \exp\left( -\dfrac{\rho}{2} \lVert x_i - \overline{x}_i^k + u_i^k \rVert^2 \right) \right\} \\
+    & = \argmin_{x_i} \left\{ f_i(x_i) + \dfrac{\rho}{2} \lVert x_i - \overline{x}_i^k + u_i^k \rVert^2 \right\} \\
     & = x_i^{k+1}
 \end{align*}
+i.e. the $(k+1)$-th update of $x_i$ are just the MAP of $x_i$ with given prior distribution.
 
+\section{Consensus with Regularization}
+
+Consider the problem
+\begin{align*}
+    & \text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + \framebox{g(z)} \tikz[overlay, remember picture]{\node[] (cc_item) {}} \\
+    & \text{subject to} \quad x_i-z = 0, \quad i=1,\cdots,N
+\end{align*}
+with regularization term $g(z)$ in the objective function.
+\tikz[overlay, remember picture]{\node[above right = 0.3cm and 1cm of cc_item.east] (cc_text) {regularization on consensus}}
+\tikz[overlay, remember picture]{\path[->] ([yshift = -0.05cm]cc_text.west) edge ([yshift = 0.2cm]cc_item.east);}
+
+The ADMM iterations:
+\begin{align*}
+x^{k+1}_i & = \argmin\limits_{x_i} \left\{ f_i(x_i) + \langle y_i^k, x_i-z^k \rangle + \dfrac{\rho}{2}\lVert x_i-z^k \rVert^2 \right\} \\
+z^{k+1} & = \argmin\limits_{z} \left\{ g(z) + \sum\limits_{i=1}^N \left( \langle y_i^k, x_i^{k+1}-z \rangle + \dfrac{\rho}{2}\lVert x_i^{k+1}-z \rVert^2 \right) \right\} \tikz[overlay, remember picture]{\node[] (update_z) {}} \\
+y_i^{k+1} & = y_i^k + \rho (x^{k+1}_i-z^{k+1})
+\end{align*}
+\tikz[overlay, remember picture]{\node[below left = 1cm and -2cm of update_z.east] (update_z_text) {has no analytic expression in general}}
+\tikz[overlay, remember picture]{\path[->] ([yshift = 0.4cm, xshift = -1cm]update_z_text.east) edge ([yshift = -0.2cm]update_z.east);}
+
+One similarly has the following reductions by letting $u_i = \dfrac{y_i}{\rho}$:
+\begin{align*}
+    \tikz[overlay, remember picture]{\node[] (simp_z) {}} z^{k+1} & = \argmin_z \left\{ g(z) + \sum\limits_{i=1}^N \left( \dfrac{\rho}{2}\lVert z \rVert^2 - \langle \rho x_i^{k+1}+y_i^k, z \rangle + \cdots \right) \right\} \\
+    & = \argmin_z \left\{ g(z) + N \left( \dfrac{\rho}{2}\lVert z \rVert^2 - \langle \rho \overline{x}^{k+1}+\overline{y}^k, z \rangle + \cdots \right) \right\} \\
+    & = \argmin_z \left\{ g(z) + \dfrac{N\rho}{2} \lVert z - \overline{x}^{k+1} - \dfrac{\overline{y}^k}{\rho} \rVert^2 \right\} \\
+    & = \argmin_z \left\{ g(z) + \dfrac{N\rho}{2} \lVert z - \overline{x}^{k+1} - \overline{u}^k \rVert^2 \right\} = \operatorname{prox}_{g,N\rho}(\overline{x}^{k+1} + \overline{u}^k) \\
+    \tikz[overlay, remember picture]{\node[] (simp_x) {}} x^{k+1} & = \argmin_{x_i} \left\{ f_i(x_i) + \dfrac{\rho}{2} \lVert x_i - z^k - u_i^k \rVert^2 \right\} = \operatorname{prox}_{f_i,\rho}(z^k + u_i^k) \\
+    u_i^{k+1} & = u_i^k + (x_i^{k+1} - z^{k+1})
+\end{align*}
+\tikz[overlay, remember picture]{\path[->] ([yshift = 0.1cm]simp_x.west) edge[bend left] ([yshift = 0.6cm, xshift = 0.3cm]simp_z.north)}
+
+\begin{eg}\ 
+\begin{itemize}
+\item[(1)] $g(z) = \lambda \lVert z \rVert_1, \lambda > 0,$ then
+\begin{align*}
+    z^{k+1} & = \argmin_z \left\{ \lambda \lVert z \rVert_1 + \dfrac{N\rho}{2} \lVert z - \overline{x}^{k+1} - \overline{u}^k \rVert^2 \right\} \\
+    & = \operatorname{S}_{\lambda/N\rho} (\overline{x}^{k+1} + \overline{u}^{k+1}) \quad \leftarrow \quad \textbf{soft thresholding}
+\end{align*}
+\item[(2)] $g(z) = I_{\mathbb{R}^n_+}(z)$ the indicator function of $\mathbb{R}^n_+$, then
+\begin{align*}
+    z^{k+1} & = \argmin_z \left\{ I_{\mathbb{R}^n_+}(z) + \dfrac{N\rho}{2} \lVert z - \overline{x}^{k+1} - \overline{u}^k \rVert^2 \right\} \\
+    & = (\overline{x}^{k+1} + \overline{u}^{k+1})_+
+\end{align*}
+\end{itemize}
+\end{eg}
+
+\section{General Form Consensus}
+
+Now consider even more general setting:
+\begin{align*}
+    & x_i \in \mathbb{R}^{n_i}, z \in \mathbb{R}^n, \\
+    & \text{$x_i$ consists of a selection of components of $z$,} \\
+    & \text{i.e. } \forall i \in [1,N], \forall j \in [1,n_i], \exists \mathcal{G}(i,j) \text{ s.t. } (x_i)_j = z_{\mathcal{G}(i,j)}
+\end{align*}
+This general setting is of interest in cases where $n_i \ll n$, e.g. large global model and small local model (a small part of global params related to local data, corr. to vertical split of data?)
+
+Let $\widetilde{z}_i \in \mathbb{R}^{n_i}$ be s.t. $(\widetilde{z}_i)_j = z_{\mathcal{G}(i,j)}$, then the general form consensus problem is formulated as
+\begin{align*}
+    & \text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) \\
+    & \text{subject to} \quad x_i - \widetilde{z}_i = 0
+\end{align*}
+The augmented Lagrangian:
+$$\mathcal{L}_{\rho} = \sum\limits_{i=1}^N \left( f_i(x_i) + \langle y_i, x_i-\widetilde{z}_i \rangle + \dfrac{\rho}{2} \lVert  x_i - \widetilde{z}_i \rVert^2 \right)$$
+ADMM iterations:
+\begin{align*}
+    & x_i^{k+1} = \argmin_{x_i} \left\{ f_i(x_i) + \langle y_i^k, x_i \rangle + \dfrac{\rho}{2}\lVert x_i-\widetilde{z}_i^k \rVert^2 \right\} \\
+    & z^{k+1} = \argmin_{z} \left\{ \sum\limits_{i=1}^N \left( -\langle y_i^k, \widetilde{z}_i \rangle + \dfrac{\rho}{2}\lVert x_i^{k+1}-\widetilde{z}_i \rVert^2 \right) \right\} \\
+    & y_i^{k+1} = y_i^k + \rho (x_i^{k+1} - \widetilde{z}_i^{k+1})
+\end{align*}
+
+Rewrite
+\begin{align*}
+    z^{k+1} & = \argmin_{z} \left\{ \sum\limits_{i=1}^N \left( \dfrac{\rho}{2} \lVert \widetilde{z}_i \rVert^2 - \rho \langle x_i^{k+1} + \dfrac{1}{\rho} y_i^k, \widetilde{z}_i \rangle + \cdots \right) \right\} \\
+    & = \argmin_{z} \left\{ \sum\limits_{i=1}^N \dfrac{\rho}{2} \lVert \widetilde{z}_i - x_i^{k+1} -\dfrac{1}{\rho}y_i^k \rVert^2 \right\} \\
+    & = \argmin_{z} \left\{ \sum\limits_{i=1}^N \sum\limits_{j=1}^{n_i} \left( (\widetilde{z}_i)_j - (x^{k+1})_j - \dfrac{1}{\rho} (y_i^k)_j \right)^2 \right\} \\
+    & \qquad ( \text{since } \sum\limits_{i=1}^N \sum\limits_{j=1}^{n_i} = \sum\limits_{g=1}^n \sum\limits_{\mathcal{G}(i,j)=g} ) \\
+    & = \argmin_{z} \left\{ \sum\limits_{g=1}^n \left[ \sum\limits_{\mathcal{G}(i,j)=g} \left( z_g - (x_i^{k+1})_j - \dfrac{1}{\rho} (y_i^k)_j \right)^2 \right] \right\} \\
+    & \qquad ( \text{write } k_g = \# \{ (i,j) | \mathcal{G}(i,j) = g \} ) \\
+    & = \argmin_z \left\{ \sum\limits_{g=1}^n \left[ k_g\cdot z_g^2 - 2 \sum\limits_{\mathcal{G}(i,j)=g} \left( (x_i^{k+1})_j + \dfrac{1}{\rho} (y_i^k)_j \right) + \cdots \right] \right\} \\
+    \Rightarrow & \quad z_g^{k+1} = \dfrac{1}{k_g} \sum\limits_{\mathcal{G}(i,j)=g} \left( (x_i^{k+1})_j + \dfrac{1}{\rho} (y_i^k)_j \right) \leftarrow \text{local average}
+\end{align*}
+
+For the dual $y$-update, locally one has
+\begin{align*}
+    \sum\limits_{\mathcal{G}(i,j)=g} (y_i^{k+1})_j & = \sum\limits_{\mathcal{G}(i,j)=g} (y_i^k)_j + \rho \left( \sum\limits_{\mathcal{G}(i,j)=g} (x_i^{k+1})_j - \sum\limits_{\mathcal{G}(i,j)=g} (\widetilde{z}_i^{k+1})_j \right) \\
+    & = \sum\limits_{\mathcal{G}(i,j)=g} (y_i^k)_j + \rho \left( \sum\limits_{\mathcal{G}(i,j)=g} (x_i^{k+1})_j - k_g\cdot z_g^{k+1} \right) \\
+    & = \sum\limits_{\mathcal{G}(i,j)=g} (y_i^k)_j + \rho \left( \sum\limits_{\mathcal{G}(i,j)=g} (x_i^{k+1})_j - \sum\limits_{\mathcal{G}(i,j)=g} \left( (x_i^{k+1})_j + \dfrac{1}{\rho} (y_i^k)_j \right) \right) \\
+    & = 0 \\
+    \Rightarrow & \quad z_g^{k+1} = \dfrac{1}{k_g} \sum\limits_{\mathcal{G}(i,j)=g} (x_i^{k+1})_j
+\end{align*}
+
+Hence the iterations simplifies to
+\begin{align*}
+    x_i^{k+1} & = \argmin_{x_i} \left\{ f_i(x_i) + \langle y_i^k,x_i \rangle + \dfrac{\rho}{2} \lVert x_i-\widetilde{z}_i^k \rVert^2 \right\} \\
+    & = \argmin_{x_i} \left\{ f_i(x_i) + \dfrac{\rho}{2} \lVert x_i - \widetilde{z}_i^k + u_i^k \rVert^2 \right\} = \operatorname{prox}_{f_i,\rho} (\widetilde{z}_i^k - u_i^k) \\
+    & z_g^{k+1} = \dfrac{1}{k_g} \sum\limits_{\mathcal{G}(i,j)=g} (x_i^{k+1})_j \\
+    & u_i^{k+1} = u_i^k + (x_i^{k+1} - \widetilde{z}^{k+1}_i)
+\end{align*}
+
+\section{General Form Consensus with Regularization}
+General form consensus + consensus with regularization:
+\begin{align*}
+    & \text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + \framebox{g(z)} \\
+    & \text{subject to} \quad x_i - \widetilde{z}_i = 0
+\end{align*}
+
+ADMM iterations:
+\begin{align*}
+    x_i^{k+1} & = \argmin_{x_i} \left\{ f_i(x_i) + \langle y_i^k, x_i-\widetilde{z}_i^k \rangle + \dfrac{\rho}{2}\lVert x_i-\widetilde{z}_i^k \rVert^2 \right\} \\
+    & = \operatorname{prox}_{f_i,\rho} (\widetilde{z}_i^{k} - u_i^{k}) \\
+    z^{k+1} & = \argmin_z \left\{ g(z) + \sum\limits_{i=1}^N \left( -\langle y_i^k, \widetilde{z}_i^k \rangle + \dfrac{\rho}{2}\lVert x_i^{k+1}-\widetilde{z}_i \rVert^2 \right) \right\} \\
+    & = \operatorname{prox}_{g,k_g\rho} (v_{\mathcal{G}}) \\
+    & \text{where } (v_{\mathcal{G}}) = (v_1,\cdots,v_n)^T, \text{ s.t. } v_g = \dfrac{1}{k_g} \sum\limits_{\mathcal{G}(i,j)=g} \left( (x_i^{k+1})_j + (u_i^k)_j \right) \\
+    u^{k+1}_i & = u_i^k + (x_i^{k+1} - \widetilde{z}^{k+1}_i)
+\end{align*}
+
+\section{Sharing Problem}
+
+A sharing problem is an optimization problem formulated as
+\begin{align*}
+    & \text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + g(\sum\limits_{i=1}^N x_i) \\
+    & \text{where $f_i$: local cost} \\
+    & \text{\phantom{where }$g$: shared cost}
+\end{align*}
+
+\begin{remark}
+A sharing problem is dual to a consensus problem.
+\end{remark}
+
+Indeed, rewrite a sharing problem in the ADMM form
+\begin{align*}
+    & \text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + g(\sum\limits_{i=1}^N z_i) \\
+    & \text{subject to} \quad x_i - z_i = 0
+\end{align*}
+Its dual function is
+\begin{align*}
+    \Gamma(v_1,\cdots,v_N) & = \inf\limits_{x,z} \left\{ \sum\limits_{i=1}^N f_i(x_i) + g(\sum\limits_{i=1}^N z_i) + \sum\limits_{i=1}^N \langle v_i, x_i-z_i \rangle \right\} \\
+    & = \inf\limits_{x} \left\{ \sum\limits_{i=1}^N \left( f_i(x_i) + \langle v_i, x_i \rangle \right) \right\} + \inf\limits_{z} \left\{ g(\sum\limits_{i=1}^N z_i) - \sum\limits_{i=1}^N \langle v_i, z_i \rangle \right\} \\
+    & = -\sup\limits_{x} \left\{ \sum\limits_{i=1}^N \left( -f_i(x_i) + \langle -v_i, x_i \rangle \right) \right\} + \inf\limits_{z} \left\{ g(\sum\limits_{i=1}^N z_i) - \sum\limits_{i=1}^N \langle v_i, z_i \rangle \right\} \\
+    & = -\sum\limits_{i=1}^N f_i^*(-v_i) + \framebox{$\inf\limits_{z} \left\{ g(\sum\limits_{i=1}^N z_i) - \sum\limits_{i=1}^N \langle v_i, z_i \rangle \right\}$} \leftarrow \textcircled{$\star$}
+\end{align*}
+For \textcircled{$\star$}, assume $v_s\neq v_t$, and $\{z_i^*\}_{i=1}^N$ s.t. \textcircled{$\star$}$>-\infty$. Then let $\{\widetilde{z}_i\}_{i=1}^N$ be s.t. $\widetilde{z}_i = z_i^*$ for $i\neq s,t$, $\widetilde{z}_s = z_s^* + w, \widetilde{z}_t = z_t^* - w, w\neq 0$, one has
+\begin{align*}
+    & g(\sum\limits_{i=1}^N \widetilde{z}_i) - \sum\limits_{i=1}^N \langle v_i, \widetilde{z}_i \rangle \\
+    = & g(\sum\limits_{i=1}^N z_i^*) - \sum\limits_{i=1}^N \langle v_i, z_i^* \rangle + \langle w, -v_s+v_t \rangle
+\end{align*}
+One can always choose $w$ so that $\langle w, -v_s+v_t \rangle < 0$, contradiction (with $v_s\neq v_t$ for some $s, t$). Hence
+\begin{align*}
+    \textcircled{$\star$} & = \begin{cases}
+    \inf\limits_{z} \left\{ g(\sum\limits_{i=1}^N z_i) - \langle v_1, \sum\limits_{i=1}^N z_i \rangle \right\}, & v_1 = \cdots = v_N \\
+    -\infty, & \text{otherwise}
+    \end{cases} \\
+    & = \begin{cases}
+    -g^*(v_1), & v_1 = \cdots = v_N \\
+    -\infty, & \text{otherwise}
+    \end{cases}
+\end{align*}
+i.e. the dual function is
+$$
+\Gamma(v_1,\cdots,v_N) = \begin{cases}
+    -g^*(v_1) - \sum\limits_{i=1}^N f_i^*(-v_i), & v_1 = \cdots = v_N \\
+    -\infty, & \text{otherwise}
+    \end{cases}
+$$
+and the dual problem is
+\begin{align*}
+    & \text{minimize} \quad g^*(v) + \sum\limits_{i=1}^N f_i^*(-v_i) \\
+    & \text{subject to} \quad v_i = v
+\end{align*}
+a consensus problem with regularization. One can show that the dual of this consensus problem is the original sharing problem.
+
+ADMM iterations for sharing problem:
+\begin{align*}
+    & x_i^{k+1} = \argmin_{x_i} \left\{ f_i(x_i) + \dfrac{\rho}{2} \lVert x_i - z_i^k + u_i^k \rVert^2 \right\} \\
+    & \framebox{$z^{k+1} = \argmin\limits_z \left\{ g(\sum\limits_{i=1}^N z_i) + \dbox{$\dfrac{\rho}{2} \sum\limits_{i=1}^N \lVert z_i - x_i^{k+1} - u_i^k \rVert^2$} \right\}$} \tikz[overlay, remember picture]{\node[] (sharing_z) {}} \quad z = \begin{pmatrix} z_1 \\ \vdots \\ z_N \end{pmatrix} \\
+    & u_i^{k+1} = u_i^k + (x_i^{k+1}-z_i^{k+1})
+\end{align*}
+\tikz[overlay, remember picture]{\node[below right = 0.8cm and -2cm of sharing_z] (sharing_z_text) {\# variables can be reduced from $Nn$ to $n$}}
+\tikz[overlay, remember picture]{\path[->] ([xshift=-1cm]sharing_z_text.north) edge (sharing_z.south)}
+
+Write $a_i = u_i^k + x_i^{k+1}, \overline{z} = \dfrac{1}{N} \sum\limits_{i=1}^N z_i$, then the $(k+1)$-th $z$-update is formulated as (equivalent to)
+\begin{align*}
+    & \text{minimize} \quad g(N\overline{z}) + \dfrac{\rho}{2} \sum\limits_{i=1}^N \lVert z_i - a_i \rVert^2 \\
+    & \text{subject to} \quad N\overline{z} - \sum\limits_{i=1}^N z_i = 0
+\end{align*}
+Since
+$$\dfrac{\rho}{2}\sum\limits_{i=1}^N \lVert z_i - a_i \rVert^2 \geqslant \dfrac{\rho}{2} \dfrac{\lVert \sum\limits_{i=1}^N(z_i - a_i) \rVert^2}{N} = \dfrac{N\rho}{2} \lVert \overline{z} - \overline{a} \rVert^2$$
+``='' holds only when $z_i = a_i + \overline{z} - \overline{a}$, i.e.
+$$z_i^{k+1} = u_i^{k} + x_i^{k+1} + \overline{z}^{k+1} - \overline{u}^{k} - \overline{x}^{k+1}$$
+Hence the constrained optimization problem of $z$-update is equivalent to the following unconstrained problem
+$$\text{minimize} \quad \quad g(N\overline{z}) + \dfrac{N\rho}{2} \lVert \overline{z} - \overline{a} \rVert^2$$
+Another consequence is
+$$(\text{for simplicity } u^{k+1} = ) u_1^{k+1} = \cdots = u_N^{k+1} = \overline{u}^k + \overline{x}^{k+1} - \overline{z}^{k+1}$$
+and further
+$$z_i^{k+1} = \framebox{$\cancel{u_i^{k}}$} + x_i^{k+1} + \overline{z}^{k+1} - \framebox{$\cancel{\overline{u}^{k}}$} - \overline{x}^{k+1} = x_i^{k+1} + \overline{z}^{k+1} - \overline{x}^{k+1}$$
+
+The ADMM iterations for the whole equivalent optimization problem:
+\begin{align*}
+    & x_i^{k+1} = \argmin_{x_i} \left\{ f_i(x_i) + \dfrac{\rho}{2} \lVert x_i - x_i^k - \overline{z}^k + \overline{x}^k + u^k \rVert^2 \right\} = \operatorname{prox}_{f_i,\rho}(x_i^k + \overline{z}^k - \overline{x}^k - u^k) \\
+    & z^{k+1} = \argmin\limits_{\overline{z}} \left\{ g(N\overline{z}) + \dfrac{\rho}{2} \lVert \overline{z} - \overline{x}^{k+1} - u^k \rVert^2 \right\}  = \operatorname{prox}_{\widetilde{g},N\rho}(\overline{x}_i^{k+1} + u^k) \\
+    & u^{k+1} = u^k + (\overline{x}^{k+1}-\overline{z}^{k+1})
+\end{align*}
+where $\widetilde{g}(\overline{z}) = g(N\overline{z})$.
+
+\section*{Problem difficult and NOT discussed}
+
+Convergence analysis of the optimization problems.
 
 \bibliographystyle{plain}
 \bibliography{references}
+
+\end{document}
