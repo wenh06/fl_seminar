@@ -110,6 +110,10 @@ be the negative log likelihood function of $x_i$ (w.r.t. the data (or observatio
 \end{align*}
 i.e. the $(k+1)$-th update of $x_i$ are just the MAP of $x_i$ with given prior distribution.
 
+\begin{remark}
+Most federated learning optimization algorithms fall into paradigm of this basic consensus problem, including FedAvg \cite{mcmahan2017fed_avg}, FedOpt(FedAdam, FedAdagrad, ...) \cite{reddi2020fed_opt}, etc.
+\end{remark}
+
 \section{Consensus with Regularization}
 
 Consider the problem
@@ -155,6 +159,10 @@ One similarly has the following reductions by letting $u_i = \dfrac{y_i}{\rho}$:
 \end{align*}
 \end{itemize}
 \end{eg}
+
+\begin{remark}
+A recent paper \cite{hanzely2020federated} (rejected by CVPR2021) considered federated learning problems formulated as consensus with regularization.
+\end{remark}
 
 \section{General Form Consensus}
 
@@ -314,9 +322,14 @@ The ADMM iterations for the whole equivalent optimization problem:
 \end{align*}
 where $\widetilde{g}(\overline{z}) = g(N\overline{z})$.
 
-\section*{Problem difficult and NOT discussed}
+\section*{Problems difficult and NOT discussed}
 
-Convergence analysis of the optimization problems.
+\begin{itemize}
+    \item Convergence analysis of the optimization problems, e.g. \cite{li2019convergence}
+    \item ``infeasible'' problems, e.g. totally distributed cases where there's no ``central collector'', e.g. \cite{elgabli2020gadmm,issaid2020cq-ggadmm}
+    \item etc.
+\end{itemize}
+
 
 \bibliographystyle{plain}
 \bibliography{references}
