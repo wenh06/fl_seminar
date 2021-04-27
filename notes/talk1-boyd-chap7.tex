@@ -31,7 +31,7 @@ The iterations are given by
 Convergence of ADMM: under the conditions
 \begin{itemize}
     \item $f,g$ closed, proper convex;
-    \item $\mathcal{L}_{\rho}(x,z,y)$ has a saddle point,
+    \item $\mathcal{L}_{0}(x,z,y)$ has a saddle point,
 \end{itemize}
 as $k\rightarrow\infty$ one has
 \begin{itemize}
@@ -44,21 +44,21 @@ as $k\rightarrow\infty$ one has
 
 Assume we have global variable $x \in \mathbb{R}^n$ and ``split'' (or distributed) objective function
 $$f(x) = \sum\limits_{i=1}^N f_i(x)$$
-e.g. $x$ can be (global) model parameters, DNN weights (and biases, etc.), $f_i$ can be the loss function associated with the $i$-th block of data. The optimization problem is
+e.g. $x$ can be (global) model parameters, DNN weights (and biases, etc.), $f_i$ can be the loss function associated with the $i$-th block (``client'') of data. The optimization problem is
 \begin{align*}
     & \text{minimize} \quad \sum\limits_{i=1}^N f_i(x)
 \end{align*}
 
 Problem: $f$ is NOT block-separable.
 
-Solution: add a common global variable $z \in \mathbb{R}^n$, so that the optimization problem is (equivalently) formulated as
+Solution: add a common global variable $z \in \mathbb{R}^n$, so that the optimization problem is formulated as (equivalent to)
 \begin{align*}
     & \text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) \\
     & \text{subject to} \quad x_i - z = 0, \quad i=1,\cdots,N
 \end{align*}
 which is called a {\bfseries consensus problem}. One has the augmented Lagrangian
 $$\mathcal{L}_{\rho}(x_1,\cdots,x_N,z,y) = \sum\limits_{i=1}^N \left[ f_i(x_i) + \langle y_i, x_i-z \rangle + \dfrac{\rho}{2} \lVert x_i-z \rVert^2 \right],$$
-and iterations
+and ADMM iterations
 \begin{align*}
     \phantom{\leadsto} & \left( x = (x_1^T,\cdots,x_N^T)^T, x^{k+1} = \argmin_x \left\{ \sum\limits_{i=1}^N \left[ f_i(x_i) + \langle y^k_i, x_i-z^k \rangle + \dfrac{\rho}{2} \lVert x_i-z^k \rVert^2 \right] \right\} \right) \\
     \leadsto \quad & x_i^{k+1} = \argmin_{x_i} \left\{ f_i(x_i) + \langle y^k_i, x_i-z^k \rangle + \dfrac{\rho}{2} \lVert x_i-z^k \rVert^2 \right\} \\
@@ -101,7 +101,7 @@ or equivalently
 $$p(x_i) = \det(2\pi\rho I)^{-1/2} \exp\left(-\dfrac{1}{2} \lVert x_i - \overline{x}^k + u_i^k \rVert_{\rho I}^2 \right)$$
 Let
 $$f_i(x_i) = \operatorname{NLL}(x_i) = -\log\operatorname{LH}(x_i)$$
-be the negative log likelihood function of $x_i$ (w.r.t. the data (or observations) at the $i$-th ``client''). Then the max a posteriori estimates (MAP) of the parameters $x_i$ are
+be the negative log likelihood function\footnote{for a good visualization of NLL, ref. \href{https://ljvmiranda921.github.io/notebook/2017/08/13/softmax-and-the-negative-log-likelihood/}{https://ljvmiranda921.github.io/notebook/2017/08/13/softmax-and-the-negative-log-likelihood/}} of $x_i$ (w.r.t. the data (or observations) at the $i$-th ``client''). Then the max a posteriori estimates (MAP) of the parameters $x_i$ are
 \begin{align*}
     \operatorname{MAP}(x_i) & = \argmax_{x_i} \left\{ p(x_i) \cdot \operatorname{LH(x_i)} \right\} \\
     & = \argmax_{x_i} \left\{ \exp(-f_i(x_i)) \cdot \det(2\pi\rho I)^{-1/2} \cdot \exp\left( -\dfrac{\rho}{2} \lVert x_i - \overline{x}_i^k + u_i^k \rVert^2 \right) \right\} \\
@@ -111,19 +111,19 @@ be the negative log likelihood function of $x_i$ (w.r.t. the data (or observatio
 i.e. the $(k+1)$-th update of $x_i$ are just the MAP of $x_i$ with given prior distribution.
 
 \begin{remark}
-Most federated learning optimization algorithms fall into paradigm of this basic consensus problem, including FedAvg \cite{mcmahan2017fed_avg}, FedOpt(FedAdam, FedAdagrad, ...) \cite{reddi2020fed_opt}, etc.
+Most federated learning optimization algorithms fall into paradigm of this basic consensus problem (with inexact inner minimization loops), including FedAvg \cite{mcmahan2017fed_avg}, FedOpt(FedAdam, FedAdagrad, ...) \cite{reddi2020fed_opt}, etc.
 \end{remark}
 
 \section{Consensus with Regularization}
 
 Consider the problem
 \begin{align*}
-    & \text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + \framebox{g(z)} \tikz[overlay, remember picture]{\node[] (cc_item) {}} \\
+    & \text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + \framebox{g(z)} \tikz[overlay, remember picture]{\node[] (cc_item) {}} 
+    \tikz[overlay, remember picture]{\node[above right = 0.3cm and 1cm of cc_item.east] (cc_text) {regularization on consensus}}
+    \tikz[overlay, remember picture]{\path[->] ([yshift = -0.05cm]cc_text.west) edge ([yshift = 0.2cm]cc_item.east);} \\
     & \text{subject to} \quad x_i-z = 0, \quad i=1,\cdots,N
 \end{align*}
 with regularization term $g(z)$ in the objective function.
-\tikz[overlay, remember picture]{\node[above right = 0.3cm and 1cm of cc_item.east] (cc_text) {regularization on consensus}}
-\tikz[overlay, remember picture]{\path[->] ([yshift = -0.05cm]cc_text.west) edge ([yshift = 0.2cm]cc_item.east);}
 
 The ADMM iterations:
 \begin{align*}
@@ -160,9 +160,9 @@ One similarly has the following reductions by letting $u_i = \dfrac{y_i}{\rho}$:
 \end{itemize}
 \end{eg}
 
-\begin{remark}
-A recent paper \cite{hanzely2020federated} (rejected by CVPR2021) considered federated learning problems formulated as consensus with regularization.
-\end{remark}
+% \begin{remark}
+% A recent paper \cite{hanzely2020federated} (although rejected by CVPR2021) considered new federated learning problems formulated as consensus with regularization.
+% \end{remark}
 
 \section{General Form Consensus}
 
@@ -322,16 +322,17 @@ The ADMM iterations for the whole equivalent optimization problem:
 \end{align*}
 where $\widetilde{g}(\overline{z}) = g(N\overline{z})$.
 
-\section*{Problems difficult and NOT discussed}
+\section*{Problems NOT discussed (and difficult)}
 
 \begin{itemize}
-    \item Convergence analysis of the optimization problems, e.g. \cite{li2019convergence}
-    \item ``infeasible'' problems, e.g. totally distributed cases where there's no ``central collector'', e.g. \cite{elgabli2020gadmm,issaid2020cq-ggadmm}
+    \item convergence (rate) analysis of the optimization problems, e.g. \cite{li2019convergence}
+    \item ``infeasible'' problems, e.g. totally distributed cases where there's no ``central collector'', e.g. \cite{elgabli2020gadmm,issaid2020cq-ggadmm,francca2020distributed}, or ``weak'' consensus \cite{hanzely2020federated}
+    \item new ADMM developments, e.g. \cite{bai2021sas-admm}
     \item etc.
 \end{itemize}
 
 
-\bibliographystyle{plain}
+\bibliographystyle{ieeetr}
 \bibliography{references}
 
 \end{document}
