@@ -317,7 +317,7 @@ $$z_i^{k+1} = \framebox{$\cancel{u_i^{k}}$} + x_i^{k+1} + \overline{z}^{k+1} - \
 The ADMM iterations for the whole equivalent optimization problem:
 \begin{align*}
     & x_i^{k+1} = \argmin_{x_i} \left\{ f_i(x_i) + \dfrac{\rho}{2} \lVert x_i - x_i^k - \overline{z}^k + \overline{x}^k + u^k \rVert^2 \right\} = \operatorname{prox}_{f_i,\rho}(x_i^k + \overline{z}^k - \overline{x}^k - u^k) \\
-    & z^{k+1} = \argmin\limits_{\overline{z}} \left\{ g(N\overline{z}) + \dfrac{\rho}{2} \lVert \overline{z} - \overline{x}^{k+1} - u^k \rVert^2 \right\}  = \operatorname{prox}_{\widetilde{g},N\rho}(\overline{x}_i^{k+1} + u^k) \\
+    & \overline{z}^{k+1} = \argmin\limits_{\overline{z}} \left\{ g(N\overline{z}) + \dfrac{\rho}{2} \lVert \overline{z} - \overline{x}^{k+1} - u^k \rVert^2 \right\}  = \operatorname{prox}_{\widetilde{g},N\rho}(\overline{x}_i^{k+1} + u^k) \\
     & u^{k+1} = u^k + (\overline{x}^{k+1}-\overline{z}^{k+1})
 \end{align*}
 where $\widetilde{g}(\overline{z}) = g(N\overline{z})$.
@@ -330,6 +330,20 @@ where $\widetilde{g}(\overline{z}) = g(N\overline{z})$.
     \item new ADMM developments, e.g. \cite{bai2021sas-admm}
     \item etc.
 \end{itemize}
+
+For example, in \cite{hanzely2020federated}, the authors considered a ``weak'' consensus problem
+$$\text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + \dfrac{\lambda}{2} \sum\limits_{i=1}^N \lVert x_i - \overline{x} \rVert^2$$
+which can be reformulated as constrained optimization problems
+\begin{align*}
+    & \text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + \dfrac{\lambda}{2} \sum\limits_{i=1}^N \lVert x_i - z \rVert^2 \\
+    & \text{subject to} \quad Nz - \sum\limits_{i=1}^N x_i = 0
+\end{align*}
+or
+\begin{align*}
+    & \text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + \dfrac{\lambda}{2} \sum\limits_{i=1}^N \lVert x_i \rVert^2 -\dfrac{\lambda N}{2} \lVert z \rVert^2 \\
+    & \text{subject to} \quad Nz - \sum\limits_{i=1}^N x_i = 0
+\end{align*}
+which is a nonconvex sharing problem considered in \cite{hong2016convergence} (Eq. (3.2)).
 
 
 \bibliographystyle{ieeetr}
