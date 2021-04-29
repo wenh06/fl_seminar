@@ -15,7 +15,7 @@
 %	PACKAGES AND THEMES
 %----------------------------------------------------------------------------------------
 
-\documentclass[UTF8, 10pt]{beamer}
+\documentclass[UTF8, 12pt]{beamer}
 
 \mode<presentation> {
 
@@ -160,7 +160,7 @@
 \usepackage[all,cmtip]{xy}
 \usepackage{dashbox}
 \usepackage{tikz}
-\usetikzlibrary{trees,arrows,decorations.pathmorphing,shapes,backgrounds,positioning,calc}
+\usetikzlibrary{trees,arrows,decorations.pathmorphing,shapes,backgrounds,positioning,calc,tikzmark}
 \usepackage{xcolor}
 \usepackage{hyperref}
 % \usepackage[cmintegrals,cmbraces]{newtxmath}
@@ -202,6 +202,10 @@
 \DeclareMathOperator{\SPEC}{\mathbf{Spec}}
 \DeclareMathOperator{\proj}{Proj}
 \DeclareMathOperator{\PROJ}{\mathbf{Proj}}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\expectation}{\mathbb{E}}
 
 
 \newtheorem{thm}{定理}[section]
