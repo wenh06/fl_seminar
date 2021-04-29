@@ -79,7 +79,8 @@ then one has the following observations
 $$\displaystyle z^{k+1} = \dfrac{1}{N\rho} \sum\limits_{i=1}^N y_i^k + \dfrac{1}{N} \sum\limits_{i=1}^N x_i^{k+1} = \dfrac{\overline{y}^k}{\rho} + \overline{x}^{k+1}$$
 and
 \begin{align*}
-    & y^{k+1}_i = y_i^k + \rho(x_i^{k+1}-z^{k+1}) = y_i^k + \rho(x_i^{k+1}-\dfrac{\overline{y}^k}{\rho} - \overline{x}^{k+1}) = 0 \\
+    & y^{k+1}_i = y_i^k + \rho(x_i^{k+1}-z^{k+1}) = y_i^k + \rho(x_i^{k+1}-\dfrac{\overline{y}^k}{\rho} - \overline{x}^{k+1}) \\
+    \Rightarrow \quad & \overline{y}^{k+1} = \overline{y}^{k} + \rho (\overline{x}_i^{k+1} - \dfrac{\overline{y}^k}{\rho} - \overline{x}^{k+1}) = 0 \\
     \Rightarrow \quad & \overline{z}^{k+1} = \dfrac{0}{\rho} + \overline{x}^{k+1} = \overline{x}^{k+1} \\
 \end{align*}
 Then one can rewrite the iterations as
@@ -99,14 +100,19 @@ u_i^{k+1} & = u_i^k + (x^{k+1}_i-\overline{x}^{k+1})
 $$x_i \sim N(\overline{x}^k-u_i^k, \rho I_n)$$
 or equivalently
 $$p(x_i) = \det(2\pi\rho I)^{-1/2} \exp\left(-\dfrac{1}{2} \lVert x_i - \overline{x}^k + u_i^k \rVert_{\rho I}^2 \right)$$
+
+\begin{remark}
+As stated in \cite{boyd2011distributed}, the bias of the mean of the above normal distribution, which is $-u_i^k$, can be interpreted as the ``price'' of ``client'' i disagreeing with the consensus $\overline{x}^k$ in the previous (the $k$
+-th) iteration. As for why the ``price'' is $-u_i^k$, note that the previous scaled dual update $u_i^k$ is augmented by the bias of the $k$-th $x_i$-update, hence the accumulation of the biases of $x_i$-updates.
+\end{remark}
+
 Let
 $$f_i(x_i) = \operatorname{NLL}(x_i) = -\log\operatorname{LH}(x_i)$$
 be the negative log likelihood function\footnote{for a good visualization of NLL, ref. \href{https://ljvmiranda921.github.io/notebook/2017/08/13/softmax-and-the-negative-log-likelihood/}{https://ljvmiranda921.github.io/notebook/2017/08/13/softmax-and-the-negative-log-likelihood/}} of $x_i$ (w.r.t. the data (or observations) at the $i$-th ``client''). Then the max a posteriori estimates (MAP) of the parameters $x_i$ are
 \begin{align*}
-    \operatorname{MAP}(x_i) & = \argmax_{x_i} \left\{ p(x_i) \cdot \operatorname{LH(x_i)} \right\} \\
+    \operatorname{MAP}(x_i) & = \argmax_{x_i} \left\{ p(x_i) \cdot \operatorname{LH}(x_i) \right\} \\
     & = \argmax_{x_i} \left\{ \exp(-f_i(x_i)) \cdot \det(2\pi\rho I)^{-1/2} \cdot \exp\left( -\dfrac{\rho}{2} \lVert x_i - \overline{x}_i^k + u_i^k \rVert^2 \right) \right\} \\
-    & = \argmin_{x_i} \left\{ f_i(x_i) + \dfrac{\rho}{2} \lVert x_i - \overline{x}_i^k + u_i^k \rVert^2 \right\} \\
-    & = x_i^{k+1}
+    & = \argmin_{x_i} \left\{ f_i(x_i) + \dfrac{\rho}{2} \lVert x_i - \overline{x}_i^k + u_i^k \rVert^2 \right\} = x_i^{k+1}
 \end{align*}
 i.e. the $(k+1)$-th update of $x_i$ are just the MAP of $x_i$ with given prior distribution.
 
@@ -140,7 +146,7 @@ One similarly has the following reductions by letting $u_i = \dfrac{y_i}{\rho}$:
     & = \argmin_z \left\{ g(z) + N \left( \dfrac{\rho}{2}\lVert z \rVert^2 - \langle \rho \overline{x}^{k+1}+\overline{y}^k, z \rangle + \cdots \right) \right\} \\
     & = \argmin_z \left\{ g(z) + \dfrac{N\rho}{2} \lVert z - \overline{x}^{k+1} - \dfrac{\overline{y}^k}{\rho} \rVert^2 \right\} \\
     & = \argmin_z \left\{ g(z) + \dfrac{N\rho}{2} \lVert z - \overline{x}^{k+1} - \overline{u}^k \rVert^2 \right\} = \operatorname{prox}_{g,N\rho}(\overline{x}^{k+1} + \overline{u}^k) \\
-    \tikz[overlay, remember picture]{\node[] (simp_x) {}} x^{k+1} & = \argmin_{x_i} \left\{ f_i(x_i) + \dfrac{\rho}{2} \lVert x_i - z^k - u_i^k \rVert^2 \right\} = \operatorname{prox}_{f_i,\rho}(z^k + u_i^k) \\
+    \tikz[overlay, remember picture]{\node[] (simp_x) {}} x^{k+1} & = \argmin_{x_i} \left\{ f_i(x_i) + \dfrac{\rho}{2} \lVert x_i - z^k - u_i^k \rVert^2 \right\} = \operatorname{prox}_{f_i,\rho}(z^k - u_i^k) \\
     u_i^{k+1} & = u_i^k + (x_i^{k+1} - z^{k+1})
 \end{align*}
 \tikz[overlay, remember picture]{\path[->] ([yshift = 0.1cm]simp_x.west) edge[bend left] ([yshift = 0.6cm, xshift = 0.3cm]simp_z.north)}
@@ -213,8 +219,8 @@ Hence the iterations simplifies to
 \begin{align*}
     x_i^{k+1} & = \argmin_{x_i} \left\{ f_i(x_i) + \langle y_i^k,x_i \rangle + \dfrac{\rho}{2} \lVert x_i-\widetilde{z}_i^k \rVert^2 \right\} \\
     & = \argmin_{x_i} \left\{ f_i(x_i) + \dfrac{\rho}{2} \lVert x_i - \widetilde{z}_i^k + u_i^k \rVert^2 \right\} = \operatorname{prox}_{f_i,\rho} (\widetilde{z}_i^k - u_i^k) \\
-    & z_g^{k+1} = \dfrac{1}{k_g} \sum\limits_{\mathcal{G}(i,j)=g} (x_i^{k+1})_j \\
-    & u_i^{k+1} = u_i^k + (x_i^{k+1} - \widetilde{z}^{k+1}_i)
+    z_g^{k+1} & = \dfrac{1}{k_g} \sum\limits_{\mathcal{G}(i,j)=g} (x_i^{k+1})_j \\
+    u_i^{k+1} & = u_i^k + (x_i^{k+1} - \widetilde{z}^{k+1}_i)
 \end{align*}
 
 \section{General Form Consensus with Regularization}
@@ -287,7 +293,9 @@ and the dual problem is
     & \text{minimize} \quad g^*(v) + \sum\limits_{i=1}^N f_i^*(-v_i) \\
     & \text{subject to} \quad v_i = v
 \end{align*}
-a consensus problem with regularization. One can show that the dual of this consensus problem is the original sharing problem.
+a consensus problem with regularization. 
+
+One can show that the dual of this consensus problem is the original sharing problem.
 
 ADMM iterations for sharing problem:
 \begin{align*}
