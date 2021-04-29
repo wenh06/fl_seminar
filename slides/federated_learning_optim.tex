@@ -102,12 +102,12 @@ Federated Learning这个名词首次由Google的研究人员McMahan等人在文�
         \item[$\bullet$] {\large\bfseries Optimization}
         \vspace{0.5em}
         \pause
-        {\pgfsetfillopacity{0.6} \small
+        {\pgfsetfillopacity{0.4} \footnotesize
         \item[$\bullet$] Compression
         }
     \end{itemize}
     \vspace{1em}
-    {\pgfsetfillopacity{0.6} \small
+    {\pgfsetfillopacity{0.4} \footnotesize
     \item Privacy \& Security
     \begin{itemize}
         \item[$\bullet$] Differential Privacy (DP)
@@ -135,8 +135,54 @@ Federated Learning这个名词首次由Google的研究人员McMahan等人在文�
 % Page 15
 
 \begin{frame}
+\frametitle{问题描述}
+
+一般来说，联邦学习中我们考虑的是如下的优化问题
+\begin{align*}
+    & \text{minimize} \quad f(x) = \expectation\limits_{i \sim {\mathcal{P}}} [f_i(x)] \\
+    & \text{where} \quad f_i(x) = \expectation\limits_{z \sim \mathcal{D}_i} [\ell_i(x; z)]
+\end{align*}
+这里的$\mathcal{P}$为``client''的分布，$\mathcal{D}_i$为``client'' i 的数据分布，$\ell_i$为损失函数。
+
+\pause
+\vspace{1em}
+
+或者更简单地，考虑如下的优化问题
+\begin{align*}
+    & \text{minimize} \quad f(x) = \dfrac{1}{N} \sum\limits_{i=1}^N f_i(x)
+\end{align*}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
 \frametitle{FedAvg}
 
+\tikzset{%
+  client/.style={
+    rectangle,
+    draw,
+    minimum size=0.5cm
+  },
+  client missing/.style={
+    draw=none, 
+    scale=2,
+    text height=0.333cm,
+    execute at begin node=$\vdots$
+  },
+}
+
+\begin{figure}
+\centering
+\begin{tikzpicture}[remember picture,overlay]
+\node[draw] (server) {server $x$};
+\node[client, below left = 1cm and 3cm of server.south] (client-1) {client $x_1$};
+\node[client, below left = 1cm and 0.5cm of server.south] (client-1) {client $x_1$};
+\node[client, below left = 1cm and 3cm of server.south] (client-1) {client $x_1$};
+\end{tikzpicture}
+\end{figure}
 
 \end{frame}
 
