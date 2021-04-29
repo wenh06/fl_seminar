@@ -3,7 +3,7 @@ federated seminar held at BUAA
 
 
 ## Time
-Each Thursday 20:00, except public holidays
+Each Thursday 20:00, excluding public holidays
 
 ## Venue
 Usually in E402
@@ -24,4 +24,7 @@ Usually in E402
 10. Federated Learning of a Mixture of Global and Local Models ([PDF](https://arxiv.org/abs/2002.05516))
 11. more....
 
-# More resources (to add)
+# More resources
+1. A comprehensive survey article: Advances and open problems in federated learning ([PDF](https://arxiv.org/abs/1912.04977))
+2. [Awesome Federated Learning on GitHub](https://github.com/chaoyanghe/Awesome-Federated-Learning)
+3. [Federated Learning One World Seminar (FLOW)](https://sites.google.com/view/one-world-seminar-series-flow/home)
