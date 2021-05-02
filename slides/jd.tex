@@ -88,7 +88,7 @@
 
 \begin{columns}
 
-\begin{column}{0.72\textwidth}
+\begin{column}{0.67\textwidth}
 \begin{block}{Motivation}<1->
 
 \uncover<2->{{\large Stanford ML Group}}
@@ -101,13 +101,13 @@
 
 \end{block}
 
-\vspace{2.5em}
+\vspace{0.6em}
 
 \uncover<3->{\raggedleft 模型结构：modified resnet34 $\rightarrow$}
 
 \end{column}
 
-\begin{column}{0.27\textwidth}
+\begin{column}{0.3\textwidth}
 \uncover<3->{
 \begin{figure}
     \centering
@@ -129,16 +129,16 @@
 \begin{figure}
 \centering
 \begin{tikzpicture}[remember picture]
-\node [rectangle] (resnet34) {\includegraphics[width=0.27\textwidth,keepaspectratio]{images/stanford_resnet34.png}};
-\node [rectangle, below left = 0.7cm and 1.7cm of resnet34.north] (cnn) {CNN};
-\node [rectangle, below = 0.3cm of cnn.south] (resnet34_text) {resnet34};
-\node [rectangle, below right = 0.7cm and 1.45cm of resnet34.north] (plus1) {\includegraphics[width=0.05\textwidth,keepaspectratio]{images/gray_plus.png}};
-\node [rectangle, below right = 0.7cm and 2.4cm of resnet34.north] (rnn) {RNN};
-\node [rectangle, below = 0.7cm of rnn.south] (lstm) {{\footnotesize 双向LSTM}};
-\node [rectangle, below = 0.5cm of lstm.south] (linear) {{\footnotesize Linear}};
-\node [rectangle, below = 0.5cm of linear.south] (crf) {{\footnotesize \color{red} CRF}};
-\node [rectangle, below right = 0.7cm and 3.55cm of resnet34.north] (plus2) {\includegraphics[width=0.05\textwidth,keepaspectratio]{images/gray_plus.png}};
-\node [rectangle, below right = 0.7cm and 4.4cm of resnet34.north] (pr) {``伪''PR间期后处理};
+\node [rectangle] (resnet34) {\includegraphics[width=0.25\textwidth,keepaspectratio]{images/stanford_resnet34.png}};
+\node [rectangle, below left = 0.7cm and 1.4cm of resnet34.north] (cnn) {\footnotesize CNN};
+\node [rectangle, below = 0.3cm of cnn.south] (resnet34_text) {\footnotesize resnet34};
+\node [rectangle, below right = 0.7cm and 1.25cm of resnet34.north] (plus1) {\includegraphics[width=0.05\textwidth,keepaspectratio]{images/gray_plus.png}};
+\node [rectangle, below right = 0.7cm and 2.1cm of resnet34.north] (rnn) {\footnotesize RNN};
+\node [rectangle, below = 0.7cm of rnn.south] (lstm) {{\tiny 双向LSTM}};
+\node [rectangle, below = 0.5cm of lstm.south] (linear) {{\tiny Linear}};
+\node [rectangle, below = 0.5cm of linear.south] (crf) {{\tiny \color{red} CRF}};
+\node [rectangle, below right = 0.7cm and 3.15cm of resnet34.north] (plus2) {\includegraphics[width=0.05\textwidth,keepaspectratio]{images/gray_plus.png}};
+\node [rectangle, below right = 0.7cm and 3.9cm of resnet34.north] (pr) {\footnotesize ``伪''PR间期后处理};
 \node [rectangle, below = 1.1cm of pr.north] (pr_dist) {\includegraphics[width=0.37\textwidth,keepaspectratio]{images/pseudo_pr_dist_cinc2017.png}};
 
 \path[->] ([yshift = -0.05cm]lstm.south) edge ([yshift = 0.05cm]linear.north);
@@ -148,7 +148,7 @@
 }
 
 \uncover<2->{
-其他一些{\color{red}数据增强}{\color{zkblue} trick: random masking QRS complexes}
+\footnotesize 其他一些{\color{red}数据增强}{\color{zkblue} trick: random masking QRS complexes}
 }
 
 \end{frame}
