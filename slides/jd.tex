@@ -5,12 +5,12 @@
 %	TITLE PAGE
 %----------------------------------------------------------------------------------------
 
-\title[Medical AI]{\huge{Medical AI}  \\
+\title[Precision Health]{\huge{Precision Health}  \\
 \medskip
 \small{京东健康工作的回顾}
 } % The short title appears at the bottom of every slide, the full title is only on the title page
 
-% \author[文豪]{文豪} % Your name
+\author[文豪]{文豪} % Your name
 
 % \institute[北京航空航天大学] % Your institution as it will appear on the bottom of every slide, may be shorthand to save space
 % {
@@ -53,7 +53,7 @@
 
 %------------------------------------------------
 
-\section{Physiological Signal Processing}
+\section[PSP]{Physiological Signal Processing}
 
 %------------------------------------------------
 % Page 1
@@ -154,13 +154,137 @@
 \end{frame}
 
 %------------------------------------------------
+% Page 8
 
-\section{Blood Glucose Monitoring}
+\begin{frame}
+\frametitle{深度学习应用于生理信号处理}
+
+\begin{itemize}
+\item<1-> CinC2020: \textit{\scriptsize Classification of 12-lead ECGs: the PhysioNet - Computing in Cardiology Challenge 2020}
+\item<1-> {\color{red} CPSC2020}: \textit{\scriptsize Searching for Premature Ventricular Contraction and Supraventricular Premature Beat from Long-term ECGs: The 3rd China Physiological Signal Challenge 2020}
+
+\uncover<2->{
+\begin{figure}
+\centering
+\includegraphics[width=0.37\textwidth,keepaspectratio]{images/CPSC2020_SPBerr_3rd.jpg}
+\end{figure}
+}
+
+\item<1-> CinC2021 {\scriptsize (ongoing)}: \textit{\scriptsize Will Two Do? Varying Dimensions in Electrocardiography: The PhysioNet/Computing in Cardiology Challenge 2021}
+\item<1-> CPSC2021 {\scriptsize (ongoing)}: \textit{\scriptsize Paroxysmal Atrial Fibrillation Events Detection from Dynamic ECG Recordings: The 4th China Physiological Signal Challenge 2021}
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 10
+
+\begin{frame}
+\frametitle{深度学习应用于生理信号处理}
+
+\begin{itemize}
+\item \href{https://github.com/wenh06/cinc2020}{https://github.com/wenh06/cinc2020}
+\vspace{1em}
+\item \href{https://github.com/wenh06/cpsc2020}{https://github.com/wenh06/cpsc2020}
+\vspace{1em}
+\item \href{https://github.com/wenh06/torch_ecg}{https://github.com/wenh06/torch\_ecg}
+\vspace{1em}
+\item \href{https://github.com/wenh06/cinc2021}{https://github.com/wenh06/cinc2021} (private)
+\vspace{1em}
+\item \href{https://github.com/wenh06/cpsc2021}{https://github.com/wenh06/cpsc2021} (private)
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------
+
+\section[NLP]{Natural Language Processing}
 
 %------------------------------------------------
 % Page 15
 
 \begin{frame}
+\frametitle{PharmCoo合理用药系统}
+
+\begin{figure}
+\centering
+\includegraphics[width=0.98\textwidth,keepaspectratio]{images/pharmcoo.png}
+\end{figure}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{药学知识图谱知识抽取整体架构}
+
+\begin{figure}
+\centering
+\includegraphics[width=0.98\textwidth,keepaspectratio]{images/med_knowledge_graph.png}
+\end{figure}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{知识抽取的例子}
+
+\begin{figure}
+\centering
+\includegraphics[width=0.98\textwidth,keepaspectratio]{images/di_parsing.png}
+\end{figure}
+
+\pause
+\vspace{0.5em}
+
+\href{https://github.com/wenh06/med_nlp}{https://github.com/wenh06/med\_nlp} (private)
+
+\end{frame}
+
+%------------------------------------------------
+
+\section[CGM]{Continuous Glucose Monitoring}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{连续血糖 --- 生理模型}
+
+\begin{columns}
+
+\begin{column}{0.5\textwidth}
+{\scriptsize
+\begin{itemize}
+    \item 胃肠
+    \begin{align*}
+    \dfrac{d g^{sto\_u}(t)}{dt} = & -k_{21} \cdot g^{sto\_u}(t) \\
+    \dfrac{d g^{sto\_d}(t)}{dt} = & -k_{e} \cdot g^{sto\_d}(t) \\ 
+    & + k_{21} \cdot g^{sto\_u}(t) \\
+    \dfrac{\partial g(z,t)}{\partial t} = & -\overline{u}\dfrac{\partial g(z,t)}{\partial z} - \overline{K}\cdot g(z,t)
+    \end{align*}
+    \item 血糖
+    \begin{align*}
+    \dfrac{G^{pl}}{dt} = & \~ g^{liv}(t) + g^{gut}(t) \\
+    & - g^{non-it}(t) - g^{it}(t) - g^{ren}(t)
+    \end{align*}
+    \item 胰岛素
+    $$\dfrac{I^{pl}}{dt} = i^{pnc}(t) - i^{liv}(t) - i^{if}(t)$$
+\end{itemize}
+}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+\begin{figure}
+\centering
+\includegraphics[width=1\textwidth,keepaspectratio]{images/bg_model.png}
+\end{figure}
+\end{column}
+
+\end{columns}
 
 
 \end{frame}
@@ -169,31 +293,19 @@
 % Page 15
 
 \begin{frame}
+\frametitle{血糖 --- 生理模型}
 
+用途：预测餐后血糖，评估运动对血糖影响
 
-\end{frame}
+\vspace{1em}
 
-%------------------------------------------------
-
-\section{NLP}
-
-%------------------------------------------------
-% Page 15
-
-\begin{frame}
-
-
-\end{frame}
-
-%------------------------------------------------
-
-\section{Miscellaneous}
-
-%------------------------------------------------
-% Page 15
-
-\begin{frame}
-
+\uncover<2->{
+一些问题：
+}
+\begin{itemize}
+    \item<3-> 实际使用的时候，胰岛素浓度没有方便途径采集，导致整个模型是non-identifiable的（是一个病态的问题，解局部不唯一）。
+    \item<4-> 即使固定一些未知量，模型参数拟合计算慢（scipy.optimize Nelder-Mead）
+\end{itemize}
 
 \end{frame}
 
@@ -201,7 +313,61 @@
 % Page 15
 
 \begin{frame}
-\frametitle{参考文献}
+\frametitle{夜间低血糖预测模型}
+
+\uncover<2->{
+方法（专利）：从连续血糖数据提取一系列特征
+}
+\vspace{1em}
+
+\uncover<3->{
+模型：二分类XGBoost
+}
+\vspace{1em}
+
+\uncover<4->{
+该模型在生产环境中使用，对于二型糖尿病人的夜间低血糖事件的预警非常有效。
+}
+
+\end{frame}
+
+%------------------------------------------------
+
+\section[Misc]{Miscellaneous}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Miscellaneous}
+
+\begin{itemize}
+    \item<2-> 中医望诊系统（面诊、舌诊、手诊） --- 图像
+    \item<3-> 饮食营养分析 --- 图像
+    \begin{columns}
+    \begin{column}{0.5\textwidth}
+    \begin{figure}
+        \centering
+        \includegraphics[width=1\textwidth,keepaspectratio]{images/diet_img.jpg}
+    \end{figure}
+    \end{column}
+    \begin{column}{0.27\textwidth}
+    \begin{figure}
+        \centering
+        \includegraphics[width=1\textwidth,keepaspectratio]{images/diet_ann_res.jpg}
+    \end{figure}
+    \end{column}
+    \end{columns}
+    \item<4-> etc.
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{}
 
 
 
