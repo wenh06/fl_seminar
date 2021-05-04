@@ -6,7 +6,7 @@
 
 \title{Talk 1: Distributed Optimization and Statistical Learning via ADMM (I)}
 \date{2021年4月29日}
-\author{}
+\author{WEN Hao}
 
 \maketitle
 
@@ -351,7 +351,7 @@ or
     & \text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + \dfrac{\lambda}{2} \sum\limits_{i=1}^N \lVert x_i \rVert^2 -\dfrac{\lambda N}{2} \lVert z \rVert^2 \\
     & \text{subject to} \quad Nz - \sum\limits_{i=1}^N x_i = 0
 \end{align*}
-which is a nonconvex sharing problem considered in \cite{hong2016convergence} (Eq. (3.2)). Note the difference with the a normal consensus problem with proximal term technique, e.g. as in \cite{sahu2018fedprox}.
+which is a nonconvex sharing problem considered in \cite{hong2016convergence} (Eq. (3.2)). Under certain assumptions, this latter problem is a DC (difference-of-convex) programming problem. Note the difference with the a normal consensus problem with proximal term technique, e.g. as in \cite{sahu2018fedprox}.
 
 
 \bibliographystyle{ieeetr}

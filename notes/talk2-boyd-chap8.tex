@@ -1,0 +1,36 @@
+
+\begin{document}
+
+\title{Talk 2: Distributed Optimization and Statistical Learning via ADMM (II)}
+\date{2021年5月?日}
+\author{WEN Hao}
+
+\maketitle
+
+{\bfseries Main Resource: Chapter 8 of \cite{boyd2011distributed}}
+
+\section{Distributed Model Fitting Overview}
+
+Consider a general convex (linear) model fitting problem
+\begin{align*}
+    & \text{minimize} \quad \ell(Ax-b) + r(x)
+\end{align*}
+where
+\begin{align*}
+    & x \in \mathbb{R}^n: \text{parameter vector} \\
+    & A \in \operatorname{Mat}_{m\times n}(\mathbb{R}): \text{feature matrix} \\
+    & b \in \mathbb{R}^m: \text{output (label) vector} \\
+    & \ell: \mathbb{R}^m \rightarrow \mathbb{R}: \text{convex loss function} \\
+    & r: \mathbb{R}^n \rightarrow \mathbb{R}: \text{convex regularization function} \\
+\end{align*}
+
+Important examples of $\ell$ and $r$:
+$$\ell(Ax-b) = \sum\limits_{i=1}^m \ell_i(a_i^Tx-b_i)$$
+the $\ell_i$ is the loss function for sample $i$. For example one can assign (different) weights to each sample, thus different loss function yields from a common base loss function. For concrete examples, ref. \href{https://scikit-learn.org/stable/auto_examples/svm/plot_weighted_samples.html}{a scikit-learn example}.
+\begin{align*}
+    & r(x) = \lambda \lVert x \rVert_2^2: \text{ridge penalty} \\
+    & r(x) = \lambda \lVert x \rVert_1: \text{lasso penalty} \\
+    & r(x) = \lambda_2 \lVert x \rVert_2^2 + \lambda_1 \lVert x \rVert_1: \text{elastic net}
+\end{align*}
+
+\end{document}
