@@ -23,14 +23,78 @@ where
     & \ell: \mathbb{R}^m \rightarrow \mathbb{R}: \text{convex loss function} \\
     & r: \mathbb{R}^n \rightarrow \mathbb{R}: \text{convex regularization function} \\
 \end{align*}
+Recall that $\ell$ is generally expressed as $\expectation\limits_{z\sim \mathcal{D}} \operatorname{loss}(x;z)$.
 
-Important examples of $\ell$ and $r$:
+$\ell$ is usually additive w.r.t. samples, i.e.
 $$\ell(Ax-b) = \sum\limits_{i=1}^m \ell_i(a_i^Tx-b_i)$$
-the $\ell_i$ is the loss function for sample $i$. For example one can assign (different) weights to each sample, thus different loss function yields from a common base loss function. For concrete examples, ref. \href{https://scikit-learn.org/stable/auto_examples/svm/plot_weighted_samples.html}{a scikit-learn example}.
+where each $\ell_i$ is the loss function for sample $i$. For example one can assign (different) weights to each sample, thus different loss function yields from a common base loss function. For concrete examples, ref. \href{https://scikit-learn.org/stable/auto_examples/svm/plot_weighted_samples.html}{a scikit-learn example}.
+
+Important examples of $r$:
 \begin{align*}
     & r(x) = \lambda \lVert x \rVert_2^2: \text{ridge penalty} \\
     & r(x) = \lambda \lVert x \rVert_1: \text{lasso penalty} \\
-    & r(x) = \lambda_2 \lVert x \rVert_2^2 + \lambda_1 \lVert x \rVert_1: \text{elastic net}
+    & r(x) = \lambda_2 \lVert x \rVert_2^2 + \lambda_1 \lVert x \rVert_1: \text{elastic net} \\
+    & etc.
 \end{align*}
+
+\section{Examples of Model Fitting}
+
+\subsection{(Linear) Regression}
+
+Consider a linear model
+$$b = a^Tx$$
+One models each sample (measurement) as
+$$b_i = a_i^Tx + \varepsilon_i$$
+with $\varepsilon_i$ being measurement error or noise, which are independent with log-concave density $p_i$ (sometimes simpler, IID with density $p$). The likelihood function of the parameters $x$ w.r.t. the observations $\{(a_i,b_i)\}_{i=1}^m$ is
+$$\operatorname{LH}(x) = \prod\limits_{i=1}^m p_i(\varepsilon_i) = \prod\limits_{i=1}^m p_i(b_i - a_i^Tx)$$
+If $r = 0$ (no regularization), then the model fitting problem can be interpreted as maximum likelihood estimation (MLE) of $x$ under noise model $p_i$. For example, if we assume that $\varepsilon_i \sim N(0, \sigma^2)$ (IID), then the likelihood function of $x$ is
+$$\operatorname{LH}(x) = \prod\limits_{i=1}^m \dfrac{1}{\sqrt{2\pi}\sigma} e^{-\frac{(b_i-a_i^Tx)^2}{2\sigma^2}}$$
+Therefore,
+\begin{align*}
+    x^* & = \argmin_x \{\operatorname{NLL}(x)\} = \argmin_x \left\{ -\dfrac{1}{2\sigma^2} \sum\limits_{i=1}^n (y_i-\mathbf{w}^T\mathbf{x}_i)^2 + \cdots \right\} \\
+    & = \argmin_x \left\{ \sum\limits_{i=1}^m (b_i-a_i^Tx)^2 \right\}
+\end{align*}
+a least square problem.
+
+If $r_i$ is taken to be the negative log prior density of $x_i$, then the model fitting problem can be interpreted as MAP ( = $\argmax \left\{ \operatorname{LH} \cdot \operatorname{prior}\right\}$) estimation. Again, we model each sample (measurement) as
+$b_i = a_i^Tx + \varepsilon_i$ with $\varepsilon_i \sim N(0, \sigma^2)$. Then 
+\begin{itemize}
+    \item if the parameters $x$ are endowed with Laplacian prior, then MAP of $x$ is equivalent to lasso,
+    \item if the parameters $x$ are endowed with normal prior, then MAP of $x$ is equivalent to ridge regression.
+\end{itemize}
+
+\subsection{Classification}
+
+Consider a binary classification problem (multi-class or multi-label problems can be generalized as vector or sum or mean of this kind of problems). Suppose we have samples $\{p_i,q_i\}_{i=1}^m$, with $q_i\in\{-1,1\}$. The goal is to find a weight vector $w$ and bias $v$ s.t.
+$\operatorname{sign}(p_i^Tw + v) = q_i$
+holds ``for as many samples as possible''. The function
+$$f(p_i) = p_i^Tw + v$$
+is called a discriminant function (``decision function'' in scikit-learn), telling on which side of the classifying hyperplane we are and how far we are away from it. The loss is usually given by
+$$\ell_i(p_i^Tw + v) = \ell_i(q_i(p_i^Tw + v)) \quad (\text{by abuse of notation})$$
+The quantity $\mu_i := q_i(p_i^Tw + v)$ is called the margin of sample $i$.
+
+As a function of the margin $\mu_i$, $\ell_i$ should be (positive) decreasing. Common loss functions are
+\begin{align*}
+    & \text{hinge loss}: \quad (1-\mu_i)_+ \\
+    & \text{exponential loss}: \quad \exp(-\mu_i) \\
+    & \text{logistic loss}: \quad \log(1+\exp(-\mu_i))
+\end{align*}
+For more loss functions for classification, ref. \href{https://en.wikipedia.org/wiki/Loss_functions_for_classification}{Wikipedia}
+
+\section{Splitting across Examples (Horizontal splitting}
+
+In the model fitting problem
+\begin{align*}
+    & \text{minimize} \quad \ell(Ax-b) + r(x)
+\end{align*}
+we partition the feature matrix $A$ and labels $b$ by rows, i.e.
+$$A = \begin{pmatrix} A_1 \\ \vdots \\ A_N \end{pmatrix}, \quad b = \begin{pmatrix} b_1 \\ \vdots \\ b_N \end{pmatrix},$$
+where $A_i \in \operatorname{Mat}_{m_i\times n}, b_i \in \mathbb{R}^{m_i}$ are from samples of ``client'' $i$. The consensus (with regularization) form of the above problem is formulated as
+\begin{align*}
+    & \text{minimize} \quad \sum\limits_{i=1}^N \ell_i(A_ix_i-b_i) + r(z) \\
+    & \text{subject to} \quad x_i = z
+\end{align*}
+
+\section{Splitting across Features (Vertical splitting}
 
 \end{document}
