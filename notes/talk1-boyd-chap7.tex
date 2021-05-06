@@ -146,7 +146,7 @@ One similarly has the following reductions by letting $u_i = \dfrac{y_i}{\rho}$:
     & = \argmin_z \left\{ g(z) + N \left( \dfrac{\rho}{2}\lVert z \rVert^2 - \langle \rho \overline{x}^{k+1}+\overline{y}^k, z \rangle + \cdots \right) \right\} \\
     & = \argmin_z \left\{ g(z) + \dfrac{N\rho}{2} \lVert z - \overline{x}^{k+1} - \dfrac{\overline{y}^k}{\rho} \rVert^2 \right\} \\
     & = \argmin_z \left\{ g(z) + \dfrac{N\rho}{2} \lVert z - \overline{x}^{k+1} - \overline{u}^k \rVert^2 \right\} = \operatorname{prox}_{g,N\rho}(\overline{x}^{k+1} + \overline{u}^k) \\
-    \tikz[overlay, remember picture]{\node[] (simp_x) {}} x^{k+1} & = \argmin_{x_i} \left\{ f_i(x_i) + \dfrac{\rho}{2} \lVert x_i - z^k - u_i^k \rVert^2 \right\} = \operatorname{prox}_{f_i,\rho}(z^k - u_i^k) \\
+    \tikz[overlay, remember picture]{\node[] (simp_x) {}} x_i^{k+1} & = \argmin_{x_i} \left\{ f_i(x_i) + \dfrac{\rho}{2} \lVert x_i - z^k + u_i^k \rVert^2 \right\} = \operatorname{prox}_{f_i,\rho}(z^k - u_i^k) \\
     u_i^{k+1} & = u_i^k + (x_i^{k+1} - z^{k+1})
 \end{align*}
 \tikz[overlay, remember picture]{\path[->] ([yshift = 0.1cm]simp_x.west) edge[bend left] ([yshift = 0.6cm, xshift = 0.3cm]simp_z.north)}

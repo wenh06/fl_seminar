@@ -19,11 +19,13 @@ where
 \begin{align*}
     & x \in \mathbb{R}^n: \text{parameter vector} \\
     & A \in \operatorname{Mat}_{m\times n}(\mathbb{R}): \text{feature matrix} \\
-    & b \in \mathbb{R}^m: \text{output (label) vector} \\
+    & b \in \mathbb{R}^m: \text{output (response, etc) vector} \\
     & \ell: \mathbb{R}^m \rightarrow \mathbb{R}: \text{convex loss function} \\
     & r: \mathbb{R}^n \rightarrow \mathbb{R}: \text{convex regularization function} \\
 \end{align*}
-Recall that $\ell$ is generally expressed as $\expectation\limits_{z\sim \mathcal{D}} \operatorname{loss}(x;z)$.
+Recall that $\ell$ is generally expressed as $\expectation\limits_{z\sim \mathcal{D}} \operatorname{loss}(x;z)$. 
+
+For linear models with bias term, one can always add the bias term as the first (or last) element of $x$, and add a column with values 1 to the feature matrix $A$. In this way, the model can be written in a uniform and simple way $Ax$.
 
 $\ell$ is usually additive w.r.t. samples, i.e.
 $$\ell(Ax-b) = \sum\limits_{i=1}^m \ell_i(a_i^Tx-b_i)$$
@@ -48,20 +50,29 @@ $$b_i = a_i^Tx + \varepsilon_i$$
 with $\varepsilon_i$ being measurement error or noise, which are independent with log-concave density $p_i$ (sometimes simpler, IID with density $p$). The likelihood function of the parameters $x$ w.r.t. the observations $\{(a_i,b_i)\}_{i=1}^m$ is
 $$\operatorname{LH}(x) = \prod\limits_{i=1}^m p_i(\varepsilon_i) = \prod\limits_{i=1}^m p_i(b_i - a_i^Tx)$$
 If $r = 0$ (no regularization), then the model fitting problem can be interpreted as maximum likelihood estimation (MLE) of $x$ under noise model $p_i$. For example, if we assume that $\varepsilon_i \sim N(0, \sigma^2)$ (IID), then the likelihood function of $x$ is
-$$\operatorname{LH}(x) = \prod\limits_{i=1}^m \dfrac{1}{\sqrt{2\pi}\sigma} e^{-\frac{(b_i-a_i^Tx)^2}{2\sigma^2}}$$
+$$\operatorname{LH}(x) = \prod\limits_{i=1}^m \dfrac{1}{\sqrt{2\pi}\sigma} \exp\left(-\frac{(b_i-a_i^Tx)^2}{2\sigma^2}\right)$$
 Therefore,
 \begin{align*}
-    x^* & = \argmin_x \{\operatorname{NLL}(x)\} = \argmin_x \left\{ -\dfrac{1}{2\sigma^2} \sum\limits_{i=1}^n (y_i-\mathbf{w}^T\mathbf{x}_i)^2 + \cdots \right\} \\
+    \operatorname{MLE}(x) & = \argmax_x \{\operatorname{LH}(x)\} = \argmin_x \{\operatorname{NLL}(x)\} \\
+    & = \argmin_x \left\{ \dfrac{1}{2\sigma^2} \sum\limits_{i=1}^n (b_i-a_i^Tx)^2 \right\} \\
     & = \argmin_x \left\{ \sum\limits_{i=1}^m (b_i-a_i^Tx)^2 \right\}
 \end{align*}
 a least square problem.
 
-If $r_i$ is taken to be the negative log prior density of $x_i$, then the model fitting problem can be interpreted as MAP ( = $\argmax \left\{ \operatorname{LH} \cdot \operatorname{prior}\right\}$) estimation. Again, we model each sample (measurement) as
+If $r_i$ is taken to be the negative log prior density of $x_i$, then the model fitting problem can be interpreted as max a posteriori estimates (MAP) ( = $\argmax \left\{ \operatorname{LH} \cdot \operatorname{prior}\right\}$) estimation. Again, we model each sample (measurement) as
 $b_i = a_i^Tx + \varepsilon_i$ with $\varepsilon_i \sim N(0, \sigma^2)$. Then 
 \begin{itemize}
     \item if the parameters $x$ are endowed with Laplacian prior, then MAP of $x$ is equivalent to lasso,
     \item if the parameters $x$ are endowed with normal prior, then MAP of $x$ is equivalent to ridge regression.
 \end{itemize}
+For example, let $x$ be endowed with Laplacian prior
+$$p(x_j) = \dfrac{1}{2\tau}\exp\left( -\dfrac{|x_j|}{\tau} \right)$$
+Then
+\begin{align*}
+\operatorname{MAP}(x) & = \argmax_x \{p(x) \cdot \operatorname{LH}(x) \} \\
+& = \argmax_x \left\{ \prod\limits_{j=1}^n \dfrac{1}{2\tau}\exp\left( -\dfrac{|x_j|}{\tau} \right) \cdot \prod\limits_{i=1}^m \dfrac{1}{\sqrt{2\pi}\sigma} \exp\left(-\frac{(b_i-a_i^Tx)^2}{2\sigma^2}\right) \right\} \\
+& = \argmin_x \left\{ \sum\limits_{i=1}^m (b_i-a_i^Tx)^2 + \lambda \lVert x \rVert_1 \right\}
+\end{align*}
 
 \subsection{Classification}
 
@@ -69,9 +80,9 @@ Consider a binary classification problem (multi-class or multi-label problems ca
 $\operatorname{sign}(p_i^Tw + v) = q_i$
 holds ``for as many samples as possible''. The function
 $$f(p_i) = p_i^Tw + v$$
-is called a discriminant function (``decision function'' in scikit-learn), telling on which side of the classifying hyperplane we are and how far we are away from it. The loss is usually given by
+is called a discriminant function (``decision function'' in scikit-learn), telling on which side of the classifying hyperplane we are and how far we are away from it. The (margin-based) loss functions is usually given by
 $$\ell_i(p_i^Tw + v) = \ell_i(q_i(p_i^Tw + v)) \quad (\text{by abuse of notation})$$
-The quantity $\mu_i := q_i(p_i^Tw + v)$ is called the margin of sample $i$.
+where the quantity $\mu_i := q_i(p_i^Tw + v)$ is called the margin of sample $i$.
 
 As a function of the margin $\mu_i$, $\ell_i$ should be (positive) decreasing. Common loss functions are
 \begin{align*}
@@ -79,9 +90,25 @@ As a function of the margin $\mu_i$, $\ell_i$ should be (positive) decreasing. C
     & \text{exponential loss}: \quad \exp(-\mu_i) \\
     & \text{logistic loss}: \quad \log(1+\exp(-\mu_i))
 \end{align*}
-For more loss functions for classification, ref. \href{https://en.wikipedia.org/wiki/Loss_functions_for_classification}{Wikipedia}
 
-\section{Splitting across Examples (Horizontal splitting}
+Recall that SVM (SVC) is to solve
+\begin{align*}
+    & \text{minimize} \quad \sum\limits_{i=1}^m (1 - q_i({\tikz[baseline,yshift=2.3pt]{\node[] (svm_kernel) {$\color{red} p_i^Tx$} } } + v))_+ + \lambda \lVert x \rVert_2^2
+% \tikz[]{
+% \node[above right = 0.3cm and 0.5cm of svm_kernel.north] (svm_kernel_text) {SVM kernel, can be generalized to non-linear $k(p_i, x)$};
+% \path[->] (svm_kernel_text.south) edge ([xshift=-3cm]svm_kernel.north);
+% }
+\end{align*}
+where hinge loss and $\ell_2$ regularizer are used. $p_i^Tx$ is the SVM kernel, which can be generalized to non-linear ones $k(p_i, x)$. (for more kernel functions, ref. \href{https://scikit-learn.org/stable/modules/svm.html#svm-kernels}{scikit-learn docs})
+
+
+
+Let $\displaystyle f(\mu) = \dfrac{1}{1+\exp(-\mu)}$, then $f(\mu_i) = f(q_i(p_i^Tw + v))$ can be given as the probability of predicting the ground truth. In this case, the (binary) cross entropy loss is given as
+$$\operatorname{CE}_i(x) = - (1 \cdot \log(f(\mu_i)) + 0 \cdot \log(1-f(\mu_i))) = \log(1+\exp(-\mu_i))$$
+
+For more loss functions and deeper insights for classification, ref. \href{https://en.wikipedia.org/wiki/Loss_functions_for_classification}{Wikipedia} and references listed therein.
+
+\section{Splitting across Examples (Horizontal splitting)}
 
 In the model fitting problem
 \begin{align*}
@@ -89,12 +116,93 @@ In the model fitting problem
 \end{align*}
 we partition the feature matrix $A$ and labels $b$ by rows, i.e.
 $$A = \begin{pmatrix} A_1 \\ \vdots \\ A_N \end{pmatrix}, \quad b = \begin{pmatrix} b_1 \\ \vdots \\ b_N \end{pmatrix},$$
-where $A_i \in \operatorname{Mat}_{m_i\times n}, b_i \in \mathbb{R}^{m_i}$ are from samples of ``client'' $i$. The consensus (with regularization) form of the above problem is formulated as
+where $A_i \in \operatorname{Mat}_{m_i\times n}, b_i \in \mathbb{R}^{m_i}$ are from samples of ``client'' $i$. The model fitting problem thus is formulated as follows
 \begin{align*}
     & \text{minimize} \quad \sum\limits_{i=1}^N \ell_i(A_ix_i-b_i) + r(z) \\
     & \text{subject to} \quad x_i = z
 \end{align*}
+as a {\bfseries consensus problem (with regularization)}.
 
-\section{Splitting across Features (Vertical splitting}
+The scaled ADMM iterations of the above optimization problem are
+\begin{align*}
+    x^{k+1} & = \argmin_{x_i} \left\{ \ell_i(A_ix_i-b_i) + \dfrac{\rho}{2} \lVert x_i - z^k + u_i^k \rVert_2^2 \right\} = \operatorname{prox}_{\tilde{\ell}_i,\rho}(z^k - u_i^k) \\
+    z^{k+1} & = \argmin_z \left\{ r(z) + \dfrac{N\rho}{2} \lVert z - \overline{x}^{k+1} - \overline{u}^k \rVert_2^2 \right\} = \operatorname{prox}_{r,N\rho}(\overline{x}^{k+1} + \overline{u}^k) \\
+    u_i^{k+1} & = u_i^k + (x_i^{k+1} - z^{k+1})
+\end{align*}
+where $\tilde{\ell}_i(x_i) := \ell_i(A_ix_i-b_i)$. It can be seen that
+\begin{align*}
+    \text{$x$-update} & \leftarrow \text{parallel $\ell_2$-regularized model fitting problems} \\
+    \text{$z$-update} & \leftarrow \text{averaging $x,z$, and minimization problem} \\
+\end{align*}
+
+\subsection{Example: Lasso}
+Recall that Lasso is the following optimization problem
+\begin{align*}
+    & \text{minimize} \quad \dfrac{1}{2} \lVert Ax - b \rVert_2^2 + \lambda \lVert x \rVert_1
+\end{align*}
+The corresponding distributed (consensus) version of ADMM algorithm is
+\begin{align*}
+    x_i^{k+1} & = \argmin_{x_i} \left\{ \dfrac{1}{2} \lVert A_ix_i - b_i \rVert_2^2 + \dfrac{\rho}{2} \lVert x_i - z^k + u_i^k \rVert_2^2 \right\} \\
+    z^{k+1} & = \argmin_z \left\{ \lambda \lVert z \rVert_1 + \dfrac{N\rho}{2} \lVert z - \overline{x}^{k+1} - \overline{u}^k \rVert_2^2 \right\} = \operatorname{S}_{\lambda/N\rho}(\overline{x}^{k+1} + \overline{u}^k) \\
+    u_i^{k+1} & = u_i^k + (x_i^{k+1} - z^{k+1})
+\end{align*}
+Each $x_i$-update is a ridge regression problem, which is equivalent to the least square problem
+\begin{align*}
+    & \text{minimize} \left\lVert \begin{pmatrix} A_i \\ \sqrt{\rho}I \end{pmatrix} x_i - \begin{pmatrix} b_i \\ \sqrt{\rho}(z^k - u_i^k) \end{pmatrix} \right\rVert_2^2
+\end{align*}
+thus having analytic solution (and numerically solved by the so-called direct method)
+\begin{align*}
+x_i^{k+1} & = \left( \begin{pmatrix} A_i \\ \sqrt{\rho}I \end{pmatrix}^T \cdot \begin{pmatrix} A_i \\ \sqrt{\rho}I \end{pmatrix} \right)^{-1} \cdot \begin{pmatrix} A_i \\ \sqrt{\rho}I \end{pmatrix}^T \cdot \begin{pmatrix} b_i \\ \sqrt{\rho}(z^k - u_i^k) \end{pmatrix} \\
+& = \tikz[]{\node[] (lasso_cache) {}} {\color{red} (A_i^TA_i + \rho I)^{-1} } (A_i^Tb_i + \rho (z^k - u_i^k) )
+\end{align*}
+
+Accelerations on $x_i$-updates:
+\begin{itemize}
+    \item[(1)] $\color{red} (A_i^TA_i + \rho I)^{-1}$ is independent of $k$, hence (its factorizations) can be precomputed and used for each $x_i$ update.
+    \item[(2)] If further, $m_i < n$ (\# samples < \# features), by \href{https://en.wikipedia.org/wiki/Woodbury_matrix_identity}{Woodbury matrix identity} (or matrix inverse lemma),
+    $$(A_i^TA_i + \rho I)^{-1} = \dfrac{1}{\rho} - \dfrac{1}{\rho} A_i^T {\color{red} (A_iA_i^T + \rho I)^{-1}} A$$
+    The size $A_iA_i^T + \rho I$ is smaller, hence requires less computation.
+\end{itemize}
+
+\subsection{Example: SVM (SVC)}
+
+Recall again that the SVM (SVC) is the following optimization problem
+\begin{align*}
+    & \text{minimize} \quad \sum\limits_{i=1}^m (1 - q_i( p_i^Tx + v))_+ + \lambda \lVert x \rVert_2^2
+\end{align*}
+Ignore the bias term $v$ for convenience, otherwise one can replace $x$ by $\begin{pmatrix} x \\ v \end{pmatrix}$, and replace $p_i^T$ by $(p_i^T, 1)$. Write
+$$A = \begin{pmatrix} -q_1p_1^T \\ \vdots \\ -q_mp_m^T \end{pmatrix},$$
+then the problem rewrites
+\begin{align*}
+    & \text{minimize} \quad  \mathbf{1}^T (\mathbf{1} + Ax)_+ + \lambda \lVert x \rVert_2^2
+\end{align*}
+and in the horizontal splitting consensus form as
+\begin{align*}
+    & \text{minimize} \quad \mathbf{1}^T (\mathbf{1} + A_ix_i)_+ + \lambda \lVert z \rVert_2^2 \\
+    & \text{subject to} \quad x_i = z
+\end{align*}
+with ADMM iterations
+\begin{align*}
+    x_i^{k+1} & = \argmin_{x_i} \left\{ \mathbf{1}^T (\mathbf{1} + A_ix_i)_+ + \dfrac{\rho}{2} \lVert x_i - z^k + u_i^k \rVert_2^2 \right\} \\
+    z^{k+1} & = \argmin_z \left\{ \lambda \lVert z \rVert_2^2 + \dfrac{N\rho}{2} \lVert z - \overline{x}^{k+1} - \overline{u}^k \rVert_2^2 \right\} = {\color{yellow} \dfrac{N\rho}{2\lambda + N\rho}} (\overline{x}^{k+1} + \overline{u}^k) \\
+    u_i^{k+1} & = u_i^k + (x_i^{k+1} - z^{k+1})
+\end{align*}
+
+\section{Splitting across Features (Vertical splitting)}
+
+Let the feature matrix $A$ and parameter vector $x$ be partitioned vertically as
+$$A = (A_1, \cdots, A_N), \quad x = (x_1, \cdots, x_N)$$
+with $A_i \in \operatorname{Mat}_{m\times n_i}(\mathbb{R}), x_i \in \mathbb{R}^{n_i}$. Each $A_i$ can be considered as ``partial'' feature matrix, and $A_ix_i$ ``partial'' predictions. The ``full'' prediction is given as
+$$Ax = \sum\limits_{i=1}^N A_ix_i$$
+The model fitting problem hence is formulated as follows
+\begin{align*}
+    & \text{minimize} \quad \ell(\sum\limits_{i=1}^N A_ix_i - b) + \sum\limits_{i=1}^N r_i(x_i)
+\end{align*}
+which can be further formulated as a sharing problem
+\begin{align*}
+    & \text{minimize} \quad \ell(\framebox{$\sum\limits_{i=1}^N z_i$} - b) + \sum\limits_{i=1}^N r_i(x_i) \\
+    & \text{subject to} \quad A_ix_i = z_i
+\end{align*}
+The scaled ADMM iterations are
 
 \end{document}
