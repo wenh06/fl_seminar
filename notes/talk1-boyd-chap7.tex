@@ -325,7 +325,7 @@ $$z_i^{k+1} = \framebox{$\cancel{u_i^{k}}$} + x_i^{k+1} + \overline{z}^{k+1} - \
 The ADMM iterations for the whole equivalent optimization problem:
 \begin{align*}
     & x_i^{k+1} = \argmin_{x_i} \left\{ f_i(x_i) + \dfrac{\rho}{2} \lVert x_i - x_i^k - \overline{z}^k + \overline{x}^k + u^k \rVert^2 \right\} = \operatorname{prox}_{f_i,\rho}(x_i^k + \overline{z}^k - \overline{x}^k - u^k) \\
-    & \overline{z}^{k+1} = \argmin\limits_{\overline{z}} \left\{ g(N\overline{z}) + \dfrac{N\rho}{2} \lVert \overline{z} - \overline{x}^{k+1} - u^k \rVert^2 \right\}  = \operatorname{prox}_{\widetilde{g},N\rho}(\overline{x}_i^{k+1} + u^k) \\
+    & \overline{z}^{k+1} = \argmin\limits_{\overline{z}} \left\{ g(N\overline{z}) + \dfrac{N\rho}{2} \lVert \overline{z} - \overline{x}^{k+1} - u^k \rVert^2 \right\}  = \operatorname{prox}_{\widetilde{g},N\rho}(\overline{x}^{k+1} + u^k) \\
     & u^{k+1} = u^k + (\overline{x}^{k+1}-\overline{z}^{k+1})
 \end{align*}
 where $\widetilde{g}(\overline{z}) = g(N\overline{z})$.
