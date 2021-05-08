@@ -1,4 +1,23 @@
 
+
+\tikzset{%
+  client/.style={
+    rectangle,
+    thick,
+    draw,
+    minimum size=0.7cm,
+    text width=1cm,
+    align=center
+  },
+  client missing/.style={
+    draw=none, 
+    scale=2,
+    text height=0.333cm,
+    execute at begin node=$\cdots$
+  },
+}
+
+
 \begin{document}
 
 %----------------------------------------------------------------------------------------
@@ -157,32 +176,94 @@ Federated Learning这个名词首次由Google的研究人员McMahan等人在文�
 %------------------------------------------------
 % Page 15
 
+% reference: FLOW - Adaptive Federated Optimization
+
 \begin{frame}
 \frametitle{FedAvg}
-
-\tikzset{%
-  client/.style={
-    rectangle,
-    draw,
-    minimum size=0.5cm
-  },
-  client missing/.style={
-    draw=none, 
-    scale=2,
-    text height=0.333cm,
-    execute at begin node=$\vdots$
-  },
-}
 
 \begin{figure}
 \centering
 \begin{tikzpicture}[remember picture,overlay]
-\node[draw] (server) {server $x$};
-\node[client, below left = 1cm and 3cm of server.south] (client-1) {client $x_1$};
-\node[client, below left = 1cm and 0.5cm of server.south] (client-1) {client $x_1$};
-\node[client, below left = 1cm and 3cm of server.south] (client-1) {client $x_1$};
+\node[client] (server) {server $\mathbf{w}$};
+\node[client, below left = 1.5cm and 3cm of server.south] (client-1) {client $\mathbf{w}_1$};
+\node[client, below left = 1.5cm and 1cm of server.south] (client-2) {client $\mathbf{w}_2$};
+\node[client, below left = 1.5cm and -1cm of server.south] (client-3) {client $\mathbf{w}_3$};
+\node[client missing, below left = 1.3cm and -2.8cm of server.south] {};
+\node[client, below left = 1.5cm and -4cm of server.south] (client-n) {client $\mathbf{w}_n$};
+\path[->] ([xshift=-0.5cm,yshift=-0.1cm]server.south) edge ([yshift=0.15cm]client-1.north);
+\path[->] ([xshift=-0.2cm,yshift=-0.1cm]server.south) edge ([yshift=0.15cm]client-2.north);
+\path[->] ([xshift=0.05cm,yshift=-0.1cm]server.south) edge ([yshift=0.15cm]client-3.north);
+\path[->] ([xshift=0.4cm,yshift=-0.1cm]server.south) edge ([yshift=0.15cm]client-n.north);
 \end{tikzpicture}
 \end{figure}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+% reference: FLOW - Adaptive Federated Optimization
+
+\begin{frame}
+\frametitle{FedAvg}
+
+\begin{figure}
+\centering
+\begin{tikzpicture}[remember picture,overlay]
+\node[client] (server) {server $\mathbf{w}$};
+\node[client, below left = 1.5cm and 3cm of server.south] (client-1) {client $\mathbf{w}_1$};
+\node[client, below left = 1.5cm and 1cm of server.south] (client-2) {client $\mathbf{w}_2$};
+\node[client, below left = 1.5cm and -1cm of server.south] (client-3) {client $\mathbf{w}_3$};
+\node[client missing, below left = 1.3cm and -2.8cm of server.south] {};
+\node[client, below left = 1.5cm and -4cm of server.south] (client-n) {client $\mathbf{w}_n$};
+\path[->] ([yshift=0.15cm]client-1.north) edge ([xshift=-0.5cm,yshift=-0.1cm]server.south);
+\path[->] ([yshift=0.15cm]client-2.north) edge ([xshift=-0.2cm,yshift=-0.1cm]server.south);
+\path[->] ([yshift=0.15cm]client-3.north) edge ([xshift=0.05cm,yshift=-0.1cm]server.south);
+\path[->] ([yshift=0.15cm]client-n.north) edge ([xshift=0.4cm,yshift=-0.1cm]server.south);
+\end{tikzpicture}
+\end{figure}
+
+\end{frame}
+
+
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{FedOpt}
+
+
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{GADMM}
+
+
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{CQ-GGADMM}
+
+
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{convergence}
+
+
 
 \end{frame}
 
