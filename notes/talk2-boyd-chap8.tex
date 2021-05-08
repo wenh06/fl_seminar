@@ -2,7 +2,7 @@
 \begin{document}
 
 \title{Talk 2: Distributed Optimization and Statistical Learning via ADMM (II)}
-\date{2021年5月?日}
+\date{2021年5月13日}
 \author{WEN Hao}
 
 \maketitle
@@ -23,7 +23,11 @@ where
     & \ell: \mathbb{R}^m \rightarrow \mathbb{R}: \text{convex loss function} \\
     & r: \mathbb{R}^n \rightarrow \mathbb{R}: \text{convex regularization function} \\
 \end{align*}
-Recall that $\ell$ is generally expressed as $\expectation\limits_{z\sim \mathcal{D}} \operatorname{loss}(x;z)$. 
+Recall that $\ell$ is generally expressed as $\expectation\limits_{z\sim \mathcal{D}} \operatorname{loss}(x;z)$.
+
+\begin{question}
+$\ell(Ax,b)$ could be better? ref. classification.
+\end{question}
 
 For linear models with bias term, one can always add the bias term as the first (or last) element of $x$, and add a column with values 1 to the feature matrix $A$. In this way, the model can be written in a uniform and simple way $Ax$.
 
@@ -285,5 +289,39 @@ ADMM iterations are
     & = \argmin\limits_{\overline{z}} \left\{ \sum\limits_{j=1}^n \left( (1+N\overline{z}_j)_+ + \dfrac{N\rho}{2}(\overline{z}_j-s_j)^2 \right) \right\} \\
     u^{k+1} & = u^k + (\overline{Ax}^{k+1}-\overline{z}^{k+1})
 \end{align*}
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}
+  \draw[blue] (-6, 0) -- (-0.5, 0);
+  \draw[->] (-0.5, 0) -- (4, 0) node[right] {$\overline{z}_j$};
+  \draw[->] (0, -2) -- (0, 6);
+  \draw[dashed] (-0.5, -2) -- (-0.5, 6);
+  \node (one_over_N) at (-0.9,-0.6) {$\dfrac{1}{N}$};
+  \draw[domain=-0.5:2.5, smooth, variable=\x, blue] plot ({\x}, {1+2*\x});
+  \draw[dashed, domain=-4:1, smooth, variable=\x, red]  plot ({\x}, {(\x+1.5)*(\x+1.5)});
+  \draw[dashed, domain=-1.5:3.5, smooth, variable=\x, red]  plot ({\x}, {(\x-1)*(\x-1)});
+  \draw[dashed, domain=-2:1, smooth, variable=\x, cyan]  plot ({\x}, {-3*\x+0.75});
+  \node at (3,-2) {$k = N\rho\left(-\dfrac{1}{N}-s_j\right)$};
+  \node[circle,fill,inner sep=2.5pt] (tangent) at (-0.5,2.25) {};
+\end{tikzpicture}
+\end{figure}
+
+$\overline{z}$-update update splits to the component level, i.e.
+$$(1+N\overline{z}_j)_+ + \dfrac{N\rho}{2}(\overline{z}_j-s_j)^2$$
+and are easily computed
+$$\overline{z}_j = \begin{cases}
+    s_j - \dfrac{1}{\rho} & \text{ if } s_j > -\dfrac{1}{N} + \dfrac{1}{\rho} \\
+    -\dfrac{1}{N} & \text{ if } s_j \in [-\dfrac{1}{N}, -\dfrac{1}{N} + \dfrac{1}{\rho}] \\
+    s_j &  \text{ if } s_j < -\dfrac{1}{N}
+\end{cases}
+$$
+
+\subsection{Generalized Additive Models}
+
+to write
+
+\bibliographystyle{ieeetr}
+\bibliography{references}
 
 \end{document}
