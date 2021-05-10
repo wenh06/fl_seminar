@@ -176,24 +176,83 @@ Federated Learning这个名词首次由Google的研究人员McMahan等人在文�
 %------------------------------------------------
 % Page 15
 
+\begin{frame}
+\frametitle{问题描述}
+
+这里的``client''是广义上的``client''，涵盖很多场景，例如
+\begin{itemize}
+    \item （多个机器上的）多张显卡
+    % 这种情况下，数据来源（分布）可能是相同的（例如都是ImageNet），但是partition是固定的，需要区别于 datacenter 的情况
+    \item 多个移动设备
+    % 这种情况下，数据来源一般是不同的
+\end{itemize}
+
+\pause
+\vspace{1.5em}
+
+前者一般被称作cross-silo，后者一般被称作cross-device。在cross-device的场景下，一般来说，通信效率才是整个系统的瓶颈所在，此外还要考虑掉队者（straggler）等问题需要考虑。
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{数据分布}
+
+在真实场景下，各个client的分布$\mathcal{D}_i$一般不是独立同分布的（non-IID, 或称heterogeneous）。non-IID数据分布下，算法的收敛性分析相比IID数据下要更加困难，需要更多额外的假设，对client之间的数据分布的不同性（dissimilarity）进行定量上的限制。
+
+\vspace{1.5em}
+
+一般地，这种限制以gradient variance给出，例如bounded inter-client gradient variance (BCGV)：
+$$\expectation\limits_{i \sim {\mathcal{P}}} \lVert \nabla f_i(x) - \nabla f(x) \rVert_2^2 \leqslant \text{const} \quad \text{ for all } x$$
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{联邦学习的一般性框架（流程）}
+
+\begin{itemize}
+    \item client selection
+    \item parameter broadcast
+    \item {\bfseries client computation (local parameter update)}
+    \item parameter aggregation
+    \item {\bfseries server computation (global parameter update)}
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
 % reference: FLOW - Adaptive Federated Optimization
 
 \begin{frame}
-\frametitle{FedAvg}
+\frametitle{联邦学习的一般性框架（流程）}
+
+Broadcast and local update:
+
+\vspace{2em}
 
 \begin{figure}
 \centering
-\begin{tikzpicture}[remember picture,overlay]
-\node[client] (server) {server $\mathbf{w}$};
-\node[client, below left = 1.5cm and 3cm of server.south] (client-1) {client $\mathbf{w}_1$};
-\node[client, below left = 1.5cm and 1cm of server.south] (client-2) {client $\mathbf{w}_2$};
-\node[client, below left = 1.5cm and -1cm of server.south] (client-3) {client $\mathbf{w}_3$};
-\node[client missing, below left = 1.3cm and -2.8cm of server.south] {};
-\node[client, below left = 1.5cm and -4cm of server.south] (client-n) {client $\mathbf{w}_n$};
+\begin{tikzpicture}[]
+\node[] (slide-center) {};
+\node[client, above=3em of slide-center] (server) {server $x$};
+\node[client, below left = 1.5cm and 3.5cm of server.south] (client-1) {client $x_1$};
+\node[client, right = 0.4cm of client-1.east] (client-2) {client $x_2$};
+\node[client, right = 0.4cm of client-2.east] (client-3) {client $x_3$};
+\node[client missing, right = 0.1cm of client-3.east] (client-missing) {};
+\node[client, right = 0.1cm of client-missing.east] (client-n) {client $x_n$};
 \path[->] ([xshift=-0.5cm,yshift=-0.1cm]server.south) edge ([yshift=0.15cm]client-1.north);
 \path[->] ([xshift=-0.2cm,yshift=-0.1cm]server.south) edge ([yshift=0.15cm]client-2.north);
 \path[->] ([xshift=0.05cm,yshift=-0.1cm]server.south) edge ([yshift=0.15cm]client-3.north);
 \path[->] ([xshift=0.4cm,yshift=-0.1cm]server.south) edge ([yshift=0.15cm]client-n.north);
+\node[text width=1.2cm, align=center, right=0.3cm of client-n.east] (local-update) {local update};
+\node[text width=1.8cm, align=center, above left=0.5cm and 0.3cm of local-update.north] () {params broadcast};
 \end{tikzpicture}
 \end{figure}
 
@@ -205,37 +264,171 @@ Federated Learning这个名词首次由Google的研究人员McMahan等人在文�
 % reference: FLOW - Adaptive Federated Optimization
 
 \begin{frame}
-\frametitle{FedAvg}
+\frametitle{联邦学习的一般性框架（流程）}
+
+Aggregate and global update:
+
+\vspace{2em}
 
 \begin{figure}
 \centering
-\begin{tikzpicture}[remember picture,overlay]
-\node[client] (server) {server $\mathbf{w}$};
-\node[client, below left = 1.5cm and 3cm of server.south] (client-1) {client $\mathbf{w}_1$};
-\node[client, below left = 1.5cm and 1cm of server.south] (client-2) {client $\mathbf{w}_2$};
-\node[client, below left = 1.5cm and -1cm of server.south] (client-3) {client $\mathbf{w}_3$};
-\node[client missing, below left = 1.3cm and -2.8cm of server.south] {};
-\node[client, below left = 1.5cm and -4cm of server.south] (client-n) {client $\mathbf{w}_n$};
+\begin{tikzpicture}[]
+\node[] (slide-center) {};
+\node[client, above=3em of slide-center] (server) {server $x$};
+\node[client, below left = 1.5cm and 3.5cm of server.south] (client-1) {client $x_1$};
+\node[client, right = 0.4cm of client-1.east] (client-2) {client $x_2$};
+\node[client, right = 0.4cm of client-2.east] (client-3) {client $x_3$};
+\node[client missing, right = 0.1cm of client-3.east] (client-missing) {};
+\node[client, right = 0.1cm of client-missing.east] (client-n) {client $x_n$};
 \path[->] ([yshift=0.15cm]client-1.north) edge ([xshift=-0.5cm,yshift=-0.1cm]server.south);
 \path[->] ([yshift=0.15cm]client-2.north) edge ([xshift=-0.2cm,yshift=-0.1cm]server.south);
 \path[->] ([yshift=0.15cm]client-3.north) edge ([xshift=0.05cm,yshift=-0.1cm]server.south);
 \path[->] ([yshift=0.15cm]client-n.north) edge ([xshift=0.4cm,yshift=-0.1cm]server.south);
+\node[text width=1.2cm, align=center, right=0.3cm of server.east] (global-update) {global update};
+\node[text width=1.8cm, align=center, below right=0.25cm and 0.3cm of global-update.south] () {aggregation};
 \end{tikzpicture}
 \end{figure}
 
 \end{frame}
 
+%------------------------------------------------
 
+\section{FedOpt}
 
 %------------------------------------------------
 % Page 15
 
 \begin{frame}
-\frametitle{FedOpt}
+\frametitle{从FedAvg到FedOpt}
+
+Google研究人员McMahan等人。。。。（待写）
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{FedSGD -- baseline}
+
+\begin{figure}
+\centering
+\begin{tikzpicture}[]
+\node[] (slide-center) {};
+\node[left=9cm of slide-center] (x_t) {$x_t$};
+\node[above right = 1.5cm and 0.6cm of x_t] (x_1_0) {$x_{1,t}^0$};
+\node[below = 0.6cm of x_1_0] (x_2_0) {$x_{2,t}^0$};
+\node[below = 0.4cm of x_2_0] (missing) {$\vdots$};
+\node[below = 0.4cm of missing] (x_n_0) {$x_{n,t}^0$};
+\foreach \m in {1,2,n}
+{
+    \path[->,brown] (x_t) edge (x_\m_0);
+}
+
+\foreach \m in {1,2,n}
+{
+    \node[right = 0.6cm of x_\m_0] (x_\m_1) {$x_{\m,t}^1$};
+    \path[->] (x_\m_0) edge (x_\m_1);
+}
+\node[below right = 1.5cm and 0.6cm of x_1_1] (x_t_1) {$x_{t+1}$};
+\foreach \m in {1,2,n}
+{
+    \path[->,green] (x_\m_1) edge (x_t_1);
+}
+\draw[dashed,red,thick] ([xshift=-0.7cm,yshift=0.1cm]x_1_0.north) rectangle ([xshift=0.7cm,yshift=-0.1cm]x_n_1.south);
+\node[below right=0.3cm and -0.5cm of x_n_0.south] () {ONE local step};
+
+\node[above right = 1.5cm and 0.6cm of x_t_1] (x_11_0) {$x_{1,t+1}^0$};
+\node[below = 0.6cm of x_11_0] (x_12_0) {$x_{2,t+1}^0$};
+\node[below = 0.4cm of x_12_0] (missing1) {$\vdots$};
+\node[below = 0.4cm of missing1] (x_1n_0) {$x_{n,t+1}^0$};
+\foreach \m in {1,2,n}
+{
+    \path[->,brown] (x_t_1) edge (x_1\m_0);
+}
+
+\foreach \m in {1,2,n}
+{
+    \node[right = 0.6cm of x_1\m_0] (x_1\m_1) {$x_{\m,t+1}^1$};
+    \path[->] (x_1\m_0) edge (x_1\m_1);
+}
+\node[below right = 1.5cm and 0.6cm of x_11_1] (x_t_2) {$x_{t+2}$};
+\foreach \m in {1,2,n}
+{
+    \path[->,green] (x_1\m_1) edge (x_t_2);
+}
+\draw[dashed,red,thick] ([xshift=-0.8cm,yshift=0.1cm]x_11_0.north) rectangle ([xshift=0.8cm,yshift=-0.1cm]x_1n_1.south);
+\node[below right=0.3cm and -0.5cm of x_1n_0.south] () {ONE local step};
+\end{tikzpicture}
+\end{figure}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{FedAvg}
+
+\begin{figure}
+\centering
+\begin{tikzpicture}[]
+\node[] (slide-center) {};
+\node[left=9cm of slide-center] (x_t) {$x_t$};
+\node[above right = 1.5cm and 0.8cm of x_t] (x_1_0) {$x_{1,t}^0$};
+\node[below = 0.6cm of x_1_0] (x_2_0) {$x_{2,t}^0$};
+\node[below = 0.4cm of x_2_0] (missing) {$\vdots$};
+\node[below = 0.4cm of missing] (x_n_0) {$x_{n,t}^0$};
+\foreach \m in {1,2,n}
+{
+    \path[->,brown] (x_t) edge (x_\m_0);
+}
+
+\foreach \m in {1,2,n}
+{
+    \node[right = 0.8cm of x_\m_0] (x_\m_1) {$x_{\m,t}^1$};
+    \path[->] (x_\m_0) edge (x_\m_1);
+}
+\foreach \m in {1,2,n}
+{
+    \node[right = 0.8cm of x_\m_1] (x_\m_2) {$x_{\m,t}^2$};
+    \path[->] (x_\m_1) edge (x_\m_2);
+}
+\foreach \m in {1,2,n}
+{
+    \node[right = 0.5cm of x_\m_2] (missing_\m) {$\cdots$};
+    \path[->] (x_\m_2) edge (missing_\m);
+}
+\foreach \m in {1,2,n}
+{
+    \node[right = 0.5cm of missing_\m] (x_\m_K) {$x_{\m,t}^K$};
+    \path[->] (missing_\m) edge (x_\m_K);
+}
+\node[below right = 1.5cm and 0.8cm of x_1_K] (x_t_1) {$x_{t+1}$};
+\foreach \m in {1,2,n}
+{
+    \path[->,green] (x_\m_K) edge (x_t_1);
+}
+\draw[dashed,red,thick] ([xshift=-0.7cm,yshift=0.1cm]x_1_0.north) rectangle ([xshift=0.8cm,yshift=-0.1cm]x_n_K.south);
+\node[below=0.3cm of x_n_2] () {$K$ local steps};
+\end{tikzpicture}
+\end{figure}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{收敛性}
 
 
 
 \end{frame}
+
+%------------------------------------------------
+
+\section{ADMM}
 
 %------------------------------------------------
 % Page 15
@@ -261,7 +454,7 @@ Federated Learning这个名词首次由Google的研究人员McMahan等人在文�
 % Page 15
 
 \begin{frame}
-\frametitle{convergence}
+\frametitle{收敛性}
 
 
 
