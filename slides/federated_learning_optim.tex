@@ -89,7 +89,7 @@
 \end{figure}
 
 {\footnotesize
-图片来源：Kairouz et al., Advances and open problems in federated learning, 2019
+图片来源：\cite{kairouz2019advances_fl}Kairouz et al., Advances and open problems in federated learning, 2019
 }
 
 \end{frame}
@@ -100,12 +100,12 @@
 \begin{frame}
 \frametitle{引言}
 
-Federated Learning这个名词首次由Google的研究人员McMahan等人在文章 \emph{Communication-Efficient Learning of Deep Networks from Decentralized Data} (2017)  中提出。
+Federated Learning这个名词首次由Google的研究人员McMahan等人在文章\cite{mcmahan2017fed_avg} \emph{Communication-Efficient Learning of Deep Networks from Decentralized Data} (2016) 中提出。
 
 \vspace{3em}
 \pause
 
-相关的分布式的模型训练（优化）方法则可以追溯到更早的时间，例如Boyd等人的 \emph{Distributed Optimization and Statistical Learning via the Alternating Direction Method of Multipliers} (2010)
+相关的分布式的模型训练（优化）方法则可以追溯到更早的时间，例如Boyd等人的\cite{boyd2011distributed} \emph{Distributed Optimization and Statistical Learning via the Alternating Direction Method of Multipliers} (2010)
 
 \end{frame}
 
@@ -183,14 +183,14 @@ Federated Learning这个名词首次由Google的研究人员McMahan等人在文�
 \begin{itemize}
     \item （多个机器上的）多张显卡
     % 这种情况下，数据来源（分布）可能是相同的（例如都是ImageNet），但是partition是固定的，需要区别于 datacenter 的情况
-    \item 多个移动设备
+    \item 多个移动设备（edge device）
     % 这种情况下，数据来源一般是不同的
 \end{itemize}
 
 \pause
 \vspace{1.5em}
 
-前者一般被称作cross-silo，后者一般被称作cross-device。在cross-device的场景下，一般来说，通信效率才是整个系统的瓶颈所在，此外还要考虑掉队者（straggler）等问题需要考虑。
+前者一般被称作cross-silo，后者一般被称作cross-device。在cross-device的场景下，一般来说，通信效率才是整个系统的瓶颈所在，此外还需要考虑掉队者（straggler）等问题。
 
 \end{frame}
 
@@ -217,10 +217,14 @@ $$\expectation\limits_{i \sim {\mathcal{P}}} \lVert \nabla f_i(x) - \nabla f(x) 
 
 \begin{itemize}
     \item client selection
+    \vspace{0.5em}
     \item parameter broadcast
-    \item {\bfseries client computation (local parameter update)}
+    \vspace{0.5em}
+    \item {\large \bfseries client computation (local parameter update)}
+    \vspace{0.5em}
     \item parameter aggregation
-    \item {\bfseries server computation (global parameter update)}
+    \vspace{0.5em}
+    \item {\large \bfseries server computation (global parameter update)}
 \end{itemize}
 
 \end{frame}
@@ -301,7 +305,40 @@ Aggregate and global update:
 \begin{frame}
 \frametitle{从FedAvg到FedOpt}
 
-Google研究人员McMahan等人。。。。（待写）
+Google研究人员McMahan等人在文章\cite{mcmahan2017fed_avg}(2016)中考察了普通的SGD在分布式下的平凡推广FedSGD，即在每次循环中，client执行一次full-batch gradient descent，并做出了进一步推广，提出了FedAvg算法。具体做法就是在每次循环的client local computation中，执行多步mini-batch SGD。这样，既降低了通信开销（communication-efficient），同时也在实验上观察到了模型效果的提升。
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{从FedAvg到FedOpt}
+
+\begin{algorithm}[H]
+\SetAlgoNoLine
+\DontPrintSemicolon
+{\bfseries Server executes:}\;
+\Indp initialize parameters $x_0$, learning rate $\eta$, batch size $B$;
+\For{each round $t = 0, 1, \cdots, T-1$}{
+    $S_t \gets$ (random set of clients)\;
+    \For{each client $i \in \mathcal{S}_t$ {\bfseries in parallel}}{
+        $x_{i,t} \gets$ {\bfseries ClientUpdate}$(i, x_t)$\;
+        }
+    $x_{t+1} \gets \frac{1}{|\mathcal{S}_t|}\sum_{i\in \mathcal{S}_t} x_{i,t}$\;
+}
+\Indm
+\vspace{0.2em}
+{\bfseries ClientUpdate}$(i, x)$: // on client $i$\;
+\Indp $\mathcal{B} \gets$ (split $\mathcal{P}_i$ into batches of size $B$)\;
+\For{local step $k=0,1\cdots,K-1$}{
+    \For{batch $b \in \mathcal{B}$}{
+        $x \gets x-\eta\nabla \ell_i(x;b)$\;
+    }
+}
+return $x$\;
+\caption{FedAvg}
+\end{algorithm}
 
 \end{frame}
 
@@ -310,6 +347,8 @@ Google研究人员McMahan等人。。。。（待写）
 
 \begin{frame}
 \frametitle{FedSGD -- baseline}
+
+FedSGD: 在每个client执行一次full-batch GD之后，即进行模型同步（平均）。
 
 \begin{figure}
 \centering
@@ -336,7 +375,7 @@ Google研究人员McMahan等人。。。。（待写）
     \path[->,green] (x_\m_1) edge (x_t_1);
 }
 \draw[dashed,red,thick] ([xshift=-0.7cm,yshift=0.1cm]x_1_0.north) rectangle ([xshift=0.7cm,yshift=-0.1cm]x_n_1.south);
-\node[below right=0.3cm and -0.5cm of x_n_0.south] () {ONE local step};
+\node[below right=0.3cm and -0.5cm of x_n_0.south] () {ONE local GD};
 
 \node[above right = 1.5cm and 0.6cm of x_t_1] (x_11_0) {$x_{1,t+1}^0$};
 \node[below = 0.6cm of x_11_0] (x_12_0) {$x_{2,t+1}^0$};
@@ -358,7 +397,7 @@ Google研究人员McMahan等人。。。。（待写）
     \path[->,green] (x_1\m_1) edge (x_t_2);
 }
 \draw[dashed,red,thick] ([xshift=-0.8cm,yshift=0.1cm]x_11_0.north) rectangle ([xshift=0.8cm,yshift=-0.1cm]x_1n_1.south);
-\node[below right=0.3cm and -0.5cm of x_1n_0.south] () {ONE local step};
+\node[below right=0.3cm and -0.5cm of x_1n_0.south] () {ONE local GD};
 \end{tikzpicture}
 \end{figure}
 
@@ -369,6 +408,8 @@ Google研究人员McMahan等人。。。。（待写）
 
 \begin{frame}
 \frametitle{FedAvg}
+
+FedAvg: 每个client执行$K$个mini-batch SGD之后，进行模型同步（平均）。在通信量大大降低的情况下，。。。。（待写）
 
 \begin{figure}
 \centering
@@ -410,9 +451,128 @@ Google研究人员McMahan等人。。。。（待写）
     \path[->,green] (x_\m_K) edge (x_t_1);
 }
 \draw[dashed,red,thick] ([xshift=-0.7cm,yshift=0.1cm]x_1_0.north) rectangle ([xshift=0.8cm,yshift=-0.1cm]x_n_K.south);
-\node[below=0.3cm of x_n_2] () {$K$ local steps};
+\node[below=0.3cm of x_n_2] () {$K$ local mini-batch SGD};
 \end{tikzpicture}
 \end{figure}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{FedOpt}
+
+McMahan等人进一步在文章\cite{reddi2020fed_opt}(2020)中，将Adam等自适应、（momentum）加速算法融入联邦学习中，提出了更一般的FedOpt框架。
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{FedOpt}
+
+\begin{algorithm}[H]
+\SetAlgoNoLine
+\DontPrintSemicolon
+\SetKwInOut{Input}{Input}
+\Input{parameters $x_0$, methods {\bfseries ServerOpt, ClientOpt}, learning rate (schedule) $\eta_g, \eta_l$}
+\For{each round $t = 0, 1, \cdots, T-1$}{
+    $S_t \gets$ (random set of clients)\;
+    $x_{i,t}^0 \gets x_t$\;
+    \For{each client $i \in S_t$ {\bfseries in parallel}}{
+        \For{local step $k=0,1,\cdots,K-1$}{
+            Compute unbiased estimate $g^k_{i,t}$ of $\nabla f_i(x_{i,t}^{k})$
+            $x_{i,t}^{k+1} \gets$ {\bfseries ClientOpt}$(x_{i,t}^{k}, g^k_{i,t}, \eta_l, t)$\;
+        }
+        $\Delta_{i,t} \gets x_{i,t}^{K} - x_t$
+    }
+    $\Delta_{t} \gets \operatorname{aggregate}(\{\Delta_{i,t}\}_{i\in\mathcal{S}_t}) \quad (\text{e.g.} \frac{1}{|\mathcal{S}_t|} \sum_{i\in\mathcal{S}_t} \Delta_{i,t})$\;
+    $x_{t+1} \gets$ {\bfseries ServerOpt}$(x_{t}, \Delta_{t}, \eta_g, t)$\;
+}
+\caption{FedOpt}
+\end{algorithm}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{FedOpt}
+
+一般来说，
+\vspace{0.8em}
+
+\begin{itemize}
+    \item unbiased gradient estimate + {\bfseries ClientOpt}:
+    \begin{align*}
+        & \text{(local) mini-batch SGD, \phantom{aaaaaaa}} \\
+        & \text{i.e. } x_{i,t}^{k+1} = x_{i,t}^{k} - \eta_l g^k_{i,t}
+    \end{align*}
+    \item {\bfseries ServerOpt}:
+    \begin{align*}
+        & \text{Avg, \framebox{Adagrad, Yogi, Adam}, etc.}
+    \end{align*}
+    后面几种算法还需要额外的一些超参数，例如decay parameters $\beta_1,\beta_2\in [0,1)$以及状态量momentum$v_t$。
+\end{itemize}
+% \begin{align*}
+%     & \text{unbiased gradient estimate} + \operatorname{ClientOpt} & = \text{ (local) mini-batch SGD, } \\
+%     & & \qquad \text{i.e. } x_{i,t}^{k+1} = x_{i,t}^{k} - \eta_l g^k_{i,t} \\
+%     \vspace{0.8em}
+%     & \operatorname{ServerOpt} & = \text{ Avg, \framebox{Adagrad, Yogi, Adam}, etc.}
+% \end{align*}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+% \frametitle{FedAdagrad, FedYogi, FedAdam}
+\frametitle{FedAdagrad, FedAdam}
+
+% 3个太长写不下，改成2个
+
+\begin{algorithm}[H]
+\SetAlgoNoLine
+\DontPrintSemicolon
+\SetKwInOut{Input}{Input}
+% \Input{$x_0, v_{-1},\Delta_{-1}, decay params $\beta_1,\beta_2\in [0,1)$$ }  % v_{-1},\Delta_{-1} 还要满足一些条件
+\For{each round $t = 0, 1, \cdots, T-1$}{
+    $S_t \gets$ (random set of clients), \quad $x_{i,t}^0 \gets x_t$\;
+    \For{each client $i \in S_t$ {\bfseries in parallel}}{
+        \For{local step $k=0,1,\cdots,K-1$}{
+            Compute unbiased estimate $g^k_{i,t}$ of $\nabla f_i(x_{i,t}^{k})$
+            $x_{i,t}^{k+1} \gets x_{i,t}^{k} - \eta_l g^k_{i,t}$\;
+        }
+        $\Delta_{i,t} \gets x_{i,t}^{K} - x_t$
+    }
+    \colorbox{pink}{$\Delta_{t} \gets \beta_1 \Delta_{t-1} + ((1-\beta_1)/|\mathcal{S}_t|) \sum_{i\in\mathcal{S}_t} \Delta_{i,t}$}\;
+    \colorbox{green}{$v_t \gets v_{t-1} + \Delta_t^2$ ({\bfseries FedAdagrad})}\;
+    % \colorbox{green}{$v_t \gets v_{t-1} - (1-\beta_2)\Delta_t^2\operatorname{sign}(v_{t-1}-\Delta_t^2)$ (FedYogi)}\;
+    \colorbox{yellow}{$v_t \gets \beta_2 v_{t-1} + (1-\beta_2)\Delta_t^2$ ({\bfseries FedAdam})}\;
+    $x_{t+1} \gets x_t + \eta_g \Delta_t / (\sqrt{v_t}+\tau)$\;
+}
+\caption{\colorbox{green}{FedAdagrad}, \colorbox{yellow}{FedAdam}}
+\end{algorithm}
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Non-IID数据分布下的特殊处理}
+
+对于Non-IID的数据分布，还有一些研究人员对于优化算法做了特殊的处理，例如
+\begin{itemize}
+    \item proximal term (FedProx \cite{sahu2018fedprox}, 2018): 在client local update时，在目标函数上添加proximal term
+    $$x_{i, t+1} \approx \argmin_x f_i(x) + \dfrac{\mu}{2}\lVert x-x_t \rVert_2^2$$
+    \item variance reduction (SCAFFOLD \cite{karimireddy2020scaffold}, 2019)：在server以及client额外的参数$c,c_i$，与模型参数$x$一起更新。在进行local mini-batch SGD时，用这些参数对gradient进行修正：
+    $$x_{i,t}^{k+1} \gets x_{i,t}^k - \eta_l (g_{i,t}^k - c_{i,t} + c_t)$$
+\end{itemize}
+
 
 \end{frame}
 
@@ -429,6 +589,44 @@ Google研究人员McMahan等人。。。。（待写）
 %------------------------------------------------
 
 \section{ADMM}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Consensus and Sharing}
+
+更传统一些的处理分布式的机器学习模型训练的方法是（例如\cite{boyd2011distributed}）将我们要优化的问题
+\begin{align*}
+    & \text{minimize} \quad f(x) = \dfrac{1}{N} \sum\limits_{i=1}^N f_i(x)
+\end{align*}
+转化成Consensus问题或是Sharing问题。
+
+\pause
+\vspace{0.8em}
+
+例如以上问题引入一个新的变量$z$，就可以转化为一个标准的Consensus问题
+\begin{align*}
+    & \text{minimize} \quad \dfrac{1}{N} \sum\limits_{i=1}^N f_i(x_i) \\
+    & \text{subject to} \quad z = x_i, \quad i=1,\cdots,N
+\end{align*}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Consensus and Sharing}
+
+一些传统的（线性）机器学习模型，当数据在所有client上是垂直划分的（vertical splitting），即不同的client上分布着同一批样本的不同特征，我们还可以把要优化的问题表达为一个Sharing问题。
+
+\pause
+\vspace{0.8em}
+
+例如
+
+\end{frame}
 
 %------------------------------------------------
 % Page 15
@@ -463,10 +661,13 @@ Google研究人员McMahan等人。。。。（待写）
 %------------------------------------------------
 % Page 15
 
-\begin{frame}
+\begin{frame}[allowframebreaks]
 \frametitle{参考文献}
 
-
+{\footnotesize
+\bibliographystyle{ieeetr}
+\bibliography{references}
+}
 
 \end{frame}
 
