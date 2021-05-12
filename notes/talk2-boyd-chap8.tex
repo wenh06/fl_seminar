@@ -253,6 +253,7 @@ For the $x_i$-update, $x_i^{k+1} := \argmin\limits_{x_i} \left\{ \dfrac{1}{2} \l
 \end{align*}
 It is claimed that
 $$x^{k+1}_i = 0 \Longleftrightarrow \lVert A_i^T v_i \rVert_2 \leqslant \dfrac{\lambda}{\rho}$$
+{\color{red}
 Indeed, consider
 $$\mathcal{L}(x_i) := \dfrac{1}{2} \lVert v_i - A_ix_i \rVert_2^2 + \dfrac{\lambda}{\rho} \lVert x_i \rVert_1,$$
 then
@@ -262,6 +263,8 @@ then
     & \Longleftrightarrow \dfrac{\lambda}{\rho} \geqslant \max\limits_{\lVert s \rVert_1=1} \langle A_i^T v_i, s \rangle \\
     & \Longleftrightarrow ?
 \end{align*}
+}
+For another bound, ref. \cite{hastie2019statistical} exercise 2.1.
 
 
 \subsection{Example: Group Lasso}
