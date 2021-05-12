@@ -88,8 +88,8 @@
     \includegraphics[width=\textwidth,keepaspectratio]{images/fl_overview.png}
 \end{figure}
 
-{\footnotesize
-图片来源：\cite{kairouz2019advances_fl}Kairouz et al., Advances and open problems in federated learning, 2019
+{\scriptsize
+图片来源：\cite{kairouz2019advances_fl} Kairouz et al., Advances and open problems in federated learning, 2019
 }
 
 \end{frame}
@@ -106,6 +106,26 @@ Federated Learning这个名词首次由Google的研究人员McMahan等人在文�
 \pause
 
 相关的分布式的模型训练（优化）方法则可以追溯到更早的时间，例如Boyd等人的\cite{boyd2011distributed} \emph{Distributed Optimization and Statistical Learning via the Alternating Direction Method of Multipliers} (2010)
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{联邦学习的定义}
+
+Advances and open problems in federated learning (\cite{kairouz2019advances_fl} 2019)给联邦学习下过如下的定义
+
+\vspace{0.5em}
+
+\begin{quote}
+    ``Federated learning is a machine learning setting where multiple entities (clients) collaborate in solving a machine learning problem, under the coordination of a central server or service provider. Each client's raw data is stored locally and not exchanged or transferred; instead, focused updates intended for immediate aggregation are used to achieve the learning objective.''
+\end{quote}
+
+\pause
+\vspace{0.5em}
+\noindent 注：没有central server的去中心化学习（decentralized learning）任务，有时候也可以在广义上被认为是联邦学习。
 
 \end{frame}
 
@@ -181,7 +201,7 @@ Federated Learning这个名词首次由Google的研究人员McMahan等人在文�
 
 这里的``client''是广义上的``client''，涵盖很多场景，例如
 \begin{itemize}
-    \item （多个机器上的）多张显卡
+    \item 多家医院的服务器
     % 这种情况下，数据来源（分布）可能是相同的（例如都是ImageNet），但是partition是固定的，需要区别于 datacenter 的情况
     \item 多个移动设备（edge device）
     % 这种情况下，数据来源一般是不同的
@@ -297,7 +317,7 @@ Aggregate and global update:
 
 %------------------------------------------------
 
-\section{FedOpt}
+\section{FedOpt}  % gradient based methods
 
 %------------------------------------------------
 % Page 15
@@ -515,7 +535,7 @@ McMahan等人进一步在文章\cite{reddi2020fed_opt}(2020)中，将Adam等自�
     \begin{align*}
         & \text{Avg, \framebox{Adagrad, Yogi, Adam}, etc.}
     \end{align*}
-    后面几种算法还需要额外的一些超参数，例如decay parameters $\beta_1,\beta_2\in [0,1)$以及状态量momentum$v_t$。
+    后面几种算法还需要额外的一些超参数，例如decay parameters $\beta_1,\beta_2\in [0,1)$以及状态量momentum $v_t$。
 \end{itemize}
 % \begin{align*}
 %     & \text{unbiased gradient estimate} + \operatorname{ClientOpt} & = \text{ (local) mini-batch SGD, } \\
@@ -588,7 +608,7 @@ McMahan等人进一步在文章\cite{reddi2020fed_opt}(2020)中，将Adam等自�
 
 %------------------------------------------------
 
-\section{ADMM}
+\section{ADMM}  % primal-dual based methods
 
 %------------------------------------------------
 % Page 15
@@ -596,7 +616,7 @@ McMahan等人进一步在文章\cite{reddi2020fed_opt}(2020)中，将Adam等自�
 \begin{frame}
 \frametitle{Consensus and Sharing}
 
-更传统一些的处理分布式的机器学习模型训练的方法是（例如\cite{boyd2011distributed}）将我们要优化的问题
+更传统一些的处理分布式的机器学习模型训练的方法是（例如\cite{boyd2011distributed}）将我们要优化的（简化的）问题
 \begin{align*}
     & \text{minimize} \quad f(x) = \dfrac{1}{N} \sum\limits_{i=1}^N f_i(x)
 \end{align*}
@@ -610,6 +630,50 @@ McMahan等人进一步在文章\cite{reddi2020fed_opt}(2020)中，将Adam等自�
     & \text{minimize} \quad \dfrac{1}{N} \sum\limits_{i=1}^N f_i(x_i) \\
     & \text{subject to} \quad z = x_i, \quad i=1,\cdots,N
 \end{align*}
+$x_i$可以视作client $i$上的模型参数，$z$则可被视作server上的模型参数。
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Consensus and Sharing}
+
+以上Consensus问题的ADMM算法为
+
+\vspace{0.8em}
+
+\begin{itemize}
+    \item Client $i$ local primal update
+    $$x^{k+1}_i = \argmin\limits_{x_i} \left\{ f_i(x_i) + \langle \lambda_i^k, x_i-z^k \rangle + \dfrac{\rho}{2}\lVert x_i-\overline{x}^k \rVert^2 \right\}$$
+    \item Server aggregation
+    $$z^{k+1} = \dfrac{1}{N}\sum\limits_{i=1}^N (x^{k+1}_i + \dfrac{1}{\rho} \lambda^{k}_i)$$
+    \item Client $i$ dual variable update
+    $$\lambda_i^{k+1} = \lambda_i^k + \rho(x^{k+1}_i-z^{k+1})$$
+\end{itemize}
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Consensus and Sharing}
+
+以上循环可以简化为
+
+\vspace{0.3em}
+
+\begin{align*}
+x^{k+1}_i & = \argmin\limits_{x_i} \left\{ f_i(x_i) + \langle \lambda_i^k, x_i-\overline{x}^k \rangle + \dfrac{\rho}{2}\lVert x_i-\overline{x}^k \rVert^2 \right\} \\
+z^{k+1} & = \overline{x}^{k+1} \\
+\lambda_i^{k+1} & = \lambda_i^k + \rho(x^{k+1}_i-\overline{x}^{k+1})
+\end{align*}
+
+\vspace{0.5em}
+
+$\overline{x}$为对所有的client上的模型参数取均值。
+
 
 \end{frame}
 
@@ -620,11 +684,7 @@ McMahan等人进一步在文章\cite{reddi2020fed_opt}(2020)中，将Adam等自�
 \frametitle{Consensus and Sharing}
 
 一些传统的（线性）机器学习模型，当数据在所有client上是垂直划分的（vertical splitting），即不同的client上分布着同一批样本的不同特征，我们还可以把要优化的问题表达为一个Sharing问题。
-
-\pause
-\vspace{0.8em}
-
-例如
+% Sharing问题就不再赘述举例了
 
 \end{frame}
 
@@ -634,7 +694,28 @@ McMahan等人进一步在文章\cite{reddi2020fed_opt}(2020)中，将Adam等自�
 \begin{frame}
 \frametitle{GADMM}
 
+基于减少通信开销以及推广到去中心化学习的考虑，一些学者提出了Group Alternating Direction Method of Multipliers (GADMM)算法（\cite{elgabli2020gadmm}, 2020）。他们考虑了一种链式的去中心化网络
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth,keepaspectratio]{images/GADMM.png}
+\end{figure}
+{\scriptsize 图片来源：\cite{issaid2020cq-ggadmm} Issaid et al., Communication Efficient Distributed Learning with Censored, Quantized, and Generalized Group ADMM, 2020}
 
+所有的client被分为了head group $\mathcal{N}_h$ 与tail group $\mathcal{N}_t$，以此来进行交替方向优化。
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{GADMM}
+
+要优化的问题变为了
+\begin{align*}
+    & \text{minimize} \quad \dfrac{1}{N} \sum\limits_{i=1}^N f_i(x_i) \\
+    & \text{subject to} \quad x_i = x_{i+1}, \quad i=1,\cdots,N-1
+\end{align*}
 
 \end{frame}
 
@@ -652,11 +733,35 @@ McMahan等人进一步在文章\cite{reddi2020fed_opt}(2020)中，将Adam等自�
 % Page 15
 
 \begin{frame}
-\frametitle{收敛性}
+\frametitle{ADMM与神经网络}
 
 
 
 \end{frame}
+
+%------------------------------------------------
+% Page 15
+
+% \begin{frame}
+% \frametitle{收敛性}
+
+
+
+% \end{frame}
+
+
+% %------------------------------------------------
+
+% \section[Misc]{其他一些问题}  % 其他一些有趣的问题
+
+% %------------------------------------------------
+% % Page 15
+
+% \begin{frame}
+
+
+
+% \end{frame}
 
 %------------------------------------------------
 % Page 15
