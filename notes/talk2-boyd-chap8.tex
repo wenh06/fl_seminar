@@ -251,6 +251,17 @@ For the $x_i$-update, $x_i^{k+1} := \argmin\limits_{x_i} \left\{ \dfrac{1}{2} \l
     & A_i^T (v_i-A_ix_i^{k+1}) = \dfrac{\lambda}{\rho} \partial \lVert x_i^{k+1} \rVert_1 = \dfrac{\lambda}{\rho} \begin{pmatrix} s_1 \\ \vdots \\ s_n \end{pmatrix} \\
     \text{where} & \quad s_j \begin{cases} = \operatorname{sign}((x_i^{k+1})_j) & \text{ if } (x_i^{k+1})_j \neq 0 \\ \in [-1, 1] & \text{ if } (x_i^{k+1})_j = 0 \end{cases}
 \end{align*}
+It is claimed that
+$$x^{k+1}_i = 0 \Longleftrightarrow \lVert A_i^T v_i \rVert_2 \leqslant \dfrac{\lambda}{\rho}$$
+Indeed, consider
+$$\mathcal{L}(x_i) := \dfrac{1}{2} \lVert v_i - A_ix_i \rVert_2^2 + \dfrac{\lambda}{\rho} \lVert x_i \rVert_1,$$
+then
+\begin{align*}
+    0 \text{ is solution to } \argmin_{x_i} \mathcal{L}(x_i) & \Longleftrightarrow \nabla_s \mathcal{L}(0) \geqslant 0, \ \forall s \\
+    & \Longleftrightarrow \langle -A_i^T (v_i - 0), s \rangle + \dfrac{\lambda}{\rho} \lVert s \rVert_1 \geqslant 0, \ \forall s \\
+    & \Longleftrightarrow \dfrac{\lambda}{\rho} \geqslant \max\limits_{\lVert s \rVert_1=1} \langle A_i^T v_i, s \rangle \\
+    & \Longleftrightarrow ?
+\end{align*}
 
 
 \subsection{Example: Group Lasso}
@@ -272,7 +283,9 @@ For the $x_i$-update, one similarly has
     & A_i^T (v_i-A_ix_i^{k+1}) = \dfrac{\lambda}{\rho} \partial \lVert x_i^{k+1} \rVert_2 \begin{cases} = \dfrac{\lambda}{\rho} \cdot \dfrac{x_i^{k+1}}{\lVert x_i^{k+1} \rVert_2} & \text{ if } x_i^{k+1} \neq 0 \\ \in \dfrac{\lambda}{\rho} \cdot \mathbb{B}(0,1) & \text{ if } x_i^{k+1} = 0 \end{cases}
 \end{align*}
 i.e.
-$$x_i^{k+1} = (A_i^TA_i + \tilde{\lambda})^{-1} A_i^Tv_i \quad \text{ with $\tilde{\lambda}$ satisfying } \tilde{\lambda}\rho \lVert x_i^{k+1} \rVert_2 = \lambda$$
+$$x_i^{k+1} = (A_i^TA_i + \tilde{\lambda})^{-1} A_i^Tv_i \quad \text{ with $\tilde{\lambda}$ satisfying } \tilde{\lambda}\rho \lVert x_i^{k+1} \rVert_2 = \lambda \text{ if } x_i^{k+1} != 0.$$
+Again, it's claimed that (note the difference with ordinary Lasso on the penalty term)
+$$x^{k+1}_i = 0 \Longleftrightarrow \lVert A_i^T v_i \rVert_2 \leqslant \dfrac{\lambda}{\rho}$$
 
 \subsection{Example: SVM}
 
@@ -302,12 +315,13 @@ ADMM iterations are
   \draw[dashed, domain=-4:1, smooth, variable=\x, red]  plot ({\x}, {(\x+1.5)*(\x+1.5)});
   \draw[dashed, domain=-1.5:3.5, smooth, variable=\x, red]  plot ({\x}, {(\x-1)*(\x-1)});
   \draw[dashed, domain=-2:1, smooth, variable=\x, cyan]  plot ({\x}, {-3*\x+0.75});
-  \node at (3,-2) {$k = N\rho\left(-\dfrac{1}{N}-s_j\right)$};
+  \node at (3,-2) {slope $N\rho\left(-\dfrac{1}{N}-s_j\right)$};
   \node[circle,fill,inner sep=2.5pt] (tangent) at (-0.5,2.25) {};
 \end{tikzpicture}
+\caption{sketch of $\overline{z}$-update of vertical splitting SVM}
 \end{figure}
 
-$\overline{z}$-update update splits to the component level, i.e.
+$\overline{z}$-update splits to the component level, i.e.
 $$(1+N\overline{z}_j)_+ + \dfrac{N\rho}{2}(\overline{z}_j-s_j)^2$$
 and are easily computed
 $$\overline{z}_j = \begin{cases}
@@ -317,9 +331,11 @@ $$\overline{z}_j = \begin{cases}
 \end{cases}
 $$
 
-\subsection{Generalized Additive Models}
+% \subsection{Generalized Additive Models}
 
-to write
+% Consider generalized additive (additive w.r.t. features) model $F$, i.e.
+% $$F(a) = \sum\limits_{j=1}^n F_j(a_j)$$
+% where $a$ is a feature vector, $F_j: \mathbb{R} \to \mathbb{R}$ are feature functions.
 
 \bibliographystyle{ieeetr}
 \bibliography{references}
