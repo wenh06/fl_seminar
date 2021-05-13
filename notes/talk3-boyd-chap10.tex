@@ -1,0 +1,105 @@
+
+\tikzset{%
+  client/.style={
+    rectangle,
+    thick,
+    draw,
+    minimum size=0.7cm,
+    text width=1cm,
+    align=center
+  },
+  client missing/.style={
+    draw=none, 
+    scale=2,
+    text height=0.333cm,
+    execute at begin node=$\cdots$
+  },
+}
+
+\begin{document}
+
+\title{Talk 3: Distributed Optimization and Statistical Learning via ADMM (III)}
+\date{2021年5月?日}
+\author{WEN Hao}
+
+\maketitle
+
+{\bfseries Main Resource: Chapter 10 of \cite{boyd2011distributed}}
+
+This talk deals with abstract and concrete implementation of ADMM on the consensus problem with regularization
+\begin{align*}
+    & \text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + g(z) \\
+    & \text{subject to} \quad x_i = z
+\end{align*}
+(scaled form) ADMM iterations for this problem are
+\begin{align*}
+    x_i^{k+1} & = \argmin_{x_i} \left\{ f_i(x_i) + \dfrac{\rho}{2} \lVert x_i - z^k + u_i^k \rVert^2 \right\} = \operatorname{prox}_{f_i,\rho}(z^k - u_i^k) \\
+    z^{k+1} & = \argmin_z \left\{ g(z) + \dfrac{N\rho}{2} \lVert z - \overline{x}^{k+1} - \overline{u}^k \rVert^2 \right\} = \operatorname{prox}_{g,N\rho}(\overline{x}^{k+1} + \overline{u}^k) \\
+    u_i^{k+1} & = u_i^k + (x_i^{k+1} - z^{k+1})
+\end{align*}
+$x_i, u_i$ are (local) primal and dual variables on ``client'' $i$, while $z$ is the (global) variable on the ``central server''. A general paradigm (pipeline) of federated learning is:
+\begin{itemize}
+    \item client selection
+    \item parameter broadcast
+    \item {\bfseries client computation (local parameter update)}
+    \item parameter aggregation
+    \item {\bfseries server computation (global parameter update)}
+\end{itemize}
+For fitting into this local-global paradigm, ADMM iterations can be rewritten as
+\begin{itemize}
+    \item local update (as depicted in Fig. \ref{fig:local}):
+    \begin{align*}
+        & u_i \gets u_i + (x_i - z) \\
+        & x_i \gets \operatorname{prox}_{f_i,\rho}(z - u_i)
+    \end{align*}
+    \begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[]
+    \node[] (slide-center) {};
+    \node[client, above=3em of slide-center] (server) {server $z$};
+    \node[client, below left = 1.5cm and 3.5cm of server.south] (client-1) {client $x_1, u_1$};
+    \node[client, right = 0.4cm of client-1.east] (client-2) {client $x_2, u_2$};
+    \node[client, right = 0.4cm of client-2.east] (client-3) {client $x_3, u_3$};
+    \node[client missing, right = 0.1cm of client-3.east] (client-missing) {};
+    \node[client, right = 0.1cm of client-missing.east] (client-n) {client $x_N, u_N$};
+    \path[->] ([xshift=-0.5cm,yshift=-0.1cm]server.south) edge ([yshift=0.15cm]client-1.north);
+    \path[->] ([xshift=-0.2cm,yshift=-0.1cm]server.south) edge ([yshift=0.15cm]client-2.north);
+    \path[->] ([xshift=0.05cm,yshift=-0.1cm]server.south) edge ([yshift=0.15cm]client-3.north);
+    \path[->] ([xshift=0.4cm,yshift=-0.1cm]server.south) edge ([yshift=0.15cm]client-n.north);
+    \node[text width=1.2cm, align=center, right=0.3cm of client-n.east] (local-update) {local update};
+    \node[text width=1.8cm, align=center, above left=0.5cm and 0.3cm of local-update.north] () {params broadcast};
+    \end{tikzpicture}
+    \caption{Broadcast and local update}
+    \label{fig:local}
+    \end{figure}
+    \item global update (as depicted in Fig. \ref{fig:global}):
+    $$z \gets \operatorname{prox}_{g,N\rho}(\overline{x} + \overline{u})$$
+    \begin{figure}[H]
+    \centering
+    \begin{tikzpicture}[]
+    \node[] (slide-center) {};
+    \node[client, above=3em of slide-center] (server) {server $z$};
+    \node[client, below left = 1.5cm and 3.5cm of server.south] (client-1) {client $x_1, u_1$};
+    \node[client, right = 0.4cm of client-1.east] (client-2) {client $x_2, u_2$};
+    \node[client, right = 0.4cm of client-2.east] (client-3) {client $x_3, u_3$};
+    \node[client missing, right = 0.1cm of client-3.east] (client-missing) {};
+    \node[client, right = 0.1cm of client-missing.east] (client-n) {client $x_N, u_N$};
+    \path[->] ([yshift=0.15cm]client-1.north) edge ([xshift=-0.5cm,yshift=-0.1cm]server.south);
+    \path[->] ([yshift=0.15cm]client-2.north) edge ([xshift=-0.2cm,yshift=-0.1cm]server.south);
+    \path[->] ([yshift=0.15cm]client-3.north) edge ([xshift=0.05cm,yshift=-0.1cm]server.south);
+    \path[->] ([yshift=0.15cm]client-n.north) edge ([xshift=0.4cm,yshift=-0.1cm]server.south);
+    \node[text width=1.2cm, align=center, right=0.3cm of server.east] (global-update) {global update};
+    \node[text width=1.8cm, align=center, below right=0.25cm and 0.3cm of global-update.south] () {aggregation};
+    \end{tikzpicture}
+    \caption{Aggregate and global update}
+    \label{fig:global}
+    \end{figure}
+\end{itemize}
+
+\subsection{Message Passing Interface (MPI)}
+
+
+\bibliographystyle{ieeetr}
+\bibliography{references}
+
+\end{document}
