@@ -13,12 +13,12 @@ Usually in E402
 to turn into a table
 
 1. Distributed Optimization and Statistical Learning via the Alternating Direction Method of Multipliers ([PDF](https://web.stanford.edu/~boyd/papers/pdf/admm_distr_stats.pdf)) chapter 7
-    * time: 2021-04-29
+    * time: 2021-04-29 Thursday 20:00
     * venue: E402
     * speaker: WEN Hao
     * [notes](notes/talk1-boyd-chap7.tex)
 2. Distributed Optimization and Statistical Learning via the Alternating Direction Method of Multipliers ([PDF](https://web.stanford.edu/~boyd/papers/pdf/admm_distr_stats.pdf)) chapter 8
-    * time: 2021-05-12
+    * time: 2021-05-12 Thursday 20:00
     * venue: E502
     * speaker: WEN Hao
     * [notes](notes/talk2-boyd-chap8.tex)
