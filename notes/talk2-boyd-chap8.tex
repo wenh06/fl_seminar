@@ -188,7 +188,7 @@ and in the horizontal splitting consensus form as
 with ADMM iterations
 \begin{align*}
     x_i^{k+1} & = \argmin_{x_i} \left\{ \mathbf{1}^T (\mathbf{1} + A_ix_i)_+ + \dfrac{\rho}{2} \lVert x_i - z^k + u_i^k \rVert_2^2 \right\} \\
-    z^{k+1} & = \argmin_z \left\{ \lambda \lVert z \rVert_2^2 + \dfrac{N\rho}{2} \lVert z - \overline{x}^{k+1} - \overline{u}^k \rVert_2^2 \right\} = {\color{yellow} \dfrac{N\rho}{2\lambda + N\rho}} (\overline{x}^{k+1} + \overline{u}^k) \\
+    z^{k+1} & = \argmin_z \left\{ \lambda \lVert z \rVert_2^2 + \dfrac{N\rho}{2} \lVert z - \overline{x}^{k+1} - \overline{u}^k \rVert_2^2 \right\} = {\color{green} \dfrac{N\rho}{2\lambda + N\rho}} (\overline{x}^{k+1} + \overline{u}^k) \\
     u_i^{k+1} & = u_i^k + (x_i^{k+1} - z^{k+1})
 \end{align*}
 
