@@ -711,11 +711,21 @@ $\overline{x}$为对所有的client上的模型参数取均值。
 \begin{frame}
 \frametitle{GADMM}
 
-要优化的问题变为了
+于是，要优化的问题变为了
 \begin{align*}
     & \text{minimize} \quad \dfrac{1}{N} \sum\limits_{i=1}^N f_i(x_i) \\
     & \text{subject to} \quad x_i = x_{i+1}, \quad i=1,\cdots,N-1
 \end{align*}
+
+ADMM循环中的primal updates为
+\begin{multline*}
+    x_i^{k+1} = \argmin\limits_{x_i} \{ f_i(x_i) + \langle \lambda_{i-1}^k, x_{i-1}^k - x_i \rangle + \langle \lambda_{i}^k, x_{i} - x_{i+1}^k \rangle \\
+    + \dfrac{\rho}{2}\lVert x_{i-1}^k - x_i \rVert^2 + \dfrac{\rho}{2}\lVert x_{i} - x_{i+1}^k \rVert^2 \}, \quad i \in \mathcal{N}_h
+\end{multline*}
+\begin{multline*}
+    x_i^{k+1} = \argmin\limits_{x_i} \{ f_i(x_i) + \langle \lambda_{i-1}^k, x_{i-1}^{k+1} - x_i \rangle + \langle \lambda_{i}^k, x_{i} - x_{i+1}^{k+1} \rangle \\
+    + \dfrac{\rho}{2}\lVert x_{i-1}^{k+1} - x_i \rVert^2 + \dfrac{\rho}{2}\lVert x_{i} - x_{i+1}^{k+1} \rVert^2 \}, \quad i \in \mathcal{N}_t
+\end{multline*}
 
 \end{frame}
 
@@ -725,7 +735,11 @@ $\overline{x}$为对所有的client上的模型参数取均值。
 \begin{frame}
 \frametitle{CQ-GGADMM}
 
-
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth,keepaspectratio]{images/CQ-GGADMM.png}
+\end{figure}
+{\scriptsize 图片来源：\cite{issaid2020cq-ggadmm} Issaid et al., Communication Efficient Distributed Learning with Censored, Quantized, and Generalized Group ADMM, 2020}
 
 \end{frame}
 
