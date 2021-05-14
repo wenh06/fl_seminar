@@ -35,5 +35,6 @@ to turn into a table
 
 # More resources
 1. A comprehensive survey article: Advances and open problems in federated learning ([PDF](https://arxiv.org/abs/1912.04977))
-2. [Awesome Federated Learning on GitHub](https://github.com/chaoyanghe/Awesome-Federated-Learning)
-3. [Federated Learning One World Seminar (FLOW)](https://sites.google.com/view/one-world-seminar-series-flow/home)
+2. [Federated Learning One World Seminar (FLOW)](https://sites.google.com/view/one-world-seminar-series-flow/home)
+3. [Awesome Federated Learning on GitHub](https://github.com/chaoyanghe/Awesome-Federated-Learning)
+4. [Another Introductory Repository on GitHub](https://github.com/ZeroWangZY/federated-learning)
