@@ -129,7 +129,7 @@ as a {\bfseries consensus problem (with regularization)}.
 
 The scaled ADMM iterations of the above optimization problem are
 \begin{align*}
-    x^{k+1} & = \argmin_{x_i} \left\{ \ell_i(A_ix_i-b_i) + \dfrac{\rho}{2} \lVert x_i - z^k + u_i^k \rVert_2^2 \right\} = \operatorname{prox}_{\tilde{\ell}_i,\rho}(z^k - u_i^k) \\
+    x_i^{k+1} & = \argmin_{x_i} \left\{ \ell_i(A_ix_i-b_i) + \dfrac{\rho}{2} \lVert x_i - z^k + u_i^k \rVert_2^2 \right\} = \operatorname{prox}_{\tilde{\ell}_i,\rho}(z^k - u_i^k) \\
     z^{k+1} & = \argmin_z \left\{ r(z) + \dfrac{N\rho}{2} \lVert z - \overline{x}^{k+1} - \overline{u}^k \rVert_2^2 \right\} = \operatorname{prox}_{r,N\rho}(\overline{x}^{k+1} + \overline{u}^k) \\
     u_i^{k+1} & = u_i^k + (x_i^{k+1} - z^{k+1})
 \end{align*}
@@ -164,7 +164,7 @@ Accelerations on $x_i$-updates:
 \begin{itemize}
     \item[(1)] $\color{red} (A_i^TA_i + \rho I)^{-1}$ is independent of $k$, hence (its factorizations) can be precomputed and used for each $x_i$ update.
     \item[(2)] If further, $m_i < n$ (\# samples < \# features), by \href{https://en.wikipedia.org/wiki/Woodbury_matrix_identity}{Woodbury matrix identity} (or matrix inverse lemma),
-    $$(A_i^TA_i + \rho I)^{-1} = \dfrac{1}{\rho} - \dfrac{1}{\rho} A_i^T {\color{red} (A_iA_i^T + \rho I)^{-1}} A$$
+    $$(A_i^TA_i + \rho I)^{-1} = \dfrac{1}{\rho} - \dfrac{1}{\rho} A_i^T {\color{red} (A_iA_i^T + \rho I)^{-1}} A_i$$
     The size $A_iA_i^T + \rho I$ is smaller, hence requires less computation.
 \end{itemize}
 
@@ -252,7 +252,7 @@ For the $x_i$-update, $x_i^{k+1} := \argmin\limits_{x_i} \left\{ \dfrac{1}{2} \l
     \text{where} & \quad s_j \begin{cases} = \operatorname{sign}((x_i^{k+1})_j) & \text{ if } (x_i^{k+1})_j \neq 0 \\ \in [-1, 1] & \text{ if } (x_i^{k+1})_j = 0 \end{cases}
 \end{align*}
 It is claimed that
-$$x^{k+1}_i = 0 \Longleftrightarrow \lVert A_i^T v_i \rVert_2 \leqslant \dfrac{\lambda}{\rho}$$
+$$x^{k+1}_i = 0 \Longleftrightarrow \lVert A_i^T v_i \rVert_{\color{red}\infty} \leqslant \dfrac{\lambda}{\rho}$$
 {\color{red}
 Indeed, consider
 $$\mathcal{L}(x_i) := \dfrac{1}{2} \lVert v_i - A_ix_i \rVert_2^2 + \dfrac{\lambda}{\rho} \lVert x_i \rVert_1,$$
@@ -261,10 +261,10 @@ then
     0 \text{ is solution to } \argmin_{x_i} \mathcal{L}(x_i) & \Longleftrightarrow \nabla_s \mathcal{L}(0) \geqslant 0, \ \forall s \\
     & \Longleftrightarrow \langle -A_i^T (v_i - 0), s \rangle + \dfrac{\lambda}{\rho} \lVert s \rVert_1 \geqslant 0, \ \forall s \\
     & \Longleftrightarrow \dfrac{\lambda}{\rho} \geqslant \max\limits_{\lVert s \rVert_1=1} \langle A_i^T v_i, s \rangle \\
-    & \Longleftrightarrow ?
+    & \Longleftrightarrow \dfrac{\lambda}{\rho} \geqslant \lVert A_i^T v_i \rVert_{\infty}
 \end{align*}
 }
-For another bound, ref. \cite{hastie2019statistical} exercise 2.1.
+For more, ref. \cite{hastie2019statistical} exercise 2.1.
 
 
 \subsection{Example: Group Lasso}

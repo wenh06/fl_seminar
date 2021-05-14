@@ -100,12 +100,33 @@
 \begin{frame}
 \frametitle{引言}
 
+这种分布式训练的需求多是当多个数据拥有方想要联合他们各自的数据训练机器学习模型，由于涉及隐私和数据安全等法律问题，或是数据庞大且过于分散导致的可行性问题，而不能将数据集中到一起进行模型训练而产生的。随着越来越严格的数据隐私方面的法律法规的施行，这种需求会越来越大。
+
+\pause
+\vspace{0.8em}
+
+一般来说，在联邦学习的框架下，数据拥有方在不用给出己方数据的情况下，也可进行模型训练得到公共的模型$M_{fed}$，使得模型$M_{fed}$，与将数据集中到一起进行训练能得到的模型$M$，二者的预测值的偏差的期望能足够小。
+$$\expectation_{z\sim\mathcal{D}} \lVert M_{fed}(z) - M(z) \rVert \leqslant \delta$$
+
+\pause
+\vspace{0.8em}
+
+{\footnotesize 注：以下将数据拥有方统称为``节点''}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{引言}
+
 Federated Learning这个名词首次由Google的研究人员McMahan等人在文章\cite{mcmahan2017fed_avg} \emph{Communication-Efficient Learning of Deep Networks from Decentralized Data} (2016) 中提出。
 
-\vspace{3em}
+\vspace{1em}
 \pause
 
-相关的分布式的模型训练（优化）方法则可以追溯到更早的时间，例如Boyd等人的\cite{boyd2011distributed} \emph{Distributed Optimization and Statistical Learning via the Alternating Direction Method of Multipliers} (2010)
+相关的分布式的模型训练（优化）方法则可以追溯到更早的时间，例如Boyd等人的著作\cite{boyd2011distributed} \emph{Distributed Optimization and Statistical Learning via the Alternating Direction Method of Multipliers} (2010)
 
 \end{frame}
 
@@ -115,17 +136,17 @@ Federated Learning这个名词首次由Google的研究人员McMahan等人在文�
 \begin{frame}
 \frametitle{联邦学习的定义}
 
-Advances and open problems in federated learning (\cite{kairouz2019advances_fl} 2019)给联邦学习下过如下的定义
+综述文章\cite{kairouz2019advances_fl} Advances and open problems in federated learning (2019)给联邦学习下过如下的定义
 
-\vspace{0.5em}
+\vspace{0.8em}
 
 \begin{quote}
     ``Federated learning is a machine learning setting where multiple entities (clients) collaborate in solving a machine learning problem, under the coordination of a central server or service provider. Each client's raw data is stored locally and not exchanged or transferred; instead, focused updates intended for immediate aggregation are used to achieve the learning objective.''
 \end{quote}
 
-\pause
-\vspace{0.5em}
-\noindent 注：没有central server的去中心化学习（decentralized learning）任务，有时候也可以在广义上被认为是联邦学习。
+% \pause
+% \vspace{0.5em}
+% \noindent 注：没有central server的去中心化学习（decentralized learning）任务，有时候也可以在广义上被认为是联邦学习。
 
 \end{frame}
 
@@ -181,7 +202,7 @@ Advances and open problems in federated learning (\cite{kairouz2019advances_fl} 
     & \text{minimize} \quad f(x) = \expectation\limits_{i \sim {\mathcal{P}}} [f_i(x)] \\
     & \text{where} \quad f_i(x) = \expectation\limits_{z \sim \mathcal{D}_i} [\ell_i(x; z)]
 \end{align*}
-这里的$\mathcal{P}$为``client''的分布，$\mathcal{D}_i$为``client'' i 的数据分布，$\ell_i$为损失函数。
+这里的$\mathcal{P}$为节点的分布，$\mathcal{D}_i$为节点$i$上 的数据分布，$\ell_i$为损失函数。
 
 \pause
 \vspace{1em}
@@ -199,7 +220,7 @@ Advances and open problems in federated learning (\cite{kairouz2019advances_fl} 
 \begin{frame}
 \frametitle{问题描述}
 
-这里的``client''是广义上的``client''，涵盖很多场景，例如
+要注意的是，联邦学习中的``节点''（数据拥有方）意义比较宽泛，涵盖很多场景，例如
 \begin{itemize}
     \item 多家医院的服务器
     % 这种情况下，数据来源（分布）可能是相同的（例如都是ImageNet），但是partition是固定的，需要区别于 datacenter 的情况
@@ -210,7 +231,7 @@ Advances and open problems in federated learning (\cite{kairouz2019advances_fl} 
 \pause
 \vspace{1.5em}
 
-前者一般被称作cross-silo，后者一般被称作cross-device。在cross-device的场景下，一般来说，通信效率才是整个系统的瓶颈所在，此外还需要考虑掉队者（straggler）等问题。
+前者一般被称作cross-silo，后者一般被称作cross-device。在cross-device的场景下，一般来说，通信效率才是整个系统的瓶颈所在，此外还需要考虑掉队者（stragglers）等问题。
 
 \end{frame}
 
@@ -220,7 +241,25 @@ Advances and open problems in federated learning (\cite{kairouz2019advances_fl} 
 \begin{frame}
 \frametitle{数据分布}
 
-在真实场景下，各个client的分布$\mathcal{D}_i$一般不是独立同分布的（non-IID, 或称heterogeneous）。non-IID数据分布下，算法的收敛性分析相比IID数据下要更加困难，需要更多额外的假设，对client之间的数据分布的不同性（dissimilarity）进行定量上的限制。
+在真实场景下，各个节点上的数据的分布$\mathcal{D}_i$一般不是独立同分布的（non-IID, 或称heterogeneous）。这种数据分布的各向异性将联邦学习分为了3类
+
+\begin{itemize}
+    \item 横向联邦学习：各节点的样本重叠度{\color{red} 低}，样本特征重叠度{\color{green} 高}
+    \item 纵向联邦学习：各节点的样本重叠度{\color{green} 高}，样本特征重叠度{\color{red} 低}
+    \item 迁移联邦学习：各节点的样本重叠度{\color{red} 低}，样本特征重叠度{\color{red} 低}
+\end{itemize}
+
+同一种算法（例如SVM）在不同类型的联邦学习模式下，对应的优化问题的具体形式会稍有不同。
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{数据分布}
+
+non-IID数据分布下，算法的收敛性分析相比IID数据下要更加困难，需要更多额外的假设，对节点之间的数据分布的不同性（dissimilarity）进行定量上的限制。
 
 \vspace{1.5em}
 
@@ -325,7 +364,7 @@ Aggregate and global update:
 \begin{frame}
 \frametitle{从FedAvg到FedOpt}
 
-Google研究人员McMahan等人在文章\cite{mcmahan2017fed_avg}(2016)中考察了普通的SGD在分布式下的平凡推广FedSGD，即在每次循环中，client执行一次full-batch gradient descent，并做出了进一步推广，提出了FedAvg算法。具体做法就是在每次循环的client local computation中，执行多步mini-batch SGD。这样，既降低了通信开销（communication-efficient），同时也在实验上观察到了模型效果的提升。
+Google研究人员McMahan等人在文章\cite{mcmahan2017fed_avg}(2016)中考察了普通的SGD在分布式下的平凡推广FedSGD，即在每次循环中，节点执行一次full-batch gradient descent，并做出了进一步推广，提出了FedAvg算法。具体做法就是在每次循环的client local computation中，执行多步mini-batch SGD。这样，既降低了通信开销（communication-efficient），同时也在实验上观察到了模型效果的提升。
 
 \end{frame}
 
@@ -368,7 +407,7 @@ return $x$\;
 \begin{frame}
 \frametitle{FedSGD -- baseline}
 
-FedSGD: 在每个client执行一次full-batch GD之后，即进行模型同步（平均）。
+FedSGD: 在每个节点执行一次full-batch GD之后，即进行模型同步（平均）。
 
 \begin{figure}
 \centering
@@ -429,7 +468,7 @@ FedSGD: 在每个client执行一次full-batch GD之后，即进行模型同步�
 \begin{frame}
 \frametitle{FedAvg}
 
-FedAvg: 每个client执行$K$个mini-batch SGD之后，进行模型同步（平均）。在通信量大大降低的情况下，。。。。（待写）
+FedAvg: 每个节点执行$K$个mini-batch SGD之后，进行模型同步（平均）。在通信量大大降低的情况下，。。。。（待写）
 
 \begin{figure}
 \centering
@@ -602,7 +641,11 @@ McMahan等人进一步在文章\cite{reddi2020fed_opt}(2020)中，将Adam等自�
 \begin{frame}
 \frametitle{收敛性}
 
-
+在假设损失函数$\ell_i(x;z)$有Lipschetz光滑性条件
+$$\lVert \nabla_x \ell_i(x;z) - \nabla_y \ell_i(y;z) \rVert \leqslant L \cdot \lVert x-y \rVert$$
+以及节点内梯度方差（intra-client gradient variance）的限制条件下
+$$\expectation_{z \sim \mathcal{D}_i} \lVert \nabla_x \ell_i(x;z) - \nabla f_i(x) \rVert^2 \leqslant \sigma^2$$
+我们考察误差
 
 \end{frame}
 
@@ -630,7 +673,7 @@ McMahan等人进一步在文章\cite{reddi2020fed_opt}(2020)中，将Adam等自�
     & \text{minimize} \quad \dfrac{1}{N} \sum\limits_{i=1}^N f_i(x_i) \\
     & \text{subject to} \quad z = x_i, \quad i=1,\cdots,N
 \end{align*}
-$x_i$可以视作client $i$上的模型参数，$z$则可被视作server上的模型参数。
+$x_i$可以视作节点$i$上的模型参数，$z$则可被视作server上的模型参数。
 
 \end{frame}
 
@@ -672,7 +715,7 @@ z^{k+1} & = \overline{x}^{k+1} \\
 
 \vspace{0.5em}
 
-$\overline{x}$为对所有的client上的模型参数取均值。
+$\overline{x}$为对所有节点上的模型参数取均值。
 
 
 \end{frame}
@@ -683,7 +726,7 @@ $\overline{x}$为对所有的client上的模型参数取均值。
 \begin{frame}
 \frametitle{Consensus and Sharing}
 
-一些传统的（线性）机器学习模型，当数据在所有client上是垂直划分的（vertical splitting），即不同的client上分布着同一批样本的不同特征，我们还可以把要优化的问题表达为一个Sharing问题。
+一些传统的（线性）机器学习模型，进行垂直联邦学习，即当数据在所有节点上是垂直划分的（vertical splitting），不同的client上分布着同一批样本的不同特征时，我们还可以把要优化的问题表达为一个Sharing问题。
 % Sharing问题就不再赘述举例了
 
 \end{frame}
@@ -701,7 +744,7 @@ $\overline{x}$为对所有的client上的模型参数取均值。
 \end{figure}
 {\scriptsize 图片来源：\cite{issaid2020cq-ggadmm} Issaid et al., Communication Efficient Distributed Learning with Censored, Quantized, and Generalized Group ADMM, 2020}
 
-所有的client被分为了head group $\mathcal{N}_h$ 与tail group $\mathcal{N}_t$，以此来进行交替方向优化。
+所有的节点被分为了head group $\mathcal{N}_h$ 与tail group $\mathcal{N}_t$，以此来进行交替方向优化。
 
 \end{frame}
 
@@ -734,6 +777,8 @@ ADMM循环中的primal updates为
 
 \begin{frame}
 \frametitle{CQ-GGADMM}
+
+这一问题随后被推广到了更一般的网络结构上，即从链式的网络结构推广到了一般的二分网络（bipartite graph）上（需要注意的是，这个方案为了进一步降低通信开销，而在local update完成之后进一步对参数采取了quantization以及censoring等手段）。
 
 \begin{figure}[H]
     \centering
