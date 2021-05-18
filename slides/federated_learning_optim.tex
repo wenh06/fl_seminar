@@ -108,8 +108,7 @@
 一般来说，在联邦学习的框架下，数据拥有方在不用给出己方数据的情况下，也可进行模型训练得到公共的模型$M_{fed}$，使得模型$M_{fed}$，与将数据集中到一起进行训练能得到的模型$M$，二者的预测值的偏差的期望能足够小。
 $$\expectation_{z\sim\mathcal{D}} \lVert M_{fed}(z) - M(z) \rVert \leqslant \delta$$
 
-\pause
-\vspace{0.8em}
+\vspace{0.5em}
 
 {\footnotesize 注：以下将数据拥有方统称为``节点''}
 
@@ -266,7 +265,7 @@ Federated Learning这个名词首次由Google的研究人员McMahan等人在文�
 \begin{figure}
 \begin{tikzpicture}
 \draw (0,0) rectangle (2.8,4.5);
-\node at (1.25,5) {横向联邦学习};
+\node at (1.25,5.5) {横向联邦学习};
 \draw[fill=pink] (0,0) rectangle (2.5,1.1) node[pos=.5] {client $i$};
 \draw[fill=green] (0.2,3.3) rectangle (2.8,4.5) node[pos=.5] {client $j$};
 \draw[fill=yellow] (0.3,0.9) rectangle (2.7,3.6) node[pos=.4] {client $k$};
@@ -280,7 +279,7 @@ Federated Learning这个名词首次由Google的研究人员McMahan等人在文�
 \begin{figure}
 \begin{tikzpicture}
 \draw (0,0) rectangle (2.8,4.5);
-\node at (1.25,5) {纵向联邦学习};
+\node at (1.25,5.5) {纵向联邦学习};
 \draw[fill=pink] (0,0) rectangle (1.1,4.2) node[pos=.5,rotate=-90] {client $i$};
 \draw[fill=green] (1.4,0) rectangle (2.8,4.5) node[pos=.5,rotate=-90] {client $j$};
 \draw[fill=yellow] (0.9,0.3) rectangle (1.5,4.4) node[pos=.4,rotate=-90] {client $k$};
@@ -293,7 +292,7 @@ Federated Learning这个名词首次由Google的研究人员McMahan等人在文�
 \begin{figure}
 \begin{tikzpicture}
 \draw (0,0) rectangle (2.8,4.5);
-\node at (1.25,5) {迁移联邦学习};
+\node at (1.25,5.5) {迁移联邦学习};
 \draw[fill=pink] (0,0) rectangle (0.9,1.6) node[pos=.5] {client $i$};
 \draw[fill=green] (1.5,3.8) rectangle (2.8,4.5) node[pos=.5] {client $j$};
 \draw[fill=yellow] (0.6,1.3) rectangle (1.7,3.9) node[pos=.4] {client $k$};
