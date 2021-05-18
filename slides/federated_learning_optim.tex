@@ -947,7 +947,26 @@ The original unconstrained problem is studied in \cite{hanzely2020federated} usi
     \item $f_i$ strongly convex
 \end{itemize}
 
-to write more ....
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Backup}
+
+Rewrite $\sum\limits_{i=1}^N f_i(x_i) + \frac{\lambda}{2} \sum\limits_{i=1}^N \lVert x_i - \overline{x} \rVert^2$ as $f(x) + \psi(x)$ with $x = (x_1,\cdots,x_N)$, the local step of L2GD at a client $i$ is
+$$x^{k+1} = x^k - \alpha G(x^k)$$
+where
+$$
+G(x^k) = \begin{cases}
+\dfrac{\nabla f(x^k)}{1-p} & \text{ with probability } 1-p \\
+\dfrac{\lambda \nabla \psi(x^k)}{p} & \text{ with probability } p 
+\end{cases}
+$$
+Locally, one has
+$$x_i^{k+1} = x_i^k - \beta \nabla f_i(x_i^k), \quad x_i^{k+1} = (1-\gamma)x_i^k + \gamma \overline{x}^k$$
+with probabilities $1-p$ and $p$ respectively.
 
 \end{frame}
 
