@@ -897,6 +897,56 @@ ADMM循环中的primal updates为
 
 \end{frame}
 
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Backup}
+
+Some authors considered a {\color{red} ``weak'' consensus problem} (originally stated as ``mixture'' FL problem)
+$$\text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + \dfrac{\lambda}{2} \sum\limits_{i=1}^N \lVert x_i - \overline{x} \rVert^2$$
+which can be reformulated as constrained optimization problems
+\begin{align*}
+    & \text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + \dfrac{\lambda}{2} \sum\limits_{i=1}^N \lVert x_i - z \rVert^2 \\
+    & \text{subject to} \quad Nz - \sum\limits_{i=1}^N x_i = 0
+\end{align*}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Backup}
+
+or equivalently as the following problem,
+\begin{align*}
+    & \text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + \dfrac{\lambda}{2} \sum\limits_{i=1}^N \lVert x_i \rVert^2 -\dfrac{\lambda N}{2} \lVert z \rVert^2 \\
+    & \text{subject to} \quad Nz - \sum\limits_{i=1}^N x_i = 0
+\end{align*}
+which is a nonconvex sharing problem considered in \cite{hong2016convergence} (Eq. (3.2)). Under certain assumptions, this problem is a DC (difference-of-convex) programming problem.
+
+\begin{question}
+\begin{itemize}
+    \item what is the case when $f_i$ being nonconvex
+    \item inexact ADMM iterations (e.g. mini-batch SGD)
+\end{itemize}
+\end{question}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Backup}
+
+The original unconstrained problem is studied in \cite{hanzely2020federated} using the so-called loopless local gradient descent (L2GD) method
+
+to write more ....
+
+\end{frame}
+
 
 %------------------------------------------------
 
