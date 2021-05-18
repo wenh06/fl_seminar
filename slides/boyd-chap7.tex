@@ -1,0 +1,185 @@
+\usepackage{empheq}
+\usepackage{cancel}
+
+\begin{document}
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\title[Boyd\\Distributed ADMM]{Talk 1: Distributed Optimization and Statistical Learning via ADMM (I)}
+\date{2021年4月29日}
+\author[]{WEN Hao}
+
+% \institute[北京航空航天大学] % Your institution as it will appear on the bottom of every slide, may be shorthand to save space
+% {
+% 数学科学学院 \\ % Your institution for the title page
+% \medskip
+% \textit{wenh06@gmail.com} % Your email address
+% 北京航空航天大学 \\
+% 数学科学学院 \qquad 北京航空航天大学
+% }
+
+% \logo{\includegraphics[height=1.5cm]{logo}}
+% \logoii{\includegraphics[height=1cm]{logo2}}
+
+% \date{\footnotesize 2021年4月13日} % Date, can be changed to a custom date
+
+\setlength{\belowdisplayskip}{5pt} \setlength{\belowdisplayshortskip}{5pt}
+\setlength{\abovedisplayskip}{5pt} \setlength{\abovedisplayshortskip}{5pt}
+
+%------------------------------------------------
+
+\begin{frame}
+\titlepage % Print the title page as the first slide
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+% \frametitle{Overview} % Table of contents slide, comment this block out to remove it
+\tableofcontents % Throughout your presentation, if you choose to use \section{} and \subsection{} commands, these will automatically be printed on this slide as an overview of your presentation
+\end{frame}
+
+%------------------------------------------------
+
+%------------------------------------------------
+%	PRESENTATION SLIDES
+%------------------------------------------------
+
+
+% PPT version (read only share link): https://www.kdocs.cn/l/cigmbsd3uAI4
+
+
+%------------------------------------------------
+
+\section[Recall ADMM]{Recall of basic ADMM}
+
+%------------------------------------------------
+% Page 1
+
+\begin{frame}
+\frametitle{Recall of basic ADMM}
+
+A general ADMM optimization problem is formulated as
+\begin{align*}
+    & \text{minimize} \quad f(x) + g(z) \\
+    & \text{subject to} \quad Ax + Bz = c
+\end{align*}
+
+\pause
+
+The augmented Lagrangian of this problem is given by
+$$\mathcal{L}_{\rho}(x,z,y) = f(x) + g(z) + \langle y, Ax+Bz-c \rangle + \dfrac{1}{\rho}\lVert Ax+Bz-c \rVert^2.$$
+The iterations are given by
+\begin{align*}
+    x^{k+1} & = \argmin_{x} \left\{ \mathcal{L}_{\rho}(x,z^k,y^k) \right\} \\
+    z^{k+1} & = \argmin_{z} \left\{ \mathcal{L}_{\rho}(x^{k+1},z,y^k) \right\} \\
+    y^{k+1} & = y^{k} + \rho (Ax^{k+1}+Bz^{k+1}-c)
+\end{align*}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 1
+
+\begin{frame}
+\frametitle{Convergence of ADMM}
+
+\noindent Under the conditions
+\begin{itemize}
+    \item $f,g$ closed, proper convex;
+    \item $\mathcal{L}_{0}(x,z,y)$ has a saddle point,
+\end{itemize}
+\vspace{1em}
+then as $k\rightarrow\infty$ one has
+\begin{itemize}
+    \item feasibility: $Ax^k + By^k - c \rightarrow 0$
+    \item objective: $f(x^k) + g(y^k) \rightarrow p^*$
+    \item dual: $y^k \rightarrow y^*$
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------
+
+\section[Basic Consensus]{Consensus Problem}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Consensus Problem}
+    
+\end{frame}
+
+%------------------------------------------------
+
+\section[Consensus with Regularization]{Consensus with Regularization}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Consensus with Regularization}
+    
+\end{frame}
+
+%------------------------------------------------
+
+\section[General Consensus]{General Form Consensus}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{General Form Consensus}
+    
+\end{frame}
+
+%------------------------------------------------
+
+\section[General Consensus with Regularization]{General Form Consensus with Regularization}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{General Form Consensus with Regularization}
+    
+\end{frame}
+
+%------------------------------------------------
+
+\section[Sharing Problem]{Sharing Problem}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Sharing Problem}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}[allowframebreaks]
+\frametitle{参考文献}
+
+{\footnotesize
+\bibliographystyle{ieeetr}
+\bibliography{references}
+}
+
+\end{frame}
+
+%------------------------------------------------
+
+% \begin{frame}
+
+% \Huge{\centerline{\bfseries The End}}
+
+% \vspace{0.5em}
+
+% \Huge{\centerline{\phantom{a}\bfseries 谢谢！}}
+
+% \end{frame}
+
+%------------------------------------------------
+
+\end{document}
