@@ -180,7 +180,7 @@ Federated Learning这个名词首次由Google的研究人员McMahan等人在文�
         \item[$\bullet$] Recommendation
         \item[$\bullet$] Finance
     \end{itemize}
-    \item $\cdots\cdots$
+    \item etc.
     }
 \end{itemize}
 
@@ -530,7 +530,7 @@ FedSGD: 在每个节点执行一次full-batch GD之后，即进行模型同步�
 \begin{frame}
 \frametitle{FedAvg}
 
-FedAvg: 每个节点执行$K$个mini-batch SGD之后，进行模型同步（平均）。在通信量大大降低的情况下，。。。。（待写）
+FedAvg: 每个节点执行$K$个mini-batch SGD之后，进行模型同步（平均）。在通信量大大降低的情况下，模型效果也得到了一定提升。
 
 \begin{figure}
 \centering
@@ -705,9 +705,16 @@ McMahan等人进一步在文章\cite{reddi2020fed_opt}(2020)中，将Adam等自�
 
 在假设损失函数$\ell_i(x;z)$有Lipschetz光滑性条件
 $$\lVert \nabla_x \ell_i(x;z) - \nabla_y \ell_i(y;z) \rVert \leqslant L \cdot \lVert x-y \rVert$$
-以及节点内梯度方差（intra-client gradient variance）的限制条件下
+节点内梯度方差（intra-client gradient variance）
 $$\expectation_{z \sim \mathcal{D}_i} \lVert \nabla_x \ell_i(x;z) - \nabla f_i(x) \rVert^2 \leqslant \sigma^2$$
-我们考察误差 。。。。（待写）
+% 以及梯度的有界性
+% $$\expectation_{z\sim\mathcal{D}} [\lVert \nabla_x \ell_i(x;z) \rVert^2] \leqslant G^2$$
+的限制条件下，我们考察误差
+$$err = | \expectation [f(x_T)] - f(x^*) |$$
+一般有（FedAvg）
+$$err = \mathcal{O} \left( \dfrac{HN}{T} + \dfrac{\sigma}{\sqrt{TKN}} \right)$$
+
+% ? TODO: more convergence results
 
 \end{frame}
 
@@ -789,7 +796,18 @@ $\overline{x}$为对所有节点上的模型参数取均值。
 \frametitle{Consensus and Sharing}
 
 一些传统的（线性）机器学习模型，进行垂直联邦学习，即当数据在所有节点上是垂直划分的（vertical splitting），不同的client上分布着同一批样本的不同特征时，我们还可以把要优化的问题表达为一个Sharing问题。
-% Sharing问题就不再赘述举例了
+
+\pause
+
+例如线性问题
+\begin{align*}
+    & \text{minimize} \quad \ell (Ax - b) + r(x)
+\end{align*}
+进行垂直划分$A = (A_1, \cdots, A_N), \quad x = (x_1, \cdots, x_N)^T$，可以化为Sharing问题
+\begin{align*}
+    & \text{minimize} \quad \sum\limits_{i=1}^N r_i(x_i) + \ell(\sum\limits_{i=1}^N z_i - b) \\
+    & \text{subject to} \quad A_ix_i = z_i
+\end{align*}
 
 \end{frame}
 
@@ -924,7 +942,7 @@ or equivalently as the following problem,
     & \text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + \dfrac{\lambda}{2} \sum\limits_{i=1}^N \lVert x_i \rVert^2 -\dfrac{\lambda N}{2} \lVert z \rVert^2 \\
     & \text{subject to} \quad Nz - \sum\limits_{i=1}^N x_i = 0
 \end{align*}
-which is a nonconvex sharing problem considered in \cite{hong2016convergence} (Eq. (3.2)). Under certain assumptions, this problem is a DC (difference-of-convex) programming problem.
+which is a nonconvex sharing problem considered in \cite{hong2016convergence} (Eq. (3.2)). Under certain assumptions, this problem is a DC (difference-of-convex) programming problem with linear constraints.
 
 \begin{question}
 \begin{itemize}
@@ -943,8 +961,11 @@ which is a nonconvex sharing problem considered in \cite{hong2016convergence} (E
 
 The original unconstrained problem is studied in \cite{hanzely2020federated} using the so-called loopless local gradient descent (L2GD) method, with the assumptions that
 \begin{itemize}
-    \item $f_i$ Lipschitz smooth
-    \item $f_i$ strongly convex
+    \item $f_i$ are Lipschitz $L$-smooth
+    % $$\lVert \nabla f_i(x) - \nabla f_i(y) \rVert \leqslant L \lVert x-y \rVert$$
+    $$f(y) \leqslant f(x) + \langle \nabla f(x), (y-x)\rangle + \dfrac{L}{2} \lVert x-y \rVert^2$$
+    \item $f_i$ are $\mu$-strongly convex
+    $$f(y) \geqslant f(x) + \langle \nabla f(x), (y-x)\rangle + \dfrac{\mu}{2} \lVert x-y \rVert^2$$
 \end{itemize}
 
 \end{frame}
