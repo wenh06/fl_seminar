@@ -881,30 +881,6 @@ ADMM循环中的primal updates为
 %------------------------------------------------
 % Page 15
 
-% \begin{frame}
-% \frametitle{收敛性}
-
-
-
-% \end{frame}
-
-
-% %------------------------------------------------
-
-% \section[Misc]{其他一些问题}  % 其他一些有趣的问题
-
-% %------------------------------------------------
-% % Page 15
-
-% \begin{frame}
-
-
-
-% \end{frame}
-
-%------------------------------------------------
-% Page 15
-
 \begin{frame}[allowframebreaks]
 \frametitle{参考文献}
 
@@ -912,6 +888,15 @@ ADMM循环中的primal updates为
 \bibliographystyle{ieeetr}
 \bibliography{references}
 }
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+
+% intentionally left blank
 
 \end{frame}
 
@@ -942,7 +927,7 @@ or equivalently as the following problem,
     & \text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + \dfrac{\lambda}{2} \sum\limits_{i=1}^N \lVert x_i \rVert^2 -\dfrac{\lambda N}{2} \lVert z \rVert^2 \\
     & \text{subject to} \quad Nz - \sum\limits_{i=1}^N x_i = 0
 \end{align*}
-which is a nonconvex sharing problem considered in \cite{hong2016convergence} (Eq. (3.2)). Under certain assumptions, this problem is a DC (difference-of-convex) programming problem with linear constraints.
+which is a nonconvex sharing problem considered in \cite{hong2016convergence} (Eq. (3.2)). Under certain assumptions, this problem is a (split?) DC (difference-of-convex) programming problem with linear constraints.
 
 \begin{question}
 \begin{itemize}
@@ -988,6 +973,21 @@ $$
 Locally, one has
 $$x_i^{k+1} = x_i^k - \beta \nabla f_i(x_i^k), \quad x_i^{k+1} = (1-\gamma)x_i^k + \gamma \overline{x}^k$$
 with probabilities $1-p$ and $p$ respectively.
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Backup}
+
+One can consider a more general (split?) DC problem
+\begin{align*}
+    & \text{minimize} \quad \sum\limits_{i=1}^N F_i(x_i) - \lambda G(z) \\
+    & \text{subject to} \quad Nz = \sum\limits_{i=1}^N x_i
+\end{align*}
+where $F_i$ are strongly convex and $G$ convex.
 
 \end{frame}
 

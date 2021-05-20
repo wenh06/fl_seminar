@@ -109,7 +109,56 @@ then as $k\rightarrow\infty$ one has
 
 \begin{frame}
 \frametitle{Consensus Problem}
+
+Assume we have global variable $x \in \mathbb{R}^n$ and ``split'' (or distributed) objective function
+$$f(x) = \sum\limits_{i=1}^N f_i(x)$$
+e.g. $x$ can be (global) model parameters, DNN weights (and biases, etc.), $f_i$ can be the loss function associated with the $i$-th block (``client'') of data. The optimization problem is
+\begin{align*}
+    & \text{minimize} \quad \sum\limits_{i=1}^N f_i(x)
+\end{align*}
     
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Consensus Problem}
+
+Problem: $f$ is NOT block-separable.
+
+\pause
+\vspace{0.8em}
+
+Solution: add a common global variable $z \in \mathbb{R}^n$, so that the optimization problem is formulated as (equivalent to)
+\begin{align*}
+    & \text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) \\
+    & \text{subject to} \quad x_i - z = 0, \quad i=1,\cdots,N
+\end{align*}
+which is called a {\bfseries consensus problem}.
+
+\pause
+\vspace{0.8em}
+
+One has the augmented Lagrangian
+$$\mathcal{L}_{\rho}(x_1,\cdots,x_N,z,y) = \sum\limits_{i=1}^N \left[ f_i(x_i) + \langle y_i, x_i-z \rangle + \dfrac{\rho}{2} \lVert x_i-z \rVert^2 \right],$$
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Consensus Problem}
+
+and ADMM iterations
+\begin{align*}
+    \phantom{\leadsto} & \left( x = (x_1^T,\cdots,x_N^T)^T, x^{k+1} = \argmin_x \left\{ \sum\limits_{i=1}^N \left[ f_i(x_i) + \langle y^k_i, x_i-z^k \rangle + \dfrac{\rho}{2} \lVert x_i-z^k \rVert^2 \right] \right\} \right) \\
+    \leadsto \quad & x_i^{k+1} = \argmin_{x_i} \left\{ f_i(x_i) + \langle y^k_i, x_i-z^k \rangle + \dfrac{\rho}{2} \lVert x_i-z^k \rVert^2 \right\} \\
+    & z^{k+1} = \argmin_{z} \left\{ \sum\limits_{i=1}^N \left[ f_i(x_i^{k+1}) + \langle y^k_i, x_i^{k+1}-z \rangle + \dfrac{\rho}{2} \lVert x_i^{k+1}-z \rVert^2 \right] \right\} \\
+    & \phantom{z^{k+1}} = \argmin_{z} \left\{ \dfrac{N\rho}{2} \lVert z \rVert^2 - \langle z, \sum\limits_{i=1}^N (y_i^k+\rho x_i^{k+1}) \rangle + \cdots \right\} \\
+    & \phantom{z^{k+1}} = \dfrac{1}{N} \sum\limits_{i=1}^N \left( \dfrac{y_i^{k}}{\rho} + x_i^{k+1} \right) \\
+    & y_i^{k+1} = y_i^k + \rho (x_i^{k+1} - z^{k+1})
+\end{align*}
+
 \end{frame}
 
 %------------------------------------------------
