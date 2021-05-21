@@ -140,7 +140,7 @@ which is called a {\bfseries consensus problem}.
 \vspace{0.8em}
 
 One has the augmented Lagrangian
-$$\mathcal{L}_{\rho}(x_1,\cdots,x_N,z,y) = \sum\limits_{i=1}^N \left[ f_i(x_i) + \langle y_i, x_i-z \rangle + \dfrac{\rho}{2} \lVert x_i-z \rVert^2 \right],$$
+$$\mathcal{L}_{\rho}(x_1,\cdots,x_N,z,y) = \sum\limits_{i=1}^N \left[ f_i(x_i) + \langle y_i, x_i-z \rangle + \dfrac{\rho}{2} \lVert x_i-z \rVert^2 \right]$$
 
 \end{frame}
 
@@ -150,6 +150,7 @@ $$\mathcal{L}_{\rho}(x_1,\cdots,x_N,z,y) = \sum\limits_{i=1}^N \left[ f_i(x_i) +
 \frametitle{Consensus Problem}
 
 and ADMM iterations
+{\scriptsize
 \begin{align*}
     \phantom{\leadsto} & \left( x = (x_1^T,\cdots,x_N^T)^T, x^{k+1} = \argmin_x \left\{ \sum\limits_{i=1}^N \left[ f_i(x_i) + \langle y^k_i, x_i-z^k \rangle + \dfrac{\rho}{2} \lVert x_i-z^k \rVert^2 \right] \right\} \right) \\
     \leadsto \quad & x_i^{k+1} = \argmin_{x_i} \left\{ f_i(x_i) + \langle y^k_i, x_i-z^k \rangle + \dfrac{\rho}{2} \lVert x_i-z^k \rVert^2 \right\} \\
@@ -158,6 +159,99 @@ and ADMM iterations
     & \phantom{z^{k+1}} = \dfrac{1}{N} \sum\limits_{i=1}^N \left( \dfrac{y_i^{k}}{\rho} + x_i^{k+1} \right) \\
     & y_i^{k+1} = y_i^k + \rho (x_i^{k+1} - z^{k+1})
 \end{align*}
+}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Consensus Problem}
+
+Simplify notations by letting
+$$
+\begin{cases}
+\overline{x}^k := \dfrac{1}{N} \sum\limits_{i=1}^N x_i^k \\
+\overline{y}^k := \dfrac{1}{N} \sum\limits_{i=1}^N y_i^k \\
+\end{cases}
+$$
+then one has the following observations
+$$\displaystyle z^{k+1} = \dfrac{1}{N\rho} \sum\limits_{i=1}^N y_i^k + \dfrac{1}{N} \sum\limits_{i=1}^N x_i^{k+1} = \dfrac{\overline{y}^k}{\rho} + \overline{x}^{k+1}$$
+and
+\begin{align*}
+    & y^{k+1}_i = y_i^k + \rho(x_i^{k+1}-z^{k+1}) = y_i^k + \rho(x_i^{k+1}-\dfrac{\overline{y}^k}{\rho} - \overline{x}^{k+1}) \\
+    \Rightarrow \quad & \overline{y}^{k+1} = \overline{y}^{k} + \rho (\overline{x}_i^{k+1} - \dfrac{\overline{y}^k}{\rho} - \overline{x}^{k+1}) = 0 \\
+    \Rightarrow \quad & \overline{z}^{k+1} = \dfrac{0}{\rho} + \overline{x}^{k+1} = \overline{x}^{k+1} \\
+\end{align*}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Consensus Problem}
+
+Then one can rewrite the iterations as
+\begin{align*}
+x^{k+1}_i & = \argmin\limits_{x_i} \left\{ f_i(x_i) + \langle y_i^k, x_i-\overline{x}^k \rangle + \dfrac{\rho}{2}\lVert x_i-\overline{x}^k \rVert^2 \right\} \\
+(z^{k+1} & = \overline{x}^{k+1}) \\
+y_i^{k+1} & = y_i^k + \rho(x^{k+1}_i-\overline{x}^{k+1})
+\end{align*}
+This can be further simplified by setting $u_i = \dfrac{y_i}{\rho}$:
+\begin{align*}
+x^{k+1}_i & = \argmin\limits_{x_i} \left\{ f_i(x_i) + \dfrac{\rho}{2}\lVert x_i-\overline{x}^k + u_i^k \rVert^2 \right\} = \operatorname{prox}_{f_i,\rho}(\overline{x}^k - u_i^k) \\
+(z^{k+1} & = \overline{x}^{k+1}) \\
+u_i^{k+1} & = u_i^k + (x^{k+1}_i-\overline{x}^{k+1})
+\end{align*}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{{\bfseries Statistical Interpretation} for the ADMM iterations for consensus problem}
+
+At iteration $k+1$, assume $x_i$ has prior distribution
+$$x_i \sim N(\overline{x}^k-u_i^k, \rho I_n)$$
+or equivalently
+$$p(x_i) = \det(2\pi\rho I)^{-1/2} \exp\left(-\dfrac{1}{2} \lVert x_i - \overline{x}^k + u_i^k \rVert_{\rho I}^2 \right)$$
+
+\begin{remark}
+As stated in \cite{boyd2011distributed}, the bias of the mean of the above normal distribution, which is $-u_i^k$, can be interpreted as the ``price'' of ``client'' i disagreeing with the consensus $\overline{x}^k$ in the previous (the $k$
+-th) iteration. As for why the ``price'' is $-u_i^k$, note that the previous scaled dual update $u_i^k$ is augmented by the bias of the $k$-th $x_i$-update, hence the accumulation of the biases of $x_i$-updates.
+\end{remark}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{{\bfseries Statistical Interpretation} for the ADMM iterations for consensus problem}
+
+Let
+$$f_i(x_i) = \operatorname{NLL}(x_i) = -\log\operatorname{LH}(x_i)$$
+be the negative log likelihood function of $x_i$ (w.r.t. the data (or observations) at the $i$-th ``client''). Then the max a posteriori estimates (MAP) of the parameters $x_i$ are
+\begin{align*}
+    \operatorname{MAP}(x_i) & = \argmax_{x_i} \left\{ p(x_i) \cdot \operatorname{LH}(x_i) \right\} \\
+    & = \argmax_{x_i} \left\{ \exp(-f_i(x_i)) \cdot \det(2\pi\rho I)^{-1/2} \right. \\
+    & \qquad \left. \cdot \exp\left( -\dfrac{\rho}{2} \lVert x_i - \overline{x}_i^k + u_i^k \rVert^2 \right) \right\} \\
+    & = \argmin_{x_i} \left\{ f_i(x_i) + \dfrac{\rho}{2} \lVert x_i - \overline{x}_i^k + u_i^k \rVert^2 \right\} = x_i^{k+1}
+\end{align*}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{{\bfseries Statistical Interpretation} for the ADMM iterations for consensus problem}
+
+i.e. the $(k+1)$-th update of $x_i$ are just the MAP of $x_i$ with given prior distribution.
+
+\vspace{1em}
+
+\begin{remark}
+Most federated learning optimization algorithms fall into paradigm of this basic consensus problem (with inexact inner minimization loops), including FedAvg \cite{mcmahan2017fed_avg}, FedOpt(FedAdam, FedAdagrad, ...) \cite{reddi2020fed_opt}, etc.
+\end{remark}
 
 \end{frame}
 
@@ -169,7 +263,25 @@ and ADMM iterations
 
 \begin{frame}
 \frametitle{Consensus with Regularization}
-    
+
+Consider the problem
+\begin{align*}
+    & \text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + \framebox{g(z)} \\
+    & \text{subject to} \quad x_i-z = 0, \quad i=1,\cdots,N
+\end{align*}
+with regularization term $g(z)$ in the objective function.
+
+\vspace{0.8em}
+
+The ADMM iterations:
+{\footnotesize
+\begin{align*}
+x^{k+1}_i & = \argmin\limits_{x_i} \left\{ f_i(x_i) + \langle y_i^k, x_i-z^k \rangle + \dfrac{\rho}{2}\lVert x_i-z^k \rVert^2 \right\} \\
+z^{k+1} & = \argmin\limits_{z} \left\{ g(z) + \sum\limits_{i=1}^N \left( \langle y_i^k, x_i^{k+1}-z \rangle + \dfrac{\rho}{2}\lVert x_i^{k+1}-z \rVert^2 \right) \right\} \\
+y_i^{k+1} & = y_i^k + \rho (x^{k+1}_i-z^{k+1})
+\end{align*}
+}
+
 \end{frame}
 
 %------------------------------------------------
