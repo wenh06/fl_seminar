@@ -286,6 +286,69 @@ y_i^{k+1} & = y_i^k + \rho (x^{k+1}_i-z^{k+1})
 
 %------------------------------------------------
 
+\begin{frame}
+\frametitle{Consensus with Regularization}
+
+One similarly has the following reductions by letting $u_i = \frac{y_i}{\rho}$:
+{\footnotesize
+\begin{align*}
+    z^{k+1} & = \argmin_z \left\{ g(z) + \sum\limits_{i=1}^N \left( \dfrac{\rho}{2}\lVert z \rVert^2 - \langle \rho x_i^{k+1}+y_i^k, z \rangle + \cdots \right) \right\} \\
+    & = \argmin_z \left\{ g(z) + N \left( \dfrac{\rho}{2}\lVert z \rVert^2 - \langle \rho \overline{x}^{k+1}+\overline{y}^k, z \rangle + \cdots \right) \right\} \\
+    & = \argmin_z \left\{ g(z) + \dfrac{N\rho}{2} \lVert z - \overline{x}^{k+1} - \dfrac{\overline{y}^k}{\rho} \rVert^2 \right\} \\
+    & = \argmin_z \left\{ g(z) + \dfrac{N\rho}{2} \lVert z - \overline{x}^{k+1} - \overline{u}^k \rVert^2 \right\} \\
+    & = \operatorname{prox}_{g,N\rho}(\overline{x}^{k+1} + \overline{u}^k) \\
+    x_i^{k+1} & = \argmin_{x_i} \left\{ f_i(x_i) + \dfrac{\rho}{2} \lVert x_i - z^k + u_i^k \rVert^2 \right\} = \operatorname{prox}_{f_i,\rho}(z^k - u_i^k) \\
+    u_i^{k+1} & = u_i^k + (x_i^{k+1} - z^{k+1})
+\end{align*}
+}
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Consensus with Regularization}
+
+\begin{eg}\ 
+\begin{itemize}
+\item[(1)] $g(z) = \lambda \lVert z \rVert_1, \lambda > 0,$ then
+\begin{align*}
+    z^{k+1} & = \argmin_z \left\{ \lambda \lVert z \rVert_1 + \dfrac{N\rho}{2} \lVert z - \overline{x}^{k+1} - \overline{u}^k \rVert^2 \right\} \\
+    & = \operatorname{S}_{\lambda/N\rho} (\overline{x}^{k+1} + \overline{u}^{k+1}) \quad \leftarrow \quad \textbf{soft thresholding}
+\end{align*}
+\item[(2)] $g(z) = I_{\mathbb{R}^n_+}(z)$ the indicator function of $\mathbb{R}^n_+$, then
+\begin{align*}
+    z^{k+1} & = \argmin_z \left\{ I_{\mathbb{R}^n_+}(z) + \dfrac{N\rho}{2} \lVert z - \overline{x}^{k+1} - \overline{u}^k \rVert^2 \right\} \\
+    & = (\overline{x}^{k+1} + \overline{u}^{k+1})_+
+\end{align*}
+\end{itemize}
+\end{eg}
+    
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Consensus with Regularization}
+    
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Consensus with Regularization}
+    
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Consensus with Regularization}
+    
+\end{frame}
+
+%------------------------------------------------
+
 \section[General Consensus]{General Form Consensus}
 
 %------------------------------------------------
