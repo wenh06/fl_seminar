@@ -364,7 +364,7 @@ PharmCoo合理用药系统目前已经在以下的场景投入实际的使用：
 }
 \begin{itemize}
     \item<3-> 实际使用的时候，胰岛素浓度没有方便途径采集，导致整个模型是non-identifiable的（是一个病态的问题，解局部不唯一）。
-    \item<4-> 即使固定一些未知量，模型参数拟合计算慢（scipy.optimize Nelder-Mead）
+    \item<4-> 即使固定一些未知量，模型参数拟合计算慢（scipy.optimize Nelder-Mead），但这与precision health本意相违背了。
 \end{itemize}
 
 \end{frame}
@@ -378,15 +378,25 @@ PharmCoo合理用药系统目前已经在以下的场景投入实际的使用：
 \uncover<2->{
 方法（专利）：从连续血糖数据提取一系列特征
 }
-\vspace{1em}
+\vspace{0.6em}
 
 \uncover<3->{
 模型：二分类XGBoost
 }
-\vspace{1em}
+\vspace{0.6em}
 
 \uncover<4->{
 该模型在生产环境中使用，对于二型糖尿病人的夜间低血糖事件的预警非常有效。
+}
+\vspace{1em}
+
+\uncover<5->{
+\begin{remark_cn}
+XGBoost带来的一个问题是，不太好做incremental learning. 
+\begin{quote}
+    ``the tree construction algorithm works differently than SGD. In a sense that SGD can be incremental, while tree construction algorithm is in nature batch, you want to see all the data before you decide which one is the best split.'' \hfill -- Tianqi Chen
+\end{quote}
+\end{remark_cn}
 }
 
 \end{frame}
@@ -405,32 +415,22 @@ PharmCoo合理用药系统目前已经在以下的场景投入实际的使用：
     \item<2-> 中医望诊系统（面诊、舌诊、手诊） --- 图像
     \item<3-> 饮食营养分析 --- 图像
     \begin{columns}
-    \begin{column}{0.5\textwidth}
+    \begin{column}{0.45\textwidth}
     \begin{figure}
         \centering
         \includegraphics[width=1\textwidth,keepaspectratio]{images/diet_img.jpg}
     \end{figure}
     \end{column}
-    \begin{column}{0.27\textwidth}
+    \begin{column}{0.24\textwidth}
     \begin{figure}
         \centering
         \includegraphics[width=1\textwidth,keepaspectratio]{images/diet_ann_res.jpg}
     \end{figure}
     \end{column}
     \end{columns}
-    \item<4-> 多模态（actigraph, ECG, PPG, ...）睡眠分析（sleep stage, sleep apnea, ...）
-    \item<5-> etc.
+    \item<4-> 多模态（actigraph, ECG, PPG, audio, ...）睡眠分析（sleep stage, sleep apnea, ...）
+    \item<5-> etc. (\href{https://github.com/wenh06/utils}{https://github.com/wenh06/utils})
 \end{itemize}
-
-\end{frame}
-
-%------------------------------------------------
-% Page 15
-
-\begin{frame}
-\frametitle{}
-
-
 
 \end{frame}
 
