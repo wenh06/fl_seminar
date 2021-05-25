@@ -284,6 +284,16 @@ PharmCoo合理用药系统目前已经在以下的场景投入实际的使用：
     \item 海淀区多家医院（海淀卫健委）前置审方
 \end{itemize}
 
+\pause
+\vspace{1em}
+
+at the cost of:
+
+\begin{figure}
+\centering
+\includegraphics[width=0.43\textwidth,keepaspectratio]{images/jd_coding_stats.jpg}
+\end{figure}
+
 \end{frame}
 
 %------------------------------------------------
@@ -363,7 +373,7 @@ PharmCoo合理用药系统目前已经在以下的场景投入实际的使用：
 一些问题：
 }
 \begin{itemize}
-    \item<3-> 实际使用的时候，胰岛素浓度没有方便途径采集，导致整个模型是non-identifiable的（是一个病态的问题，解局部不唯一）。
+    \item<3-> 实际使用的时候，胰岛素浓度没有方便途径采集，导致整个模型是structural non-identifiable的（是一个病态的问题，解局部不唯一）。
     \item<4-> 即使固定一些未知量，模型参数拟合计算慢（scipy.optimize Nelder-Mead），但这与precision health本意相违背了。
 \end{itemize}
 
