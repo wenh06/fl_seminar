@@ -202,7 +202,13 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\newcommand*\circled[1]{\tikz[baseline=(char.base)]{ \node[shape=circle,draw,inner sep=2pt] (char) {#1};}}
+\newcommand*\circled[1]{
+    \tikz[baseline=(char.base)]{
+        \node[shape=circle,draw,color=red,inner sep=1pt] (char) {#1};
+    }
+}
+
+\newcommand{\fl}{\circled{FL}}
 
 
 \newcommand{\fieldc}{\mathbb{C}}
