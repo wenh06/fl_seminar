@@ -16,7 +16,7 @@
     execute at begin node=$\cdots$
   },
 }
-
+\usepackage{transparent}
 
 \begin{document}
 
@@ -714,7 +714,7 @@ $$err = | \expectation [f(x_T)] - f(x^*) |$$
 一般有（FedAvg）
 $$err = \mathcal{O} \left( \dfrac{HN}{T} + \dfrac{\sigma}{\sqrt{TKN}} \right)$$
 
-% ? TODO: more convergence results
+{\color{red} \scriptsize ? TODO: more convergence results}
 
 \end{frame}
 
@@ -916,7 +916,21 @@ ADMM循环中的primal updates为
 \begin{frame}
 \frametitle{Personalization for FL}
 
+{\bfseries When does one need personalization?}
 
+\vspace{0.2em}
+\noindent --- When data across clients are ``enough'' non-IID, which is more realistic.
+
+\pause
+\vspace{0.8em}
+
+Means of personalization:
+\begin{itemize}
+    \item Federated Multi-Task Learning (+ regularization / proximal term), e.g. \cite{smith2017mocha}
+    {\pgfsetfillopacity{0.4}
+    \item Model-Agnostic Meta Learning, e.g. \cite{finn2017maml}
+    \item Local Fine-tuning.}
+\end{itemize}
 
 \end{frame}
 
@@ -926,9 +940,29 @@ ADMM循环中的primal updates为
 \begin{frame}
 \frametitle{Personalization for FL}
 
-Some authors considered a {\color{red} ``weak'' consensus problem} (originally stated as ``mixture'' FL problem)
+\begin{itemize}
+    \item Mixture of global and local \cite{hanzely2020federated}:
+    $$\text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + \dfrac{\lambda}{2} \sum\limits_{i=1}^N \lVert x_i - {\color{red} \overline{x}} \rVert^2$$
+    \item pFedMe (bi-level) \cite{t2020pfedme} (and similarly EASGD\cite{zhang2015easgd}):
+    \begin{align*}
+        & \text{minimize} \quad \sum\limits_{i=1}^N F_i(x), \\
+        & \text{where} \quad F_i(x) = \min \left\{ f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i - {\color{red} x}\rVert^2 \right\}
+    \end{align*}
+    \item FedU \cite{dinh2021fedu}:
+    $$\text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + \dfrac{\lambda}{2} \sum\limits_{i=1}^N {\color{red} \sum\limits_{j\in\mathcal{N}_i}} \lVert x_i - {\color{red} x_j} \rVert^2$$
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Mixture FL}
+
+The {\color{red} ``weak'' consensus problem} (originally stated as ``mixture'' FL problem)
 $$\text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + \dfrac{\lambda}{2} \sum\limits_{i=1}^N \lVert x_i - \overline{x} \rVert^2$$
-which can be reformulated as constrained optimization problems
+can be reformulated as constrained optimization problems
 \begin{align*}
     & \text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + \dfrac{\lambda}{2} \sum\limits_{i=1}^N \lVert x_i - z \rVert^2 \\
     & \text{subject to} \quad Nz - \sum\limits_{i=1}^N x_i = 0
@@ -940,21 +974,41 @@ which can be reformulated as constrained optimization problems
 % Page 15
 
 \begin{frame}
-\frametitle{Backup}
+\frametitle{Mixture FL}
 
 or equivalently as the following problem,
 \begin{align*}
     & \text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + \dfrac{\lambda}{2} \sum\limits_{i=1}^N \lVert x_i \rVert^2 -\dfrac{\lambda N}{2} \lVert z \rVert^2 \\
     & \text{subject to} \quad Nz - \sum\limits_{i=1}^N x_i = 0
 \end{align*}
-which is a nonconvex sharing problem considered in \cite{hong2016convergence} (Eq. (3.2)). Under certain assumptions, this problem is a (split?) DC (difference-of-convex) programming problem with linear constraints.
+which is a nonconvex sharing problem considered in \cite{hong2016convergence} (Eq. (3.2)). Note the difference of between formulations of a sharing problem in \cite{hong2016convergence} (Section 3) and in \cite{boyd2011distributed} (Section 7.3)
 
-\begin{question}
-\begin{itemize}
-    \item what is the case when $f_i$ being nonconvex
-    \item inexact ADMM iterations (e.g. mini-batch SGD)
-\end{itemize}
-\end{question}
+\vspace{0.8em}
+
+The algorithm ``Flexible ADMM'' proposed in \cite{hong2016convergence} (Algorithm 4) updates $x_i$ using Gauss-Seidel method, which is non-trivial (or impossible) for parallelization.
+
+% \begin{question}
+% \begin{itemize}
+%     \item what is the case when $f_i$ being nonconvex
+%     \item inexact ADMM iterations (e.g. mini-batch SGD)
+% \end{itemize}
+% \end{question}
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Mixture FL}
+
+Under certain assumptions, this problem is a (split?) DC (difference-of-convex) programming problem {\color{red} with linear constraints}.
+
+\begin{align*}
+    & \text{minimize} \quad \colorbox{green}{$\sum\limits_{i=1}^N \left( f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i \rVert^2 \right)$} - \lambda \colorbox{pink}{$\dfrac{N}{2} \lVert z \rVert^2$} \\
+    & \text{subject to} \quad Nz - \sum\limits_{i=1}^N x_i = 0
+\end{align*}
+
+One writes $\widetilde{f}_i (x_i) =  f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i \rVert^2, r(z) = \frac{N}{2} \lVert z \rVert^2$.
 
 \end{frame}
 
@@ -962,7 +1016,7 @@ which is a nonconvex sharing problem considered in \cite{hong2016convergence} (E
 % Page 15
 
 \begin{frame}
-\frametitle{Backup}
+\frametitle{Mixture FL}
 
 The original unconstrained problem is studied in \cite{hanzely2020federated} using the so-called loopless local gradient descent (L2GD) method, with the assumptions that
 \begin{itemize}
@@ -979,7 +1033,7 @@ The original unconstrained problem is studied in \cite{hanzely2020federated} usi
 % Page 15
 
 \begin{frame}
-\frametitle{Backup}
+\frametitle{Mixture FL}
 
 Rewrite $\sum\limits_{i=1}^N f_i(x_i) + \frac{\lambda}{2} \sum\limits_{i=1}^N \lVert x_i - \overline{x} \rVert^2$ as $f(x) + \psi(x)$ with $x = (x_1,\cdots,x_N)$, the local step of L2GD at a client $i$ is
 $$x^{k+1} = x^k - \alpha G(x^k)$$
@@ -1000,40 +1054,60 @@ with probabilities $1-p$ and $p$ respectively.
 % Page 15
 
 \begin{frame}
-\frametitle{Backup}
+\frametitle{Mixture FL}
 
-One can consider a more general (split?) DC problem
-\begin{align*}
-    & \text{minimize} \quad \sum\limits_{i=1}^N F_i(x_i) - \lambda G(z) \\
-    & \text{subject to} \quad Nz = \sum\limits_{i=1}^N x_i
-\end{align*}
-where $F_i$ are strongly convex and $G$ convex.
-
-\vspace{1em}
-
-Note that minimize $\sum\limits_{i=1}^N F_i(x_i) - \lambda G(z)$ can be seen as a DC problem, as it can be rewritten $f(\widetilde{x}) - g(\widetilde{x})$, where $\widetilde{x} = (x_1,\cdots,x_N,z)$, $f(\widetilde{x}) = \sum\limits_{i=1}^N F_i(x_i)$, and $g(\widetilde{x}) = \lambda G(z)$.
-
-\end{frame}
-
-%------------------------------------------------
-% Page 15
-
-\begin{frame}
-\frametitle{Backup --- Basic DCA}
-
-
+\begin{block}{Questions}
+\begin{itemize}
+    \item[1.] Assumptions on the objective functions can be loosened?
+    \item[2.] DCA with linear constraints? (augmented) Lagrangian is
+    {\scriptsize
+    $$\mathcal{L}_{\rho}(x,z,y) = \sum\limits_{i=1}^N \widetilde{f}_i(x_i) - \lambda r(z) + \langle y, Nz - \sum\limits_{i=1}^N x_i \rangle + \framebox{$\dfrac{\rho}{2} \lVert Nz - \sum\limits_{i=1}^N x_i \rVert^2$} $$
+    }
+    \item[3.] DCA (or stochastic, accelerated variants) can have better convergence?
+    \item[4.] more
+\end{itemize}
+\end{block}
 
 \end{frame}
 
 %------------------------------------------------
 % Page 15
 
-\begin{frame}
-\frametitle{Backup --- Variations of DCA}
+% \begin{frame}
+% \frametitle{Mixture FL}
+
+% One can consider a more general (split?) DC problem
+% \begin{align*}
+%     & \text{minimize} \quad \sum\limits_{i=1}^N F_i(x_i) - \lambda G(z) \\
+%     & \text{subject to} \quad Nz = \sum\limits_{i=1}^N x_i
+% \end{align*}
+% where $F_i$ are strongly convex and $G$ convex.
+
+% \vspace{1em}
+
+% Note that minimize $\sum\limits_{i=1}^N F_i(x_i) - \lambda G(z)$ can be seen as a DC problem, as it can be rewritten $f(\widetilde{x}) - g(\widetilde{x})$, where $\widetilde{x} = (x_1,\cdots,x_N,z)$, $f(\widetilde{x}) = \sum\limits_{i=1}^N F_i(x_i)$, and $g(\widetilde{x}) = \lambda G(z)$.
+
+% \end{frame}
+
+%------------------------------------------------
+% Page 15
+
+% \begin{frame}
+% \frametitle{Backup --- Basic DCA}
 
 
 
-\end{frame}
+% \end{frame}
+
+% %------------------------------------------------
+% % Page 15
+
+% \begin{frame}
+% \frametitle{Backup --- Variations of DCA}
+
+
+
+% \end{frame}
 
 
 %------------------------------------------------
