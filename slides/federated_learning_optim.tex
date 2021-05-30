@@ -1018,7 +1018,7 @@ One writes $\widetilde{f}_i (x_i) =  f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i \r
 \begin{frame}
 \frametitle{Mixture FL}
 
-The original unconstrained problem is studied in \cite{hanzely2020federated} using the so-called loopless local gradient descent (L2GD) method, with the assumptions that
+The original unconstrained problem is studied in \cite{hanzely2020federated} using the so-called {\color{red} loopless} local gradient descent (L2GD) method, with the assumptions that
 \begin{itemize}
     \item $f_i$ are Lipschitz $L$-smooth
     % $$\lVert \nabla f_i(x) - \nabla f_i(y) \rVert \leqslant L \lVert x-y \rVert$$
@@ -1026,6 +1026,8 @@ The original unconstrained problem is studied in \cite{hanzely2020federated} usi
     \item $f_i$ are $\mu$-strongly convex
     $$f(y) \geqslant f(x) + \langle \nabla f(x), (y-x)\rangle + \dfrac{\mu}{2} \lVert x-y \rVert^2$$
 \end{itemize}
+
+{\color{red} Looplessness} is the one of the key contribution of \cite{hanzely2020federated}, in which inner (local) loops are replaced with probabilistic gradient updates.
 
 \end{frame}
 
@@ -1067,6 +1069,38 @@ with probabilities $1-p$ and $p$ respectively.
     \item[4.] more
 \end{itemize}
 \end{block}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Mixture FL --- Research}
+
+One can add more intermediate variables and reformulates the DC-like sharing problem as
+\begin{align*}
+    & \text{minimize} \quad \sum\limits_{i=1}^N \left( f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i \rVert^2 \right) - \lambda \dfrac{N}{2} \lVert z \rVert^2 \\
+    & \text{subject to} \quad x_i' = x_i, \quad i=1,\cdots,N \\
+    & \phantom{subject to} \quad Nz = \sum\limits_{i=1}^N x_i'
+\end{align*}
+Augmented Lagrangian of the above problem is
+{\footnotesize
+\begin{multline*}
+    \sum\limits_{i=1}^N \left( f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i \rVert^2 \right) + \sum\limits_{i=1}^N \langle y_i, x_i'-x_i\rangle + \sum\limits_{i=1}^N \dfrac{\rho_i}{2} \lVert x_i'-x_i \rVert^2 \\
+    + \langle y, Nz-\sum\limits_{i=1}^N x_i'\rangle + \dfrac{\rho}{2} \lVert Nz-\sum\limits_{i=1}^N x_i' \rVert^2
+\end{multline*}
+}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Mixture FL --- Research}
+
+ADMM iterations of the above problem are
 
 \end{frame}
 
