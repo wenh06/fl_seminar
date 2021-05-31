@@ -1008,7 +1008,7 @@ Under certain assumptions, this problem is a (split?) DC (difference-of-convex) 
     & \text{subject to} \quad Nz - \sum\limits_{i=1}^N x_i = 0
 \end{align*}
 
-One writes $\widetilde{f}_i (x_i) =  f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i \rVert^2, r(z) = \frac{N}{2} \lVert z \rVert^2$.
+One writes $\widetilde{f}_i (x_i) =  f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i \rVert^2,$ and $r(z) = \frac{N}{2} \lVert z \rVert^2$.
 
 \end{frame}
 
@@ -1080,15 +1080,15 @@ with probabilities $1-p$ and $p$ respectively.
 
 One can add more intermediate variables and reformulates the DC-like sharing problem as
 \begin{align*}
-    & \text{minimize} \quad \sum\limits_{i=1}^N \left( f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i \rVert^2 \right) - \lambda \dfrac{N}{2} \lVert z \rVert^2 \\
+    & \text{minimize} \quad \sum\limits_{i=1}^N \widetilde{f}_i(x_i) - \lambda r(z) \\
     & \text{subject to} \quad x_i' = x_i, \quad i=1,\cdots,N \\
     & \phantom{subject to} \quad Nz = \sum\limits_{i=1}^N x_i'
 \end{align*}
 Augmented Lagrangian of the above problem is
 {\footnotesize
 \begin{multline*}
-    \sum\limits_{i=1}^N \left( f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i \rVert^2 \right) + \sum\limits_{i=1}^N \langle y_i, x_i'-x_i\rangle + \sum\limits_{i=1}^N \dfrac{\rho_i}{2} \lVert x_i'-x_i \rVert^2 \\
-    + \langle y, Nz-\sum\limits_{i=1}^N x_i'\rangle + \dfrac{\rho}{2} \lVert Nz-\sum\limits_{i=1}^N x_i' \rVert^2
+    \sum\limits_{i=1}^N \widetilde{f}_i(x_i) - \lambda r(z) + \sum\limits_{i=1}^N \langle y_i, x_i'-x_i\rangle + \sum\limits_{i=1}^N \dfrac{\rho_i}{2} \lVert x_i'-x_i \rVert^2 \\
+    + \langle y, Nz-\sum\limits_{i=1}^N x_i'\rangle + \dfrac{\rho}{2} \left\lVert Nz-\sum\limits_{i=1}^N x_i' \right\rVert^2
 \end{multline*}
 }
 
@@ -1100,7 +1100,10 @@ Augmented Lagrangian of the above problem is
 \begin{frame}
 \frametitle{Mixture FL --- Research}
 
-ADMM iterations of the above problem are
+ADMM iterations of the above problem are (NOT finished yet)
+\begin{align*}
+    x_i^{k+1} = \argmin_{x_i} \left\{ \widetilde{f}_i(x_i) + \frac{\rho_i}{2} \lVert x_i-x_i' \rVert^2 \right\}
+\end{align*}
 
 \end{frame}
 
