@@ -1102,7 +1102,8 @@ Augmented Lagrangian of the above problem is
 
 ADMM iterations of the above problem are (NOT finished yet)
 \begin{align*}
-    x_i^{k+1} = \argmin_{x_i} \left\{ \widetilde{f}_i(x_i) + \frac{\rho_i}{2} \lVert x_i-x_i' \rVert^2 \right\}
+    x_i^{k+1} & = \argmin_{x_i} \left\{ \widetilde{f}_i(x_i) + \frac{\rho_i}{2} \lVert x_i-x_i'^k \rVert^2 - \langle y_i^k, x_i \rangle \right\} \\
+    x_i'^{k+1} & = \argmin_{x_i'} \left\{ \langle y_i^k, x_i' \rangle \right\} \\ % not finished
 \end{align*}
 
 \end{frame}
