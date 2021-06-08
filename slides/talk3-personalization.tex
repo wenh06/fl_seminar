@@ -102,9 +102,9 @@ or equivalently as the following problem,
 \end{align*}
 which is a nonconvex sharing problem considered in \cite{hong2016convergence} (Eq. (3.2)). Note the difference of between formulations of a sharing problem in \cite{hong2016convergence} (Section 3) and in \cite{boyd2011distributed} (Section 7.3)
 
-\vspace{0.8em}
+\vspace{0.5em}
 
-The algorithm ``Flexible ADMM'' proposed in \cite{hong2016convergence} (Algorithm 4) updates $x_i$ using Gauss-Seidel method, which is non-trivial (or impossible) for parallelization.
+The algorithm ``Flexible ADMM'' proposed in \cite{hong2016convergence} (Algorithm 4) updates $x_i$ using Gauss-Seidel method, which is non-trivial (or impossible) for parallelization. On the other hand, Jacobi method seems to have no guarantee of convergence.
 
 % \begin{question}
 % \begin{itemize}
@@ -127,7 +127,7 @@ Under certain assumptions, this problem is a (split?) DC (difference-of-convex) 
     & \text{subject to} \quad Nz - \sum\limits_{i=1}^N x_i = 0
 \end{align*}
 
-One writes $\widetilde{f}_i (x_i) =  f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i \rVert^2, r(z) = \frac{N}{2} \lVert z \rVert^2$.
+One writes $\widetilde{f}_i (x_i) =  f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i \rVert^2,$ and $r(z) = \frac{N}{2} \lVert z \rVert^2$.
 
 \end{frame}
 
@@ -137,7 +137,7 @@ One writes $\widetilde{f}_i (x_i) =  f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i \r
 \begin{frame}
 \frametitle{Mixture FL}
 
-The original unconstrained problem is studied in \cite{hanzely2020federated} using the so-called loopless local gradient descent (L2GD) method, with the assumptions that
+The original unconstrained problem is studied in \cite{hanzely2020federated} using the so-called {\color{red} loopless} local gradient descent (L2GD) method, with the assumptions that
 \begin{itemize}
     \item $f_i$ are Lipschitz $L$-smooth
     % $$\lVert \nabla f_i(x) - \nabla f_i(y) \rVert \leqslant L \lVert x-y \rVert$$
@@ -145,6 +145,8 @@ The original unconstrained problem is studied in \cite{hanzely2020federated} usi
     \item $f_i$ are $\mu$-strongly convex
     $$f(y) \geqslant f(x) + \langle \nabla f(x), (y-x)\rangle + \dfrac{\mu}{2} \lVert x-y \rVert^2$$
 \end{itemize}
+
+{\color{red} Looplessness} is the one of the key contribution of \cite{hanzely2020federated}, in which {\bfseries inner (local) loops are replaced with probabilistic gradient updates}.
 
 \end{frame}
 
@@ -186,6 +188,76 @@ with probabilities $1-p$ and $p$ respectively.
     \item[4.] more
 \end{itemize}
 \end{block}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Mixture FL --- Research}
+
+Because of the existence of the boxed term $\dfrac{\rho}{2} \lVert Nz - \sum\limits_{i=1}^N x_i \rVert^2$, the only choice to fit in the distributed settings is to update using the Jacobi method, as follows:
+{\footnotesize
+\begin{align*}
+    x_i^{k+1} & = \argmin_{x_i} \left\{ \widetilde{f}_i(x_i) - \langle y_i^k, x_i \rangle + \colorbox{pink}{$\displaystyle \frac{\rho}{2} \lVert Nz^k - \sum\limits_{j\neq i}^N x_j^k - x_i \rVert^2$} \right\} \\
+    z^{k+1} & = \argmin_{z} \left\{ \langle y^k, Nz \rangle + \frac{\rho}{2} \lVert Nz - \sum\limits_{i=1}^N x_i^{k+1} \rVert^2 - \lambda r(z) \right\} \\
+    y^{k+1} & = y^k + \beta (Nz^{k+1} - \sum\limits_{i=1}^N x_i^{k+1})
+\end{align*}
+}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Mixture FL --- Research II}
+
+One can add more intermediate variables and reformulates the DC-like sharing problem as
+\begin{align*}
+    & \text{minimize} \quad \sum\limits_{i=1}^N \widetilde{f}_i(x_i) - \lambda r(z) \\
+    & \text{subject to} \quad x_i' = x_i, \quad i=1,\cdots,N \\
+    & \phantom{subject to} \quad Nz = \sum\limits_{i=1}^N x_i'
+\end{align*}
+Augmented Lagrangian of the above problem is
+{\footnotesize
+\begin{multline*}
+    \sum\limits_{i=1}^N \widetilde{f}_i(x_i) - \lambda r(z) + \sum\limits_{i=1}^N \langle y_i, x_i'-x_i\rangle + \sum\limits_{i=1}^N \dfrac{\rho_i}{2} \lVert x_i'-x_i \rVert^2 \\
+    + \langle y, Nz-\sum\limits_{i=1}^N x_i'\rangle + \dfrac{\rho}{2} \left\lVert Nz-\sum\limits_{i=1}^N x_i' \right\rVert^2
+\end{multline*}
+}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Mixture FL --- Research II}
+
+ADMM iterations of the above problem are
+{\footnotesize
+\begin{align*}
+    x_i^{k+1} & = \argmin_{x_i} \left\{ \widetilde{f}_i(x_i) + \frac{\rho_i}{2} \lVert x_i-(x_i')^k \rVert^2 - \langle y_i^k, x_i \rangle \right\} \\
+    (x_i')^{k+1} & = \argmin_{x_i'} \left\{ \langle y_i^k-y^k, x_i' \rangle + \frac{\rho_i}{2} \lVert x_i^{k+1}-x_i' \rVert^2 \right. \\
+    & \hspace{7em} + \colorbox{pink}{$\displaystyle \frac{\rho}{2} \lVert Nz^k-\sum\limits_{j\neq i}^N (x_j')^{k} - x_i' \rVert^2$} \} \\
+    z^{k+1} & = \argmin_{z} \left\{ \langle y^k, Nz \rangle + \frac{\rho}{2} \lVert Nz - \sum\limits_{i=1}^N (x_i')^{k+1} \rVert^2 - \lambda r(z) \right\} \\
+    y_i^{k+1} & = y_i^k + \beta ((x_i')^{k+1} - x^{k+1}) \\
+    y^{k+1} & = y^k + \beta (Nz^{k+1} - \sum\limits_{i=1}^N (x_i')^{k+1})
+\end{align*}
+}
+
+\end{frame}
+
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Mixture FL --- Research III}
+
+to update....
 
 \end{frame}
 
