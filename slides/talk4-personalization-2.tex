@@ -1,0 +1,154 @@
+% to copy from the backup section of federated_learning_optim.tex
+\begin{document}
+
+%----------------------------------------------------------------------------------------
+%	TITLE PAGE
+%----------------------------------------------------------------------------------------
+
+\title[Personalization]{Talk 4: Personalization in Federated Learning --- II}
+\date{2021年6月10日}
+\author[]{WEN Hao}
+
+% \institute[北京航空航天大学] % Your institution as it will appear on the bottom of every slide, may be shorthand to save space
+% {
+% 数学科学学院 \\ % Your institution for the title page
+% \medskip
+% \textit{wenh06@gmail.com} % Your email address
+% 北京航空航天大学 \\
+% 数学科学学院 \qquad 北京航空航天大学
+% }
+
+% \logo{\includegraphics[height=1.5cm]{logo}}
+% \logoii{\includegraphics[height=1cm]{logo2}}
+
+% \date{\footnotesize 2021年4月13日} % Date, can be changed to a custom date
+
+\setlength{\belowdisplayskip}{5pt} \setlength{\belowdisplayshortskip}{5pt}
+\setlength{\abovedisplayskip}{5pt} \setlength{\abovedisplayshortskip}{5pt}
+
+%------------------------------------------------
+
+\begin{frame}
+\titlepage % Print the title page as the first slide
+\end{frame}
+
+\begin{frame}
+\frametitle{Personalization for FL}
+
+{\bfseries When does one need personalization?}
+
+\vspace{0.2em}
+\noindent --- When data across clients are ``enough'' non-IID, which is more realistic.
+
+\pause
+\vspace{0.8em}
+
+Means of personalization:
+\begin{itemize}
+    \item Federated Multi-Task Learning (+ regularization / proximal term), e.g. \cite{smith2017mocha}
+    {\pgfsetfillopacity{0.4}
+    \item Model-Agnostic Meta Learning, e.g. \cite{finn2017maml}
+    \item Local Fine-tuning.}
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Personalization for FL}
+
+\begin{itemize}
+    \item Mixture of global and local \cite{hanzely2020federated}:
+    $$\text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + \dfrac{\lambda}{2} \sum\limits_{i=1}^N \lVert x_i - {\color{red} \overline{x}} \rVert^2$$
+    \item pFedMe (bi-level) \cite{t2020pfedme} (and similarly EASGD\cite{zhang2015easgd}):
+    \begin{align*}
+        & \text{minimize} \quad \sum\limits_{i=1}^N F_i(x), \\
+        & \text{where} \quad F_i(x) = \min \left\{ f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i - {\color{red} x}\rVert^2 \right\}
+    \end{align*}
+    \item FedU \cite{dinh2021fedu}:
+    $$\text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + \dfrac{\lambda}{2} \sum\limits_{i=1}^N {\color{red} \sum\limits_{j\in\mathcal{N}_i}} \lVert x_i - {\color{red} x_j} \rVert^2$$
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+
+to update....
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+
+to update....
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+
+to update....
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+
+to update....
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+
+to update....
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+
+to update....
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+
+to update....
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}[allowframebreaks]
+\frametitle{参考文献}
+
+{\footnotesize
+\bibliographystyle{ieeetr}
+\bibliography{references}
+}
+
+\end{frame}
+
+%------------------------------------------------
+
+\end{document}
