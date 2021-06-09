@@ -69,7 +69,34 @@
 
 \vspace{0.6em}
 
-a distribution of learning tasks $p(\mathcal{T})$,
+i.e. over a distribution of learning tasks $p(\mathcal{T})$, where
+$$\mathcal{T} = \{ \mathcal{L}(\{(x_t,a_t)\}), q(x_1), q(x_{t+1}|x_t, a_t), H \}$$
+with
+\begin{align*}
+    & (x_t,a_t): & \text{data points} \\
+    & \mathcal{L}: & \text{loss function} \\
+    & q(x_1): & \text{initial distribution} \\
+    & q(x_{t+1}|x_t, a_t): & \text{transition} \\
+    & H: & \text{episode length}
+\end{align*}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Model-Agnostic Meta Learning}
+
+\begin{block}{Intuition of MAML}
+Some internal representations are more transferrable than others. MAML should encourage the emergence of such general-purpose representations via searching for model parameters that are sensitive to changes in the task.
+\end{block}
+
+\begin{figure}
+    \centering
+    \includegraphics[keepaspectratio,width=.7\textwidth]{images/maml.png}
+    \label{fig:my_label}
+\end{figure}
 
 \end{frame}
 
