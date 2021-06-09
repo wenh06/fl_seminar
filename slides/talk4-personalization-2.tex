@@ -64,7 +64,7 @@
 \frametitle{Model-Agnostic Meta Learning}
 
 \begin{quote}
-    ``The goal of meta-learning is to train a model on a {\bfseries variety of learning tasks}, such that it can solve new learning tasks using only a small number of training samples.'' \hfill -- \cite{finn2017maml}
+    ``The goal of meta-learning is to train a model on a {\bfseries variety of {\color{red} learning tasks}}, such that it can solve new learning tasks using only a small number of training samples.'' \hfill -- \cite{finn2017maml}
 \end{quote}
 
 \vspace{0.6em}
@@ -101,6 +101,40 @@ Some internal representations are more transferrable than others. MAML should en
 \end{frame}
 
 %------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Model-Agnostic Meta Learning}
+
+\begin{algorithm}[H]
+\SetAlgoNoLine
+\DontPrintSemicolon
+{\bfseries Require:} $p(\mathcal{T})$ distribution over tasks\;
+{\bfseries Require:} $\alpha, \beta$ step size hyper-params\;
+randomly initialize model params $\theta$\;
+\While{not done}{
+    Sample batch of tasks $\mathcal{T}_i \sim p(\mathcal{T})$\;
+    \For{all $\mathcal{T}_i$}{
+        Evaluate $\nabla_{\theta} \mathcal{L}_{\mathcal{T}_i}(f_{\theta})$ w.r.t. $K$ samples\;
+        Compute adapted parameters with gradient descent $\theta'_i = \theta - \alpha \nabla_{\theta} \mathcal{L}_{\mathcal{T}_i}(f_{\theta})$\;
+    }
+    Update \colorbox{pink}{$\theta \leftarrow \theta - \beta \nabla_{\theta} \sum\limits_{\mathcal{T}_i\sim p(\mathcal{T})} \mathcal{L}_{\mathcal{T}_i} (f_{\theta_i'})$} (gradient through gradients)\;
+}
+\caption{MAML\cite{finn2017maml}}
+\end{algorithm}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+
+to update....
+
+\end{frame}
+
+%------------------------------------------------
 
 \section[FMTL]{Federated Multi-Task Learning}
 
@@ -130,6 +164,7 @@ Some internal representations are more transferrable than others. MAML should en
 % Page 15
 
 \begin{frame}
+\frametitle{pFedMe}
 
 to update....
 
