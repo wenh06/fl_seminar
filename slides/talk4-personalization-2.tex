@@ -43,25 +43,51 @@
 \pause
 \vspace{0.8em}
 
-Means of personalization:
+{\bfseries Means of personalization:}
 \begin{itemize}
     \item Federated Multi-Task Learning (+ regularization / proximal term), e.g. \cite{smith2017mocha}
-    {\pgfsetfillopacity{0.4}
     \item Model-Agnostic Meta Learning, e.g. \cite{finn2017maml}
-    \item Local Fine-tuning.}
+    \item Local Fine-tuning.
+    \item etc.
 \end{itemize}
 
 \end{frame}
 
 %------------------------------------------------
+
+\section[MAML]{Model-Agnostic Meta Learning}
+
+%------------------------------------------------
 % Page 15
 
 \begin{frame}
-\frametitle{Personalization for FL}
+\frametitle{Model-Agnostic Meta Learning}
+
+\begin{quote}
+    ``The goal of meta-learning is to train a model on a {\bfseries variety of learning tasks}, such that it can solve new learning tasks using only a small number of training samples.'' \hfill -- \cite{finn2017maml}
+\end{quote}
+
+\vspace{0.6em}
+
+a distribution of learning tasks $p(\mathcal{T})$,
+
+\end{frame}
+
+%------------------------------------------------
+
+\section[FMTL]{Federated Multi-Task Learning}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Federated Multi-Task Learning}
 
 \begin{itemize}
+    \pgfsetfillopacity{0.4}
     \item Mixture of global and local \cite{hanzely2020federated}:
     $$\text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + \dfrac{\lambda}{2} \sum\limits_{i=1}^N \lVert x_i - {\color{red} \overline{x}} \rVert^2$$
+    \pgfsetfillopacity{1}
     \item pFedMe (bi-level) \cite{t2020pfedme} (and similarly EASGD\cite{zhang2015easgd}):
     \begin{align*}
         & \text{minimize} \quad \sum\limits_{i=1}^N F_i(x), \\
