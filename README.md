@@ -22,20 +22,25 @@ to turn into a table
     * venue: E502
     * speaker: WEN Hao
     * [notes](notes/talk2-boyd-chap8.tex)
-3. Personalization problems in federated learning ([main resource](https://arxiv.org/pdf/2002.05516))
+3. Personalization problems in federated learning ([main resource](https://arxiv.org/pdf/1703.03400))
     * time: 2021-05-24 Thursday 20:00
     * venue: E402
     * speaker: WEN Hao
-    * [slides](slides/talk3-personalization.tex) (updating)
-4. GADMM ([PDF](https://arxiv.org/abs/1909.00047))
-5. CQ-GGADMM ([PDF](https://arxiv.org/abs/2009.06459))
-6. FedAvg ([PDF](https://arxiv.org/abs/1602.05629))
-7. Local SGD Converges Fast and Communicates Little ([PDF](https://arxiv.org/abs/1805.09767))
-8. On the Convergence of FedAvg on Non-IID Data ([PDF](https://arxiv.org/abs/1907.02189))
-9. Adaptive Federated Optimization ([PDF](https://arxiv.org/abs/2003.00295))
-10. FedProx ([PDF](https://arxiv.org/abs/1812.06127))
-11. Federated Learning of a Mixture of Global and Local Models ([PDF](https://arxiv.org/abs/2002.05516))
-12. more....
+    * [slides](slides/talk3-personalization.tex)
+4. Personalization problems in federated learning continued ([main resource1](https://arxiv.org/pdf/2002.05516), [main resource 2](https://arxiv.org/pdf/2006.08848))
+    * time: 2021-06-10 Thursday 20:00
+    * venue: E402
+    * speaker: WEN Hao
+    * [slides](slides/talk4-personalization-2.tex) (updating)
+5. GADMM ([PDF](https://arxiv.org/abs/1909.00047))
+6. CQ-GGADMM ([PDF](https://arxiv.org/abs/2009.06459))
+7. FedAvg ([PDF](https://arxiv.org/abs/1602.05629))
+8. Local SGD Converges Fast and Communicates Little ([PDF](https://arxiv.org/abs/1805.09767))
+9. On the Convergence of FedAvg on Non-IID Data ([PDF](https://arxiv.org/abs/1907.02189))
+10. Adaptive Federated Optimization ([PDF](https://arxiv.org/abs/2003.00295))
+11. FedProx ([PDF](https://arxiv.org/abs/1812.06127))
+12. Federated Learning of a Mixture of Global and Local Models ([PDF](https://arxiv.org/abs/2002.05516))
+13. more....
 
 # More resources
 1. A comprehensive survey article: Advances and open problems in federated learning ([PDF](https://arxiv.org/abs/1912.04977))

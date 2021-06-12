@@ -248,7 +248,8 @@ which is equivalent to (as in \cite{zhang2015easgd})
 
 \begin{block}{pFedMe observations}
 \begin{itemize}
-    \item global model $x$ converges (if converges) to the average of local models
+    \item global model $x$ converges (if converges) to the average of local models, which can be inferred from
+    $$\min_{x} \{ \sum\limits_{i=1}^N \left( f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i - x \rVert^2 \right) \}$$
     \item local updates are not ``totally local'', i.e. the loop $r = 0, \cdots, R$ computes the ``global objective'' $\min\{F_i(x)\}$ locally, to reduce communication
 \end{itemize}
 \end{block}
@@ -259,13 +260,13 @@ which is equivalent to (as in \cite{zhang2015easgd})
 % Page 15
 
 \begin{frame}
-\frametitle{EASGD and ADMM (?)}
+\frametitle{EASGD and ADMM (to write more)}
 
-The problem considered in \cite{zhang2015easgd}
+The problem considered in \cite{zhang2015easgd} (the very original problem is the usual consensus problem)
 \begin{align*}
     & \text{minimize} \quad \sum\limits_{i=1}^N \left( f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i - x \rVert^2 \right)
 \end{align*}
-is also formulated (equivalence?) as a minimax problem to be solved with ADMM
+is also formulated as a minimax problem to be solved with ADMM
 $$\max_{y_i}\min_{x_i,x} \sum_{i=1}^N \left( f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i - x \rVert^2 - \langle y_i, x_i-x \rangle \right)$$
 
 \end{frame}
