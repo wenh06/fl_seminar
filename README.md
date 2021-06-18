@@ -47,3 +47,4 @@ to turn into a table
 2. [Federated Learning One World Seminar (FLOW)](https://sites.google.com/view/one-world-seminar-series-flow/home)
 3. [Awesome Federated Learning on GitHub](https://github.com/chaoyanghe/Awesome-Federated-Learning)
 4. [Another Introductory Repository on GitHub](https://github.com/ZeroWangZY/federated-learning)
+5. [References netdisk folder](https://mega.nz/folder/tNoiCbQR#_HgtoFiy4PYc4Uf8-9tYTQ)
