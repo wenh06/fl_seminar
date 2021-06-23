@@ -6,7 +6,7 @@
 %----------------------------------------------------------------------------------------
 
 \title[Personalization]{Talk 4: Personalization in Federated Learning -- II}
-\date{2021年6月10日}
+\date{2021-6-10}
 \author[]{WEN Hao}
 
 % \institute[北京航空航天大学] % Your institution as it will appear on the bottom of every slide, may be shorthand to save space
@@ -262,20 +262,30 @@ which is equivalent to (as in \cite{zhang2015easgd})
 \begin{frame}
 \frametitle{EASGD and ADMM}
 
-The problem considered in \cite{zhang2015easgd} (the very original problem is the usual consensus problem)
+pFedMe originates from EASGD \cite{zhang2015easgd}, which reformulate the original distributed EM problem $\displaystyle \min_x \expectation [\ell(x,\xi)]$ as a consensus problem as the following form
 \begin{align*}
     & \text{minimize} \quad \sum\limits_{i=1}^N \left( f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i - x \rVert^2 \right)
 \end{align*}
-is also formulated as a minimax problem to be solved with ADMM
+More usually, it is formulated as a minimax (primal-dual) problem to be solved with ADMM
 $$\max_{y_i}\min_{x_i,x} \sum_{i=1}^N \left( f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i - x \rVert^2 - \langle y_i, x_i-x \rangle \right)$$
+
+Authors of \cite{zhang2015easgd} claims that EASGD is more stable than ADMM, which however has to be checked!
 
 \end{frame}
 
 %------------------------------------------------
 % Page 15
 
+% \begin{frame}
+% \frametitle{EASGD and ADMM}
+
+% \end{frame}
+
+%------------------------------------------------
+% Page 15
+
 \begin{frame}[allowframebreaks]
-\frametitle{参考文献}
+\frametitle{References}
 
 {\footnotesize
 \bibliographystyle{ieeetr}
