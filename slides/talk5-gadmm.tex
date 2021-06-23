@@ -51,8 +51,8 @@ Performance of distributed optimization algorithms is characterized by
 Communication time is determined by
 \begin{itemize}
     \item \# communication rounds
-    \item \# channels (edges in the graph) per round
-    \item bandwidth/power (data transmitted) per channel
+    \item {\color{green} \# channels (edges in the graph) per round}
+    \item {\color{pink} bandwidth/power (data transmitted) per channel}
 \end{itemize}
 
 \pause
@@ -116,6 +116,46 @@ where all clients are divided into 2 groups, i.e. head group $\mathcal{N}_h$ and
 \begin{frame}
 \frametitle{GADMM -- Remarks}
 
+\begin{itemize}
+    \item Consider the scenario with central (parameter) server, where the network is a star graph. It seems that the (vanilla) GADMM does {\color{red} NOT} communicate (per round) less than ADMM for a star graph. However, in the cross-device scenarios, where connection to central server might be slow.
+    \item the (chain) topology is too restrictive. Any graph with a vertex of degree > 2 is not able to be fitted in the GADMM settings.
+    \item more?
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Related Work -- M-ADMM}
+
+In fact, $\exists$ previous work \cite{lu2017unified}\footnote{C. Lu, J. Feng, S. Yan, and Z. Lin, A unified alternating direction method of multipliers by majorization minimization, IEEE transactions on pattern analysis and machine intelligence, 2017} which proposed Mixed Gau\ss-Seidel and Jacobian ADMM (M-ADMM).
+
+\vspace{0.6em}
+
+M-ADMM partitions a {\color{red} multi-block problem} ($m$ blocks) into 2 groups $(1,\ldots,m')$ and $(m'+1,\ldots,m)$. The 2 groups update {\color{red} in serial}, while each block within one group updates {\color{red} in parallel}.
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Related Work -- M-ADMM}
+
+Primal updates of M-ADMM are
+\begin{fleqn}
+\begin{multline*}
+    x_i^{k+1} = \argmin_{x_i} \{ f_i(x_i) + \widetilde{\mathcal{L}}(x_1^{k},\ldots,x_i,\ldots,x_m^{k}, \lambda) \},\\
+    1\leqslant i \leqslant m'
+\end{multline*}
+\begin{multline*}
+    x_j^{k+1} = \argmin_{x_i} \{ f_i(x_i) + \widetilde{\mathcal{L}}(x_1^{k+1},\ldots,x_{m'}^{k+1},x_{m'+1}^{k},\\
+    \ldots,x_j,\ldots,x_m^{k}, \lambda) \}, \quad m' < j \leqslant m
+\end{multline*}
+\end{fleqn}
+where $\widetilde{\mathcal{L}}$ is some Lagrangian function, e.g. augmented Lagrangian, linearized Lagrangian, or {\color{red} majorant first-order surrogate} of $f_i$.
 
 \end{frame}
 
@@ -136,7 +176,7 @@ where all clients are divided into 2 groups, i.e. head group $\mathcal{N}_h$ and
 % Page 15
 
 \begin{frame}
-\frametitle{CQ-GGADMM}
+\frametitle{CQ-GGADMM -- Enhanced GADMM}
 
 
 
@@ -147,16 +187,6 @@ where all clients are divided into 2 groups, i.e. head group $\mathcal{N}_h$ and
 
 \begin{frame}
 \frametitle{Related Work -- LAG \& LASG}
-
-
-
-\end{frame}
-
-%------------------------------------------------
-% Page 15
-
-\begin{frame}
-\frametitle{Related Work -- ADMM by MM}
 
 
 
