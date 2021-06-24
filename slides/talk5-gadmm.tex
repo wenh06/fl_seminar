@@ -165,10 +165,23 @@ where $\widetilde{\mathcal{L}}$ is some Lagrangian function, e.g. augmented Lagr
 \begin{frame}
 \frametitle{CQ-GGADMM -- Enhanced GADMM}
 
+To further address the problems that GADMM does not solve, {\color{red}CQ-G}GADMM \cite{issaid2020cq-ggadmm} is proposed
+
+\begin{itemize}
+    \item limited graph topology
+    \item unreduced bandwidth/power per channel
+\end{itemize}
+or does not really solve, e.g. \# communication per round
+
+\pause
+\vspace{0.8em}
+
+The connection graph topology (corr. to the ``{\color{red} G}'')
 \begin{figure}[H]
     \centering
-    \includegraphics[width=0.5\textwidth,keepaspectratio]{images/CQ-GGADMM.png}
+    \includegraphics[width=0.45\textwidth,keepaspectratio]{images/CQ-GGADMM.png}
 \end{figure}
+which is a {\color{red} bipartite} and connected graph.
 
 \end{frame}
 
@@ -178,7 +191,20 @@ where $\widetilde{\mathcal{L}}$ is some Lagrangian function, e.g. augmented Lagr
 \begin{frame}
 \frametitle{CQ-GGADMM -- Enhanced GADMM}
 
+Corr. optimization problem hence is formulated as
+\begin{align*}
+    & \text{minimize} \quad \dfrac{1}{N} \sum\limits_{i=1}^N f_i(x_i) \\
+    & \text{subject to} \quad x_i = x_{j}, \quad (i,j) \in \mathscr{E}
+\end{align*}
 
+\pause
+\vspace{0.8em}
+
+Other techniques include
+\begin{itemize}
+    \item quantization (corr. to the ``{\color{red} Q}''), reduces bandwidth/power per channel
+    \item censoring (corr. to the ``{\color{red} C}''), reduces communication per round
+\end{itemize}
 
 \end{frame}
 
@@ -188,7 +214,16 @@ where $\widetilde{\mathcal{L}}$ is some Lagrangian function, e.g. augmented Lagr
 \begin{frame}
 \frametitle{Related Work -- LAG \& LASG}
 
+Censoring is a technique such that local parameters are updated and transmitted, only when parameters change large enough:
+\begin{equation*}
+    \widehat{x}_i^{k+1} = \begin{cases} Q(x_i^{k+1}) & \text{ if } \lVert \widehat{x}_i^{k}-Q(x_i^{k+1}) \rVert \geqslant \tau_0\xi^{k+1} \\ \widehat{x}_i^{k} & \text{ otherwise} \end{cases}
+\end{equation*}
+where $\widehat{x}$ denotes the quantized parameters and $Q(\cdot)$ refer to the quantization process\footnote{should be studied in details later?}
 
+\pause
+\vspace{0.6em}
+
+Censoring, I think, originates from previous work, e.g. LAG \cite{chen2018lag} (and later LASG \cite{chen2020lasg}) where ``censoring'' is referred to as ``{\color{red} L}azy {\color{red} A}ggregation''
 
 \end{frame}
 
