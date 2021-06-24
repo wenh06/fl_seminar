@@ -32,7 +32,7 @@ to turn into a table
     * venue: E402
     * speaker: WEN Hao
     * [slides](slides/talk4-personalization-2.tex)
-5. GADMM and CQ-GADMM ([main resource1](https://arxiv.org/abs/1909.00047), [main resource2](https://arxiv.org/abs/2009.06459))
+5. GADMM and CQ-GADMM ([main resource1](https://arxiv.org/abs/1909.00047), [main resource2](https://arxiv.org/abs/2009.06459), [main resource3](FLOW/CQ-GGADMM%20-%20FLOW.pdf))
     * time: 2021-06-24 Thursday 20:00
     * venue: E402
     * speaker: WEN Hao
