@@ -1,6 +1,15 @@
 # fl_seminar
 federated seminar held at BUAA
 
+<!-- toc -->
+
+- [Time](#time)
+- [Venue](#venue)
+- [Programme](#programme-planned)
+- [More resources](#more-resources)
+
+<!-- tocstop -->
+
 
 ## Time
 Each Thursday 20:00, excluding public holidays
