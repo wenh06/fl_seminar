@@ -61,3 +61,4 @@ to turn into a table
 4. [Another Introductory Repository on GitHub](https://github.com/ZeroWangZY/federated-learning)
 5. [Yet Another Awesome Federated Learning Repository on GitHub](https://github.com/innovation-cat/Awesome-Federated-Machine-Learning)
 6. [References netdisk folder](https://mega.nz/folder/tNoiCbQR#_HgtoFiy4PYc4Uf8-9tYTQ)
+7. [AMiner: List of Must-Read](https://www.aminer.org/topic/600e890992c7f9be21d74695)
