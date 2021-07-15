@@ -95,8 +95,8 @@ One extreme case of compression is to take the {\color{red}sign} of each coordin
 \end{column}
 \begin{column}{0.48\textwidth}
 $\widetilde{g}_t^{(i)}$ is the {\color{red}ternarized} gradient given by
-$$g_t^{(i)} = \lVert g_t^{(i)} \rVert_{\infty} \cdot \operatorname{sign}(g_t^{(i)}) \circ \framebox{\color{red} $b_t$}$$
-where $b_t$ is a random binary vector satisfying some Bernoulli distribution $B(1, \lvert g_{t,k}^{(i)} \rvert / s_t)$
+$$g_t^{(i)} = \lVert g_t^{(i)} \rVert_{\infty} \cdot \operatorname{sign}(g_t^{(i)}) \odot \framebox{\color{red} $b_t$}$$
+where $b_t$ is a random binary vector satisfying some Bernoulli distribution $Be(\lvert g_{t,k}^{(i)} \rvert / s_t)$
 \end{column}
 \end{columns}
 
@@ -113,12 +113,12 @@ Similar algorithms include 1-bit SGD \cite{seide2014_1bitsgd}, signSGD \cite{ber
 \frametitle{QSGD}
 
 More generally, in QSGD \cite{alistarh2017qsgd}, randomized quantization (called ``low-precision quantizer'' in \cite{khirirat2018dcgd}) is performed on gradients $v$ via
-$$Q_s(v) = \lVert v \rVert_2 \cdot \operatorname{sign}(v) \circ \framebox{\color{red}$\xi(v,s)$},$$
+$$Q_s(v) = \lVert v \rVert_2 \cdot \operatorname{sign}(v) \odot \framebox{\color{red}$\xi(v,s)$},$$
 where the $i$-th element in vector $\xi(v,s)$ is defined by
 \begin{equation*}
     \xi_i(v,s) = \begin{cases}
-    \ell/s, & \text{with prob.} 1 - ((|v_i|/\lVert v \rVert_2) s - \ell) \\
-    (\ell+1)/s, & \text{otherwise}
+    (\ell+1)/s, & \text{with prob. } (|v_i|/\lVert v \rVert_2) s - \ell \\
+    \ell/s, & \text{otherwise}
     \end{cases}
 \end{equation*}
 $s$ controls the number of quantization levels, and $\ell$ ({\color{red} should be $\ell_i$?}) be s.t. $|v_i|/\lVert v \rVert_2 \in [\ell/s, (\ell+1)/s]$.
@@ -151,6 +151,51 @@ And perhaps with more useful properties like
 \end{frame}
 
 %------------------------------------------------
+% Page 3
+
+\begin{frame}
+\frametitle{Examples of URQs}
+
+Despite the ternary quantizer and low-precision quantizer, one has \cite{lizhize2020adiana}
+
+\only<1>{
+\begin{block}{Random-$k$ sparsification}
+$$\mathcal{C}(v) = \dfrac{d}{k} (v \odot \xi_k)$$
+where $\xi_k \in \{0, 1\}^d$ is a uniformly random binary vector with $k$ nonzero entries, $v \in \mathbb{R}^d$.
+\end{block}
+}
+
+\only<2>{
+\begin{block}{$(p,s)$-quantization}
+$$\mathcal{C}_{p,s}(v) = \operatorname{sign}(v)\cdot \lVert v \rVert_p \cdot \dfrac{1}{s} \xi(v,s)$$
+where $\xi(v,s)$ is a random vector with i-th element
+\begin{equation*}
+\xi_i(v,s) = \begin{cases}
+\ell_i+1, & \text{with prob. } (|v_i|/\lVert v \rVert_2) s - \ell_i \\
+\ell_i, & \text{otherwise}
+\end{cases}
+\end{equation*}
+and $\ell_i$ be s.t. $|v_i|/\lVert v \rVert_2 \in [\ell/s, (\ell+1)/s]$
+\end{block}
+}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 3
+
+\begin{frame}
+\frametitle{Compressors (Quantizers)}
+
+One can refer to \href{https://github.com/burlachenkok/marina}{https://github.com/burlachenkok/marina} for code and examples of various compressors, e.g. in files
+\begin{itemize}
+    \item linear\_model\_with\_non\_convex\_loss/compressors.py
+    \item neural\_nets\_experiments/compressors.py
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------
 
 \section{Recent Development}
 
@@ -165,10 +210,37 @@ $$\widetilde{g}^{(i)}_t = Q(g^{(i)}_t) = Q(\nabla f_i(x_t))$$
 one performs
 \begin{equation*}
     \begin{cases}
-    \widetilde{g}^{(i)}_t = \widetilde{h}^{(i)}_t + Q(\nabla f_i(x_t) - \widetilde{h}^{(i)}_t) \\
-    \widetilde{h}^{(i)}_{t+1} = \widetilde{h}^{(i)}_t + \alpha Q(\nabla f_i(x_t) - \widetilde{h}^{(i)}_t)
+    \widetilde{g}^{(i)}_t = \widetilde{h}^{(i)}_t + Q(\colorbox{pink}{$\nabla f_i(x_t) - h^{(i)}_t$}) \\
+    \colorbox{pink}{$h^{(i)}_{t+1} = h^{(i)}_t + \alpha Q(\nabla f_i(x_t) - h^{(i)}_t)$}
     \end{cases}
 \end{equation*}
+
+$h^{(i)}$ are ``memory'' maintained locally, whose average is maintained in the central server.
+
+\end{frame}
+
+%------------------------------------------------
+% Page 3
+
+\begin{frame}
+\frametitle{(A)DIANA}
+
+Another key point (feature) of (A)DIANA is the combination with acceleration (and variance reduction):
+
+\only<1>{
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\textwidth,keepaspectratio]{images/diana.png}
+\end{figure}
+
+{\footnotesize Note the ``Quant'' operator is a so-called ``block-quantizer'' or ``bucket-quantizer''\cite{alistarh2017qsgd}}
+}
+\only<2>{
+\begin{figure}
+    \centering
+    \includegraphics[width=0.54\textwidth,keepaspectratio]{images/adiana.png}
+\end{figure}
+}
 
 \end{frame}
 
@@ -178,8 +250,47 @@ one performs
 \begin{frame}
 \frametitle{MARINA}
 
+MARINA \cite{gorbunov2021marina} replaced the unbiased compressor by a {\color{red}biased} one, via replacing
+\begin{equation*}
+\begin{cases}
+\widetilde{g}^{(i)}_t = \widetilde{h}^{(i)}_t + Q(\nabla f_i(x_t) - h^{(i)}_t) \\
+h^{(i)}_{t+1} = h^{(i)}_t + \alpha Q(\nabla f_i(x_t) - h^{(i)}_t)
+\end{cases}
+\end{equation*}
+by
+\begin{equation*}
+\widetilde{g}^{(i)}_t = 
+\begin{cases}
+\nabla f_i(x_t), & \text{with prob. } p \\
+\widetilde{g}^{(i)}_{t-1} + Q(\nabla f_i(x_t) - \nabla f_i(x_{t-1})), & \text{with prob. } 1-p
+\end{cases}
+\end{equation*}
+for some small $p$.
+
+\pause
+\vspace{0.6em}
+
+As claimed by the authors, their intuition come from the rare (?) phenomenon in stochastic optimization that
+\begin{quote}
+`` the bias of the stochastic gradient helps to achieve better complexity''
+\end{quote}
+
 \end{frame}
 
+%------------------------------------------------
+% Page 3
+
+\begin{frame}
+\frametitle{MARINA}
+
+The basic MARINA algorithm is as follows:
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\textwidth,keepaspectratio]{images/marina.png}
+\end{figure}
+
+\end{frame}
 
 %------------------------------------------------
 % Page 3
@@ -190,7 +301,14 @@ one performs
 \begin{itemize}
     \item higher order methods \cite{crane2019dingo,islamov2021distributed}
     \item combination with lazy aggregation \cite{issaid2020cq-ggadmm}, and with stochastic update
+    \item biased compression \cite{beznosikov2020biased,safaryan2020uncertainty}
+    \item analysis of communication cost (\# rounds and bandwidth)
 \end{itemize}
+
+\pause
+\vspace{0.6em}
+
+and more, to be continued...
 
 \end{frame}
 
