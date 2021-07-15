@@ -5,8 +5,15 @@ This file is forked from
 https://github.com/burlachenkok/marina/blob/main/linear_model_with_non_convex_loss/compressors.py
 """
 
-import numpy as np
 import random, math
+
+import numpy as np
+
+
+__all__ = [
+    "CompressorType", "Compressor",
+]
+
 
 class CompressorType:
     IDENTICAL                = 1 # Identical compressor
@@ -21,19 +28,28 @@ class CompressorType:
 
 class Compressor:
     def __init__(self, compressorName = ""):
-        self.compressorName = compressorName        
-        self.compressorType = CompressorType.IDENTICAL
+        self.__compressorName = compressorName        
+        self.__compressorType = CompressorType.IDENTICAL
         self.w = 0.0
         self.total_input_components = 0
         self.really_need_to_send_components = 0
         self.last_input_advance = 0
         self.last_need_to_send_advance = 0
     
+    @property
+    def compressorName(self):
+        return self.__compressorName
+    
+    @property
+    def compressorType(self):
+        return self.__compressorType
+    
+    @property
     def name(self):
         omega = r'$\omega$'
         if self.compressorType == CompressorType.IDENTICAL: return f"Identical"
         if self.compressorType == CompressorType.LAZY_COMPRESSOR: return f"Bernoulli(Lazy) [p={self.P:g},{omega}={self.getW():.1f}]"
-        if self.compressorType == CompressorType.RANDK_COMPRESSOR: return f" (K={self.K})"
+        if self.compressorType == CompressorType.RANDK_COMPRESSOR: return f"Random-K (K={self.K}) compressor"
         if self.compressorType == CompressorType.NATURAL_COMPRESSOR_FP64: return f"Natural for fp64 [{omega}={self.getW():.1f}]"
         if self.compressorType == CompressorType.NATURAL_COMPRESSOR_FP32: return f"Natural for fp32 [{omega}={self.getW():.1f}]"
         if self.compressorType == CompressorType.STANDARD_DITHERING_FP64: return f"Standard Dithering for fp64[s={self.s}]"
@@ -42,7 +58,8 @@ class Compressor:
         if self.compressorType == CompressorType.NATURAL_DITHERING_FP64:  return f"Natural Dithering for fp64[s={self.s},{omega}={self.getW():.1f}]"
 
         return "?"
-
+    
+    @property
     def fullName(self):
         omega = r'$\omega$'
         if self.compressorType == CompressorType.IDENTICAL: return f"Identical"
@@ -64,20 +81,23 @@ class Compressor:
         self.last_need_to_send_advance = 0
 
     def makeIdenticalCompressor(self):
-        self.compressorType = CompressorType.IDENTICAL
+        self.__compressorName = "IdenticalCompressor"
+        self.__compressorType = CompressorType.IDENTICAL
         self.w = 0.0
         self.resetStats()
 
     def makeLazyCompressor(self, P):
         # w + 1 = p* 1/(p**2) => w = 1/p - 1
-        self.compressorType = CompressorType.LAZY_COMPRESSOR
+        self.__compressorName = "LazyCompressor"
+        self.__compressorType = CompressorType.LAZY_COMPRESSOR
         self.P = P
         self.w = 1.0 / P - 1.0
         self.resetStats()
 
 
     def makeStandardDitheringFP64(self, levels, vectorNormCompressor, p = np.inf):
-        self.compressorType = CompressorType.STANDARD_DITHERING_FP64
+        self.__compressorName = "StandardDitheringFP64"
+        self.__compressorType = CompressorType.STANDARD_DITHERING_FP64
         self.levelsValues = np.arange(0.0, 1.1, 1.0/levels)     # levels + 1 values in range [0.0, 1.0] which uniformly split this segment
         self.s = len(self.levelsValues) - 1                     # # should be equal to level
         assert self.s == levels
@@ -89,7 +109,8 @@ class Compressor:
         self.resetStats()   
 
     def makeStandardDitheringFP32(self, levels, vectorNormCompressor, p = np.inf):
-        self.compressorType = CompressorType.STANDARD_DITHERING_FP32
+        self.__compressorName = "StandardDitheringFP32"
+        self.__compressorType = CompressorType.STANDARD_DITHERING_FP32
         self.levelsValues = np.arange(0.0, 1.1, 1.0/levels)     # levels + 1 values in range [0.0, 1.0] which uniformly split this segment
         self.s = len(self.levelsValues) - 1                     # should be equal to level
         assert self.s == levels
@@ -108,7 +129,8 @@ class Compressor:
         self.w = min(dInput/(levels*levels), dInput**0.5/levels)
 
     def makeNaturalDitheringFP64(self, levels, dInput, p = np.inf):
-        self.compressorType = CompressorType.NATURAL_DITHERING_FP64
+        self.__compressorName = "NaturalDitheringFP64"
+        self.__compressorType = CompressorType.NATURAL_DITHERING_FP64
         self.levelsValues = np.zeros(levels + 1)
         for i in range(levels):
             self.levelsValues[i] = (1.0/2.0)**i
@@ -123,7 +145,8 @@ class Compressor:
         self.resetStats()   
 
     def makeNaturalDitheringFP32(self, levels, dInput, p = np.inf):
-        self.compressorType = CompressorType.NATURAL_DITHERING_FP32
+        self.__compressorName = "NaturalDitheringFP32"
+        self.__compressorType = CompressorType.NATURAL_DITHERING_FP32
         self.levelsValues = np.zeros(levels + 1)
         for i in range(levels):
             self.levelsValues[i] = (1.0/2.0)**i
@@ -141,19 +164,22 @@ class Compressor:
     # D - input vector dimension    
     def makeRandKCompressor(self, K, D):
         # E[|C(x)|^2]=(d*d)/(k*k) * E[sum( (I |xi|)^2)] = (d*d)/(k*k) * k/d *|x|^2 = d/k * (x^2) = (w + 1) (x^2) => w = d/k-1
-        self.compressorType = CompressorType.RANDK_COMPRESSOR
+        self.__compressorName = "RandKCompressor"
+        self.__compressorType = CompressorType.RANDK_COMPRESSOR
         self.D = D
         self.K = K
         self.w = self.D / self.K - 1.0
         self.resetStats()
    
     def makeNaturalCompressorFP64(self):
-        self.compressorType = CompressorType.NATURAL_COMPRESSOR_FP64
+        self.__compressorName = "NaturalCompressorFP64"
+        self.__compressorType = CompressorType.NATURAL_COMPRESSOR_FP64
         self.w = 1.0/8.0     
         self.resetStats()
 
     def makeNaturalCompressorFP32(self):
-        self.compressorType = CompressorType.NATURAL_COMPRESSOR_FP32
+        self.__compressorName = "NaturalCompressorFP32"
+        self.__compressorType = CompressorType.NATURAL_COMPRESSOR_FP32
         self.w = 1.0/8.0     
         self.resetStats()
 
@@ -282,3 +308,12 @@ class Compressor:
         self.total_input_components += self.last_input_advance
 
         return out
+    
+    def __str__(self):
+        return self.name
+    
+    def __repr__(self):
+        return self.fullName
+    
+    def __call__(self, vec):
+        return self.compressVector(vec)
