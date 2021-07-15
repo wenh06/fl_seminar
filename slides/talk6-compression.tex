@@ -176,7 +176,7 @@ where $\xi(v,s)$ is a random vector with i-th element
 \ell_i, & \text{otherwise}
 \end{cases}
 \end{equation*}
-and $\ell_i$ be s.t. $|v_i|/\lVert v \rVert_2 \in [\ell/s, (\ell+1)/s]$
+and $\ell_i$ be s.t. $|v_i|/\lVert v \rVert_2 \in [\ell_i/s, (\ell_i+1)/s]$
 \end{block}
 }
 
@@ -186,7 +186,7 @@ and $\ell_i$ be s.t. $|v_i|/\lVert v \rVert_2 \in [\ell/s, (\ell+1)/s]$
 % Page 3
 
 \begin{frame}
-\frametitle{Compressors (Quantizers)}
+\frametitle{Implementations of Quantizers}
 
 One can refer to \href{https://github.com/burlachenkok/marina}{https://github.com/burlachenkok/marina} for code and examples of various compressors, e.g. in files
 \begin{itemize}
@@ -215,7 +215,7 @@ $$\widetilde{g}^{(i)}_t = Q(g^{(i)}_t) = Q(\nabla f_i(x_t))$$
 one performs
 \begin{equation*}
     \begin{cases}
-    \widetilde{g}^{(i)}_t = \widetilde{h}^{(i)}_t + Q(\colorbox{pink}{$\nabla f_i(x_t) - h^{(i)}_t$}) \\
+    \widetilde{g}^{(i)}_t = h^{(i)}_t + Q(\colorbox{pink}{$\nabla f_i(x_t) - h^{(i)}_t$}) \\
     \colorbox{pink}{$h^{(i)}_{t+1} = h^{(i)}_t + \alpha Q(\nabla f_i(x_t) - h^{(i)}_t)$}
     \end{cases}
 \end{equation*}
@@ -258,7 +258,7 @@ Another key point (feature) of (A)DIANA is the combination with acceleration (an
 MARINA \cite{gorbunov2021marina} replaced the unbiased compressor by a {\color{red}biased} one, via replacing
 \begin{equation*}
 \begin{cases}
-\widetilde{g}^{(i)}_t = \widetilde{h}^{(i)}_t + Q(\nabla f_i(x_t) - h^{(i)}_t) \\
+\widetilde{g}^{(i)}_t = h^{(i)}_t + Q(\nabla f_i(x_t) - h^{(i)}_t) \\
 h^{(i)}_{t+1} = h^{(i)}_t + \alpha Q(\nabla f_i(x_t) - h^{(i)}_t)
 \end{cases}
 \end{equation*}
