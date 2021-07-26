@@ -2,6 +2,24 @@
 
 \usepackage{nccmath}
 
+\tikzset{%
+  client/.style={
+    rectangle,
+    thick,
+    draw,
+    minimum size=0.7cm,
+    text width=1cm,
+    align=center
+  },
+  client missing/.style={
+    draw=none, 
+    scale=2,
+    text height=0.333cm,
+    execute at begin node=$\cdots$
+  },
+}
+\usepackage{transparent}
+
 \begin{document}
 
 %----------------------------------------------------------------------------------------
@@ -9,7 +27,7 @@
 %----------------------------------------------------------------------------------------
 
 \title[Personalization]{Problems of Personalization in Federated Learning}
-\date{2021-?-?}
+\date{2021-07-29}
 \author[]{WEN Hao}
 
 % \institute[北京航空航天大学] % Your institution as it will appear on the bottom of every slide, may be shorthand to save space

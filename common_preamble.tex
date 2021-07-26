@@ -82,6 +82,22 @@
 
 % \newcommand{\tikzmark}[1]{\tikz[baseline,remember picture] \coordinate (#1) {};}
 
+% \usepackage{natbib}  % bibliography package
+\usepackage{bibentry}         %  full citation in the body of the text (turn off natbib if use it)
+\nobibliography*                   % no bib at the end
+
+
+% https://tex.stackexchange.com/questions/30720/footnote-without-a-marker
+\newcommand\blfootnote[1]{%
+  \begingroup
+  \renewcommand\thefootnote{}\footnote{#1}%
+  \addtocounter{footnote}{-1}%
+  \endgroup
+}
+% \usepackage[hang,flushmargin]{footmisc}
+
+
+
 \newcommand*\circled[1]{\tikz[baseline=(char.base)]{ \node[shape=circle,draw,inner sep=2pt] (char) {#1};}}
 
 
