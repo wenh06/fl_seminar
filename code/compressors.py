@@ -6,6 +6,7 @@ https://github.com/burlachenkok/marina/blob/main/linear_model_with_non_convex_lo
 """
 
 import random, math
+from enum import Enum, unique
 
 import numpy as np
 
@@ -15,7 +16,8 @@ __all__ = [
 ]
 
 
-class CompressorType:
+@unique
+class CompressorType(Enum):
     IDENTICAL                = 1 # Identical compressor
     LAZY_COMPRESSOR          = 2 # Lazy or Bernulli compressor
     RANDK_COMPRESSOR         = 3 # Rank-K compressor
@@ -25,6 +27,7 @@ class CompressorType:
     STANDARD_DITHERING_FP32  = 7 # Standard dithering with FP32
     NATURAL_DITHERING_FP32   = 8 # Natural Dithering applied for FP32 components vectors
     NATURAL_DITHERING_FP64   = 9 # Natural Dithering applied for FP64 components vectors
+    TOPK_COMPRESSOR          = 10 # Top-K compressor
 
 class Compressor:
     def __init__(self, compressorName = ""):
@@ -35,6 +38,18 @@ class Compressor:
         self.really_need_to_send_components = 0
         self.last_input_advance = 0
         self.last_need_to_send_advance = 0
+        self.__is_biased = {
+           CompressorType.IDENTICAL: False,
+           CompressorType.LAZY_COMPRESSOR: False,
+           CompressorType.RANDK_COMPRESSOR: False,
+           CompressorType.NATURAL_COMPRESSOR_FP64: False,
+           CompressorType.NATURAL_COMPRESSOR_FP32: False,
+           CompressorType.STANDARD_DITHERING_FP64: False,
+           CompressorType.STANDARD_DITHERING_FP32: False,
+           CompressorType.NATURAL_DITHERING_FP32: False,
+           CompressorType.NATURAL_DITHERING_FP64: False,
+           CompressorType.TOPK_COMPRESSOR: True,
+        }
     
     @property
     def compressorName(self):
@@ -43,6 +58,14 @@ class Compressor:
     @property
     def compressorType(self):
         return self.__compressorType
+
+    @property
+    def is_biased(self):
+        return self.__is_biased[self.compressorType]
+
+    @property
+    def is_unbiased(self):
+        return not self.is_biased
     
     @property
     def name(self):
@@ -50,6 +73,7 @@ class Compressor:
         if self.compressorType == CompressorType.IDENTICAL: return f"Identical"
         if self.compressorType == CompressorType.LAZY_COMPRESSOR: return f"Bernoulli(Lazy) [p={self.P:g},{omega}={self.getW():.1f}]"
         if self.compressorType == CompressorType.RANDK_COMPRESSOR: return f"Random-K (K={self.K}) compressor"
+        if self.compressorType == CompressorType.TOPK_COMPRESSOR: return f"Top-K (K={self.K}) compressor"
         if self.compressorType == CompressorType.NATURAL_COMPRESSOR_FP64: return f"Natural for fp64 [{omega}={self.getW():.1f}]"
         if self.compressorType == CompressorType.NATURAL_COMPRESSOR_FP32: return f"Natural for fp32 [{omega}={self.getW():.1f}]"
         if self.compressorType == CompressorType.STANDARD_DITHERING_FP64: return f"Standard Dithering for fp64[s={self.s}]"
@@ -65,6 +89,7 @@ class Compressor:
         if self.compressorType == CompressorType.IDENTICAL: return f"Identical"
         if self.compressorType == CompressorType.LAZY_COMPRESSOR: return f"Bernoulli(Lazy) [p={self.P:g},{omega}={self.getW():.1f}]"
         if self.compressorType == CompressorType.RANDK_COMPRESSOR: return f"Rand [K={self.K},D={self.D}]"
+        if self.compressorType == CompressorType.TOPK_COMPRESSOR: return f"Top [K={self.K},D={self.D}]"
         if self.compressorType == CompressorType.NATURAL_COMPRESSOR_FP64: return f"Natural for fp64 [{omega}={self.getW():.1f}]"
         if self.compressorType == CompressorType.NATURAL_COMPRESSOR_FP32: return f"Natural for fp32 [{omega}={self.getW():.1f}]"
         if self.compressorType == CompressorType.STANDARD_DITHERING_FP64: return f"Standard Dithering for fp64[s={self.s}]"
@@ -170,17 +195,26 @@ class Compressor:
         self.K = K
         self.w = self.D / self.K - 1.0
         self.resetStats()
+
+    # K - how much component we leave from input vector
+    # D - input vector dimension    
+    def makeTopKCompressor(self, K, D):
+        self.__compressorName = "TopKCompressor"
+        self.__compressorType = CompressorType.TOPK_COMPRESSOR
+        self.D = D
+        self.K = K
+        self.resetStats()
    
     def makeNaturalCompressorFP64(self):
         self.__compressorName = "NaturalCompressorFP64"
         self.__compressorType = CompressorType.NATURAL_COMPRESSOR_FP64
-        self.w = 1.0/8.0     
+        self.w = 1.0/8.0
         self.resetStats()
 
     def makeNaturalCompressorFP32(self):
         self.__compressorName = "NaturalCompressorFP32"
         self.__compressorType = CompressorType.NATURAL_COMPRESSOR_FP32
-        self.w = 1.0/8.0     
+        self.w = 1.0/8.0
         self.resetStats()
 
     def getW(self):
@@ -211,6 +245,10 @@ class Compressor:
             out = np.zeros_like(x)
             for i in S:
                 out[i] = self.D / self.K * x[i]
+            self.last_need_to_send_advance = self.K
+        elif self.compressorType == CompressorType.TOPK_COMPRESSOR:
+            out = x.copy()
+            out[np.argsort(out)[:-self.K]] = 0
             self.last_need_to_send_advance = self.K
         elif self.compressorType == CompressorType.NATURAL_COMPRESSOR_FP64 or self.compressorType == CompressorType.NATURAL_COMPRESSOR_FP32:
             out = np.zeros_like(x)
