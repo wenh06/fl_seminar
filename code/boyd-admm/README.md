@@ -2,9 +2,11 @@
 
 ## Requirements
 
-1. install `CVX` from [its official website](http://cvxr.com/cvx/download/)
+1. install [`Matlab kernel for Jupyter`](https://github.com/Calysto/matlab_kernel)
 
-2. install `L-BFGS-B` from [matlab file exchange](https://www.mathworks.com/matlabcentral/fileexchange/15061-matlab-interface-for-l-bfgs-b)
+2. install `CVX` from [its official website](http://cvxr.com/cvx/download/)
+
+3. install `L-BFGS-B` from [matlab file exchange](https://www.mathworks.com/matlabcentral/fileexchange/15061-matlab-interface-for-l-bfgs-b)
 
 most probably one has to add `#include <cstring>` in the file `matlabstring.cpp`, and modify the `Makefile`. For example in `Ubuntu20.04`,
 ```make
