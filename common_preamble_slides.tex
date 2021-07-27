@@ -226,12 +226,22 @@
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+% page number in the bottom navigation bar
 % https://tex.stackexchange.com/questions/137022/how-to-insert-page-number-in-beamer-navigation-symbols
-\addtobeamertemplate{navigation symbols}{}{%
-    \usebeamerfont{footline}%
-    \usebeamercolor[fg]{footline}%
-    \hspace{1em}%
-    \insertframenumber/\inserttotalframenumber
+% \addtobeamertemplate{navigation symbols}{}{%
+%     \usebeamerfont{footline}%
+%     \usebeamercolor[fg]{footline}%
+%     \hspace{1em}%
+%     \insertframenumber/\inserttotalframenumber
+% }
+
+% page number in the left side bar
+% https://tex.stackexchange.com/questions/332895/slide-number-in-the-sidebar-of-paloalto-theme-in-beamer
+\addtobeamertemplate{footline}
+{%
+   \usebeamercolor[fg]{author in sidebar}
+   \vskip-1cm\hskip10pt
+   {\bfseries\color{white}\fontsize{10pt}{10pt}\selectfont \insertframenumber\,/\,\inserttotalframenumber\kern1em\vskip2pt}
 }
 
 

@@ -20,6 +20,27 @@
 }
 \usepackage{transparent}
 
+\usepackage{listings}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{zkbackground},   
+    commentstyle=\color{green},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{gray},
+    stringstyle=\color{purple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=4
+}
+
 \begin{document}
 
 %----------------------------------------------------------------------------------------
@@ -51,6 +72,574 @@
 
 \begin{frame}
 \titlepage % Print the title page as the first slide
+\end{frame}
+%------------------------------------------------
+
+\begin{frame}
+% \frametitle{Overview} % Table of contents slide, comment this block out to remove it
+\tableofcontents % Throughout your presentation, if you choose to use \section{} and \subsection{} commands, these will automatically be printed on this slide as an overview of your presentation
+\end{frame}
+
+%------------------------------------------------
+
+%------------------------------------------------
+%	PRESENTATION SLIDES
+%------------------------------------------------
+
+
+% PPT version (read only share link): https://www.kdocs.cn/l/cigmbsd3uAI4
+
+
+%------------------------------------------------
+
+\section{引言}
+
+%------------------------------------------------
+% Page 1
+
+\begin{frame}
+\frametitle{引言}
+
+联邦学习（Federated Learning）来源于机器（深度）学习模型分布式（Distributed）训练的需求
+
+\begin{figure}
+    \centering
+    \includegraphics[width=\textwidth,keepaspectratio]{images/fl_overview.png}
+\end{figure}
+
+{\scriptsize
+图片来源：\cite{kairouz2019advances_fl} Kairouz et al., Advances and open problems in federated learning, 2019
+}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{引言}
+
+这种分布式训练的需求多是当多个数据拥有方想要联合他们各自的数据训练机器学习模型，由于涉及隐私和数据安全等法律问题，或是数据庞大且过于分散导致的可行性问题，而不能将数据集中到一起进行模型训练而产生的。随着越来越严格的数据隐私方面的法律法规的施行，这种需求会越来越大。
+
+\pause
+\vspace{0.8em}
+
+一般来说，在联邦学习的框架下，数据拥有方在不用给出己方数据的情况下，也可进行模型训练得到公共的模型$M_{fed}$，使得模型$M_{fed}$，与将数据集中到一起进行训练能得到的模型$M$，二者的预测值的偏差的期望能足够小。
+$$\expectation_{z\sim\mathcal{D}} \lVert M_{fed}(z) - M(z) \rVert \leqslant \delta$$
+
+\vspace{0.5em}
+
+{\footnotesize 注：以下将数据拥有方统称为``节点''}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{联邦学习的定义}
+
+综述文章\cite{kairouz2019advances_fl} Advances and open problems in federated learning (2019)给联邦学习下过如下的定义
+
+\vspace{0.8em}
+
+\begin{quote}
+    ``Federated learning is a machine learning setting where multiple entities (clients) collaborate in solving a machine learning problem, under the coordination of a central server or service provider. Each client's raw data is stored locally and not exchanged or transferred; instead, focused updates intended for immediate aggregation are used to achieve the learning objective.''
+\end{quote}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{联邦学习研究的一些核心的问题}
+
+\begin{itemize}
+    \item {\Large\bfseries EE (Efficiency \& Effectiveness)}
+    \begin{itemize}
+        \item[$\bullet$] {\large\bfseries Optimization}
+        \vspace{0.5em}
+        \pause
+        {\pgfsetfillopacity{0.4} \footnotesize
+        \item[$\bullet$] Compression
+        }
+    \end{itemize}
+    \vspace{1em}
+    {\pgfsetfillopacity{0.4} \footnotesize
+    \item Privacy \& Security
+    \begin{itemize}
+        \item[$\bullet$] Differential Privacy (DP)
+        \item[$\bullet$] Secure Multi-Party Computing (SMPC)
+        \item[$\bullet$] Trusted Execution Environment (TEE)
+        \item[$\bullet$] Homomorphic Encryption (HE)
+    \end{itemize}
+    \item Applications
+    \begin{itemize}
+        \item[$\bullet$] Medical
+        \item[$\bullet$] Recommendation
+        \item[$\bullet$] Finance
+    \end{itemize}
+    \item etc.
+    }
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------
+
+\section[联邦学习中的优化]{联邦学习中的优化问题与算法}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{问题描述}
+
+一般来说，联邦学习中我们考虑的是如下的优化问题
+\begin{align*}
+    & \text{minimize} \quad f(x) = \expectation\limits_{i \sim {\mathcal{P}}} [f_i(x)] \\
+    & \text{where} \quad f_i(x) = \expectation\limits_{z \sim \mathcal{D}_i} [\ell_i(x; z)]
+\end{align*}
+这里的$\mathcal{P}$为节点的分布，$\mathcal{D}_i$为节点$i$上 的数据分布，$\ell_i$为损失函数。
+
+\pause
+\vspace{1em}
+
+或者更简单地，考虑如下的优化问题
+\begin{align*}
+    & \text{minimize} \quad f(x) = \dfrac{1}{N} \sum\limits_{i=1}^N f_i(x)
+\end{align*}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{问题描述}
+
+要注意的是，联邦学习中的``节点''（数据拥有方）意义比较宽泛，涵盖很多场景，例如
+\begin{itemize}
+    \item 多家医院的服务器
+    % 这种情况下，数据来源（分布）可能是相同的（例如都是ImageNet），但是partition是固定的，需要区别于 datacenter 的情况
+    \item 多个移动设备（edge device）
+    % 这种情况下，数据来源一般是不同的
+\end{itemize}
+
+\pause
+\vspace{1.5em}
+
+前者一般被称作cross-silo，后者一般被称作cross-device。在cross-device的场景下，一般来说，通信效率才是整个系统的瓶颈所在，此外还需要考虑掉队者（stragglers）等问题。
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{数据分布}
+
+在真实场景下，各个节点上的数据的分布$\mathcal{D}_i$一般不是独立同分布的（non-IID, 或称heterogeneous）。这种数据分布的各向异性将联邦学习分为了3类
+
+\begin{itemize}
+    \item 横向联邦学习：各节点的样本重叠度{\color{red} 低}，样本特征重叠度{\color{green} 高}
+    \item 纵向联邦学习：各节点的样本重叠度{\color{green} 高}，样本特征重叠度{\color{red} 低}
+    \item 迁移联邦学习：各节点的样本重叠度{\color{red} 低}，样本特征重叠度{\color{red} 低}
+\end{itemize}
+
+同一种算法（例如SVM）在不同类型的联邦学习模式下，对应的优化问题的具体形式会稍有不同。
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{数据分布}
+
+% 从左到右依次是横向联邦学习，纵向联邦学习，迁移联邦学习
+\begin{columns}
+
+\begin{column}{0.26\textwidth}
+\begin{figure}
+\begin{tikzpicture}
+\draw (0,0) rectangle (2.8,4.5);
+\node at (1.25,5.5) {横向联邦学习};
+\draw[fill=pink] (0,0) rectangle (2.5,1.1) node[pos=.5] {client $i$};
+\draw[fill=green] (0.2,3.3) rectangle (2.8,4.5) node[pos=.5] {client $j$};
+\draw[fill=yellow] (0.3,0.9) rectangle (2.7,3.6) node[pos=.4] {client $k$};
+% \draw[->] (0,-0.4) edge (10, -0.4);
+\node at (1.35,-0.4) {特征维度};
+\end{tikzpicture}
+\end{figure}
+\end{column}
+
+\begin{column}{0.26\textwidth}
+\begin{figure}
+\begin{tikzpicture}
+\draw (0,0) rectangle (2.8,4.5);
+\node at (1.25,5.5) {纵向联邦学习};
+\draw[fill=pink] (0,0) rectangle (1.1,4.2) node[pos=.5,rotate=-90] {client $i$};
+\draw[fill=green] (1.4,0) rectangle (2.8,4.5) node[pos=.5,rotate=-90] {client $j$};
+\draw[fill=yellow] (0.9,0.3) rectangle (1.5,4.4) node[pos=.4,rotate=-90] {client $k$};
+\node at (1.35,-0.4) {特征维度};
+\end{tikzpicture}
+\end{figure}
+\end{column}
+
+\begin{column}{0.26\textwidth}
+\begin{figure}
+\begin{tikzpicture}
+\draw (0,0) rectangle (2.8,4.5);
+\node at (1.25,5.5) {迁移联邦学习};
+\draw[fill=pink] (0,0) rectangle (0.9,1.6) node[pos=.5] {client $i$};
+\draw[fill=green] (1.5,3.8) rectangle (2.8,4.5) node[pos=.5] {client $j$};
+\draw[fill=yellow] (0.6,1.3) rectangle (1.7,3.9) node[pos=.4] {client $k$};
+\node at (1.35,-0.4) {特征维度};
+\end{tikzpicture}
+\end{figure}
+\end{column}
+
+\begin{column}{0.13\textwidth}
+\begin{figure}
+\begin{tikzpicture}
+% \coordinate (sample_node) at (0,0);
+% \node[text width=1, left=0.5cm of sample_node.west] at () {样本维度};
+\node[text width=12pt] () {样本维度};
+\end{tikzpicture}
+\end{figure}
+\end{column}
+
+\end{columns}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{数据分布}
+
+non-IID数据分布下，算法的收敛性分析相比IID数据下要更加困难，需要更多额外的假设，对节点之间的数据分布的不同性（dissimilarity）进行定量上的限制。
+
+\vspace{1.5em}
+
+一般地，这种限制以gradient variance给出，例如bounded inter-client gradient variance (BCGV)：
+$$\expectation\limits_{i \sim {\mathcal{P}}} \lVert \nabla f_i(x) - \nabla f(x) \rVert_2^2 \leqslant \text{const} \quad \text{ for all } x$$
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{联邦学习的一般性框架（流程）}
+
+\begin{itemize}
+    \item client selection
+    \vspace{0.3em}
+    \item {\color{red}parameter} broadcast
+    \vspace{0.3em}
+    \item {\large \bfseries client computation (local parameter update)}
+    \vspace{0.3em}
+    \item {\color{red}parameter} aggregation
+    \vspace{0.3em}
+    \item {\large \bfseries server computation (global parameter update)}
+\end{itemize}
+
+\vspace{0.6em}
+有人\cite{zhang2020fedpd}把以上称为所谓的``computation then aggregation'' (CTA) protocol
+
+\blfootnote{\tiny \cite{zhang2020fedpd} \bibentry{zhang2020fedpd}}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+% reference: FLOW - Adaptive Federated Optimization
+
+\begin{frame}
+\frametitle{联邦学习的一般性框架（流程）}
+
+Broadcast and local update:
+
+\vspace{2em}
+
+\begin{figure}
+\centering
+\begin{tikzpicture}[]
+\node[] (slide-center) {};
+\node[client, above=3em of slide-center] (server) {server $x$};
+\node[client, below left = 1.5cm and 3.5cm of server.south] (client-1) {client $x_1$};
+\node[client, right = 0.4cm of client-1.east] (client-2) {client $x_2$};
+\node[client, right = 0.4cm of client-2.east] (client-3) {client $x_3$};
+\node[client missing, right = 0.1cm of client-3.east] (client-missing) {};
+\node[client, right = 0.1cm of client-missing.east] (client-n) {client $x_n$};
+\path[->] ([xshift=-0.5cm,yshift=-0.1cm]server.south) edge ([yshift=0.15cm]client-1.north);
+\path[->] ([xshift=-0.2cm,yshift=-0.1cm]server.south) edge ([yshift=0.15cm]client-2.north);
+\path[->] ([xshift=0.05cm,yshift=-0.1cm]server.south) edge ([yshift=0.15cm]client-3.north);
+\path[->] ([xshift=0.4cm,yshift=-0.1cm]server.south) edge ([yshift=0.15cm]client-n.north);
+\node[text width=1.2cm, align=center, right=0.3cm of client-n.east] (local-update) {local update};
+\node[text width=1.8cm, align=center, above left=0.5cm and 0.3cm of local-update.north] () {params broadcast};
+\end{tikzpicture}
+\end{figure}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+% reference: FLOW - Adaptive Federated Optimization
+
+\begin{frame}
+\frametitle{联邦学习的一般性框架（流程）}
+
+Aggregate and global update:
+
+\vspace{2em}
+
+\begin{figure}
+\centering
+\begin{tikzpicture}[]
+\node[] (slide-center) {};
+\node[client, above=3em of slide-center] (server) {server $x$};
+\node[client, below left = 1.5cm and 3.5cm of server.south] (client-1) {client $x_1$};
+\node[client, right = 0.4cm of client-1.east] (client-2) {client $x_2$};
+\node[client, right = 0.4cm of client-2.east] (client-3) {client $x_3$};
+\node[client missing, right = 0.1cm of client-3.east] (client-missing) {};
+\node[client, right = 0.1cm of client-missing.east] (client-n) {client $x_n$};
+\path[->] ([yshift=0.15cm]client-1.north) edge ([xshift=-0.5cm,yshift=-0.1cm]server.south);
+\path[->] ([yshift=0.15cm]client-2.north) edge ([xshift=-0.2cm,yshift=-0.1cm]server.south);
+\path[->] ([yshift=0.15cm]client-3.north) edge ([xshift=0.05cm,yshift=-0.1cm]server.south);
+\path[->] ([yshift=0.15cm]client-n.north) edge ([xshift=0.4cm,yshift=-0.1cm]server.south);
+\node[text width=1.2cm, align=center, right=0.3cm of server.east] (global-update) {global update};
+\node[text width=1.8cm, align=center, below right=0.25cm and 0.3cm of global-update.south] () {aggregation};
+\end{tikzpicture}
+\end{figure}
+
+\end{frame}
+
+%------------------------------------------------
+
+\section{FedOpt}  % gradient based methods
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{从FedAvg到FedOpt}
+
+Google研究人员McMahan等人在文章\cite{mcmahan2017fed_avg}(2016)中考察了普通的SGD在分布式下的平凡推广FedSGD，即在每次循环中，节点执行一次full-batch gradient descent，并做出了进一步推广，提出了FedAvg算法。FedAvg的具体做法就是在每次循环的client local computation中，执行多步mini-batch SGD。这样，既降低了通信开销（communication-efficient），同时也在实验上观察到了模型效果的提升。
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{从FedAvg到FedOpt}
+
+\begin{algorithm}[H]
+\SetAlgoNoLine
+\DontPrintSemicolon
+{\bfseries Server executes:}\;
+\Indp initialize parameters $x_0$, learning rate $\eta$, batch size $B$;
+\For{each round $t = 0, 1, \cdots, T-1$}{
+    $S_t \gets$ (random set of clients)\;
+    \For{each client $i \in \mathcal{S}_t$ {\bfseries in parallel}}{
+        $x_{i,t} \gets$ {\bfseries ClientUpdate}$(i, x_t)$\;
+        }
+    $x_{t+1} \gets \frac{1}{|\mathcal{S}_t|}\sum_{i\in \mathcal{S}_t} x_{i,t}$\;
+}
+\Indm
+\vspace{0.2em}
+{\bfseries ClientUpdate}$(i, x)$: // on client $i$\;
+\Indp $\mathcal{B} \gets$ (split $\mathcal{P}_i$ into batches of size $B$)\;
+\For{local step $k=0,1\cdots,K-1$}{
+    \For{batch $b \in \mathcal{B}$}{
+        $x \gets x-\eta\nabla \ell_i(x;b)$\;
+    }
+}
+return $x$\;
+\caption{FedAvg}
+\end{algorithm}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{FedSGD -- baseline}
+
+FedSGD: 在每个节点执行一次full-batch GD之后，即进行模型同步（平均）。
+
+\begin{figure}
+\centering
+\begin{tikzpicture}[]
+\node[] (slide-center) {};
+\node[left=9cm of slide-center] (x_t) {$x_t$};
+\node[above right = 1.5cm and 0.6cm of x_t] (x_1_0) {$x_{1,t}^0$};
+\node[below = 0.6cm of x_1_0] (x_2_0) {$x_{2,t}^0$};
+\node[below = 0.4cm of x_2_0] (missing) {$\vdots$};
+\node[below = 0.4cm of missing] (x_n_0) {$x_{n,t}^0$};
+\foreach \m in {1,2,n}
+{
+    \path[->,brown] (x_t) edge (x_\m_0);
+}
+
+\foreach \m in {1,2,n}
+{
+    \node[right = 0.6cm of x_\m_0] (x_\m_1) {$x_{\m,t}^1$};
+    \path[->] (x_\m_0) edge (x_\m_1);
+}
+\node[below right = 1.5cm and 0.6cm of x_1_1] (x_t_1) {$x_{t+1}$};
+\foreach \m in {1,2,n}
+{
+    \path[->,green] (x_\m_1) edge (x_t_1);
+}
+\draw[dashed,red,thick] ([xshift=-0.7cm,yshift=0.1cm]x_1_0.north) rectangle ([xshift=0.7cm,yshift=-0.1cm]x_n_1.south);
+\node[below right=0.3cm and -0.5cm of x_n_0.south] () {ONE local GD};
+
+\node[above right = 1.5cm and 0.6cm of x_t_1] (x_11_0) {$x_{1,t+1}^0$};
+\node[below = 0.6cm of x_11_0] (x_12_0) {$x_{2,t+1}^0$};
+\node[below = 0.4cm of x_12_0] (missing1) {$\vdots$};
+\node[below = 0.4cm of missing1] (x_1n_0) {$x_{n,t+1}^0$};
+\foreach \m in {1,2,n}
+{
+    \path[->,brown] (x_t_1) edge (x_1\m_0);
+}
+
+\foreach \m in {1,2,n}
+{
+    \node[right = 0.6cm of x_1\m_0] (x_1\m_1) {$x_{\m,t+1}^1$};
+    \path[->] (x_1\m_0) edge (x_1\m_1);
+}
+\node[below right = 1.5cm and 0.6cm of x_11_1] (x_t_2) {$x_{t+2}$};
+\foreach \m in {1,2,n}
+{
+    \path[->,green] (x_1\m_1) edge (x_t_2);
+}
+\draw[dashed,red,thick] ([xshift=-0.8cm,yshift=0.1cm]x_11_0.north) rectangle ([xshift=0.8cm,yshift=-0.1cm]x_1n_1.south);
+\node[below right=0.3cm and -0.5cm of x_1n_0.south] () {ONE local GD};
+\end{tikzpicture}
+\end{figure}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{FedAvg}
+
+FedAvg: 每个节点执行$K$个mini-batch SGD之后，进行模型同步（平均）。在通信量大大降低的情况下，模型效果也得到了一定提升。
+
+\begin{figure}
+\centering
+\begin{tikzpicture}[]
+\node[] (slide-center) {};
+\node[left=9cm of slide-center] (x_t) {$x_t$};
+\node[above right = 1.5cm and 0.8cm of x_t] (x_1_0) {$x_{1,t}^0$};
+\node[below = 0.6cm of x_1_0] (x_2_0) {$x_{2,t}^0$};
+\node[below = 0.4cm of x_2_0] (missing) {$\vdots$};
+\node[below = 0.4cm of missing] (x_n_0) {$x_{n,t}^0$};
+\foreach \m in {1,2,n}
+{
+    \path[->,brown] (x_t) edge (x_\m_0);
+}
+
+\foreach \m in {1,2,n}
+{
+    \node[right = 0.8cm of x_\m_0] (x_\m_1) {$x_{\m,t}^1$};
+    \path[->] (x_\m_0) edge (x_\m_1);
+}
+\foreach \m in {1,2,n}
+{
+    \node[right = 0.8cm of x_\m_1] (x_\m_2) {$x_{\m,t}^2$};
+    \path[->] (x_\m_1) edge (x_\m_2);
+}
+\foreach \m in {1,2,n}
+{
+    \node[right = 0.5cm of x_\m_2] (missing_\m) {$\cdots$};
+    \path[->] (x_\m_2) edge (missing_\m);
+}
+\foreach \m in {1,2,n}
+{
+    \node[right = 0.5cm of missing_\m] (x_\m_K) {$x_{\m,t}^K$};
+    \path[->] (missing_\m) edge (x_\m_K);
+}
+\node[below right = 1.5cm and 0.8cm of x_1_K] (x_t_1) {$x_{t+1}$};
+\foreach \m in {1,2,n}
+{
+    \path[->,green] (x_\m_K) edge (x_t_1);
+}
+\draw[dashed,red,thick] ([xshift=-0.7cm,yshift=0.1cm]x_1_0.north) rectangle ([xshift=0.8cm,yshift=-0.1cm]x_n_K.south);
+\node[below=0.3cm of x_n_2] () {$K$ local mini-batch SGD};
+\end{tikzpicture}
+\end{figure}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{FedOpt}
+
+\begin{algorithm}[H]
+\SetAlgoNoLine
+\DontPrintSemicolon
+\SetKwInOut{Input}{Input}
+\Input{parameters $x_0$, methods {\bfseries ServerOpt, ClientOpt}, learning rate (schedule) $\eta_g, \eta_l$}
+\For{each round $t = 0, 1, \cdots, T-1$}{
+    $S_t \gets$ (random set of clients)\;
+    $x_{i,t}^0 \gets x_t$\;
+    \For{each client $i \in S_t$ {\bfseries in parallel}}{
+        \For{local step $k=0,1,\cdots,K-1$}{
+            Compute unbiased estimate $g^k_{i,t}$ of $\nabla f_i(x_{i,t}^{k})$
+            $x_{i,t}^{k+1} \gets$ {\bfseries ClientOpt}$(x_{i,t}^{k}, g^k_{i,t}, \eta_l, t)$\;
+        }
+        $\Delta_{i,t} \gets x_{i,t}^{K} - x_t$
+    }
+    $\Delta_{t} \gets \operatorname{aggregate}(\{\Delta_{i,t}\}_{i\in\mathcal{S}_t}) \quad (\text{e.g.} \frac{1}{|\mathcal{S}_t|} \sum_{i\in\mathcal{S}_t} \Delta_{i,t})$\;
+    $x_{t+1} \gets$ {\bfseries ServerOpt}$(x_{t}, \Delta_{t}, \eta_g, t)$\;
+}
+\caption{FedOpt}
+\end{algorithm}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{FedOpt}
+
+一般来说，
+\vspace{0.8em}
+
+\begin{itemize}
+    \item unbiased gradient estimate + {\bfseries ClientOpt}:
+    \begin{align*}
+        & \text{(local) mini-batch SGD, \phantom{aaaaaaa}} \\
+        & \text{i.e. } x_{i,t}^{k+1} = x_{i,t}^{k} - \eta_l g^k_{i,t}
+    \end{align*}
+    \item {\bfseries ServerOpt}:
+    \begin{align*}
+        & \text{Avg, \framebox{Adagrad, Yogi, Adam}, etc.}
+    \end{align*}
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+
 \end{frame}
 
 %------------------------------------------------
