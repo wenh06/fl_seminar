@@ -85,25 +85,32 @@ This is the common practice for acceleration of ordinary (non-distributed) model
 
 One extreme case of compression is to take the {\color{red}sign} of each coordinate of the stochastic gradient vector, which makes it binary (1-bit, $\pm 1$) or ternary ($\{-1, 0, +1\}$).
 
-\vspace{0.8em}
+\vspace{0.4em}
 
 \begin{columns}
-\begin{column}{0.48\textwidth}
+\begin{column}{0.44\textwidth}
 \begin{figure}
     \centering
     \includegraphics[width=1\textwidth,keepaspectratio]{images/terngrad.png}
 \end{figure}
 \end{column}
-\begin{column}{0.48\textwidth}
-$\widetilde{g}_t^{(i)}$ is the {\color{red}ternarized} gradient given by
+\begin{column}{0.52\textwidth}
+$\widetilde{g}_t^{(i)}$ is the {\color{red}ternarized} gradient
 $$g_t^{(i)} = \lVert g_t^{(i)} \rVert_{\infty} \cdot \operatorname{sign}(g_t^{(i)}) \odot \framebox{\color{red} $b_t$}$$
 where $b_t$ is a random binary vector satisfying some Bernoulli distribution $Be(\lvert g_{t,k}^{(i)} \rvert / s_t)$
 \end{column}
 \end{columns}
 
-\vspace{0.8em}
+\vspace{0.4em}
 
 Similar algorithms include 1-bit SGD \cite{seide2014_1bitsgd}, signSGD \cite{bernstein2018signsgd}
+
+\blfootnote{
+\tiny\cite{seide2014_1bitsgd} \bibentry{seide2014_1bitsgd}
+}
+\blfootnote{
+\tiny\cite{bernstein2018signsgd} \bibentry{bernstein2018signsgd}
+}
 
 \end{frame}
 
@@ -123,6 +130,13 @@ where the $i$-th element in vector $\xi(v,s)$ is defined by
     \end{cases}
 \end{equation*}
 $s$ controls the number of quantization levels, and $\ell$ ({\color{red} should be $\ell_i$?}) be s.t. $|v_i|/\lVert v \rVert_2 \in [\ell/s, (\ell+1)/s]$.
+
+\blfootnote{
+\tiny\cite{alistarh2017qsgd} \bibentry{alistarh2017qsgd}
+}
+\blfootnote{
+\tiny\cite{khirirat2018dcgd} \bibentry{khirirat2018dcgd}
+}
 
 \end{frame}
 
@@ -148,6 +162,10 @@ And perhaps with more useful properties like
     \item sparsity: $\expectation [\lVert Q(v) \rVert_0] \leqslant$ const
     \item sign preserving: $Q(v)_i \cdot v_i \geqslant 0$
 \end{itemize}
+
+\blfootnote{
+\tiny\cite{khirirat2018dcgd} \bibentry{khirirat2018dcgd}
+}
 
 \end{frame}
 
@@ -180,6 +198,10 @@ and $\ell_i$ be s.t. $|v_i|/\lVert v \rVert_2 \in [\ell_i/s, (\ell_i+1)/s]$
 \end{block}
 }
 
+\blfootnote{
+\tiny\cite{lizhize2020adiana} \bibentry{lizhize2020adiana}
+}
+
 \end{frame}
 
 %------------------------------------------------
@@ -210,7 +232,7 @@ or \href{https://github.com/wenh06/fl_seminar/blob/master/code/compressors_test.
 \begin{frame}
 \frametitle{(A)DIANA}
 
-The main contribution of (A)DIANA \cite{mishchenko2019diana,lizhize2020adiana} is that, instead of quantizing the gradients, the {\color{red} difference of gradient updates}, i.e. instead of
+The main contribution of (A)DIANA \cite{lizhize2020adiana,mishchenko2019diana} is that, instead of quantizing the gradients, the {\color{red} difference of gradient updates}, i.e. instead of
 $$\widetilde{g}^{(i)}_t = Q(g^{(i)}_t) = Q(\nabla f_i(x_t))$$
 one performs
 \begin{equation*}
@@ -221,6 +243,13 @@ one performs
 \end{equation*}
 
 $h^{(i)}$ are ``memory'' maintained locally, whose average is maintained in the central server.
+
+\blfootnote{
+\tiny\cite{lizhize2020adiana} \bibentry{lizhize2020adiana}
+}
+\blfootnote{
+\tiny\cite{mishchenko2019diana} \bibentry{mishchenko2019diana}
+}
 
 \end{frame}
 
@@ -238,8 +267,8 @@ Another key point (feature) of (A)DIANA is the combination with acceleration (an
     \includegraphics[width=0.9\textwidth,keepaspectratio]{images/diana.png}
 \end{figure}
 
-{\footnotesize Note the ``Quant'' operator is a so-called ``block-quantizer'' or ``bucket-quantizer''\cite{alistarh2017qsgd}}
-}
+{\footnotesize Note the ``Quant'' operator is a so-called ``block-quantizer'' or ``bucket-quantizer''\cite{alistarh2017qsgd} {\tiny \bibentry{alistarh2017qsgd}}
+}}
 \only<2>{
 \begin{figure}
     \centering
@@ -272,13 +301,16 @@ by
 \end{equation*}
 for some small $p$.
 
-\pause
-\vspace{0.6em}
-
+\uncover<2->{
 As claimed by the authors, their intuition come from the rare (?) phenomenon in stochastic optimization that
 \begin{quote}
 `` the bias of the stochastic gradient helps to achieve better complexity''
 \end{quote}
+}
+
+\blfootnote{
+\tiny\cite{gorbunov2021marina} \bibentry{gorbunov2021marina}
+}
 
 \end{frame}
 
