@@ -431,7 +431,10 @@ Aggregate and global update:
 \begin{frame}
 \frametitle{从FedAvg到FedOpt}
 
-Google研究人员McMahan等人在文章\cite{mcmahan2017fed_avg}(2016)中考察了普通的SGD在分布式下的平凡推广FedSGD，即在每次循环中，节点执行一次full-batch gradient descent，并做出了进一步推广，提出了FedAvg算法。FedAvg的具体做法就是在每次循环的client local computation中，执行多步mini-batch SGD。这样，既降低了通信开销（communication-efficient），同时也在实验上观察到了模型效果的提升。
+Google研究人员McMahan等人在文章\cite{mcmahan2017fed_avg}中考察了普通的SGD在分布式下的平凡推广FedSGD，即在每次循环中，节点执行一次full-batch gradient descent，并做出了进一步推广，提出了FedAvg算法。FedAvg的具体做法就是在每次循环的client local computation中，执行多步mini-batch SGD。这样，既降低了通信开销（communication-efficient），同时也在实验上观察到了模型效果的提升。随后，McMahan等人进一步在文章\cite{reddi2020fed_opt}中，将Adam等自适应、加速算法融入联邦学习中，提出了更一般的FedOpt框架。
+
+\blfootnote{\tiny \cite{mcmahan2017fed_avg}\bibentry{mcmahan2017fed_avg}}
+\blfootnote{\tiny \cite{reddi2020fed_opt}\bibentry{reddi2020fed_opt}}
 
 \end{frame}
 
@@ -639,6 +642,482 @@ FedAvg: 每个节点执行$K$个mini-batch SGD之后，进行模型同步（平�
 % Page 15
 
 \begin{frame}
+\frametitle{FedOpt}
+
+\begin{algorithm}[H]
+\SetAlgoNoLine
+\DontPrintSemicolon
+\SetKwInOut{Input}{Input}
+% \Input{$x_0, v_{-1},\Delta_{-1}, decay params $\beta_1,\beta_2\in [0,1)$$ }  % v_{-1},\Delta_{-1} 还要满足一些条件
+\For{each round $t = 0, 1, \cdots, T-1$}{
+    $S_t \gets$ (random set of clients), \quad $x_{i,t}^0 \gets x_t$\;
+    \For{each client $i \in S_t$ {\bfseries in parallel}}{
+        \For{local step $k=0,1,\cdots,K-1$}{
+            Compute unbiased estimate $g^k_{i,t}$ of $\nabla f_i(x_{i,t}^{k})$
+            $x_{i,t}^{k+1} \gets x_{i,t}^{k} - \eta_l g^k_{i,t}$\;
+        }
+        $\Delta_{i,t} \gets x_{i,t}^{K} - x_t$
+    }
+    \colorbox{pink}{$\Delta_{t} \gets \beta_1 \Delta_{t-1} + ((1-\beta_1)/|\mathcal{S}_t|) \sum_{i\in\mathcal{S}_t} \Delta_{i,t}$}\;
+    \colorbox{green}{$v_t \gets v_{t-1} + \Delta_t^2$ ({\bfseries FedAdagrad})}\;
+    % \colorbox{green}{$v_t \gets v_{t-1} - (1-\beta_2)\Delta_t^2\operatorname{sign}(v_{t-1}-\Delta_t^2)$ (FedYogi)}\;
+    \colorbox{yellow}{$v_t \gets \beta_2 v_{t-1} + (1-\beta_2)\Delta_t^2$ ({\bfseries FedAdam})}\;
+    $x_{t+1} \gets x_t + \eta_g \Delta_t / (\sqrt{v_t}+\tau)$\;
+}
+\caption{\colorbox{green}{FedAdagrad}, \colorbox{yellow}{FedAdam}}
+\end{algorithm}
+
+\end{frame}
+
+%------------------------------------------------
+
+\section{Personalization}
+
+%------------------------------------------------
+
+\begin{frame}
+\frametitle{Personalization for FL}
+
+{\bfseries What is model personalization for FL}
+
+\vspace{0.2em}
+
+\noindent --- different models (parameters) for different clients
+
+\pause
+\vspace{0.6em}
+
+{\bfseries When does one need personalization?}
+
+\vspace{0.2em}
+
+\noindent --- When data across clients are ``enough'' non-IID and clients do not generally have enough training data, which is more realistic.
+
+\pause
+\vspace{0.6em}
+
+{\bfseries Means of personalization:}
+\begin{itemize}
+    \item Federated Multi-Task Learning (+ regularization / proximal term), e.g. \cite{smith2017mocha}
+    \item Model-Agnostic Meta Learning, e.g. \cite{finn2017maml}
+    \item Local Fine-tuning.
+    \item etc.
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------
+
+\subsection[MAML]{Model-Agnostic Meta Learning}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Model-Agnostic Meta Learning}
+
+\begin{quote}
+    ``The goal of meta-learning is to train a model on a {\bfseries variety of {\color{red} learning tasks}}, such that it can solve new learning tasks using only a small number of training samples.'' \hfill -- \cite{finn2017maml}
+\end{quote}
+
+\vspace{0.6em}
+
+i.e. over a distribution of learning tasks $p(\mathcal{T})$, where
+$$\mathcal{T} = \{ \mathcal{L}(\{(x_t,a_t)\}), q(x_1), q(x_{t+1}|x_t, a_t), H \}$$
+with
+\begin{align*}
+    & (x_t,a_t): & \text{data points} \\
+    & \mathcal{L}: & \text{loss function} \\
+    & q(x_1): & \text{initial distribution} \\
+    & q(x_{t+1}|x_t, a_t): & \text{transition} \\
+    & H: & \text{episode length}
+\end{align*}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Model-Agnostic Meta Learning -- Intuition}
+
+\begin{block}{Intuition of MAML}
+Some internal representations are more transferrable than others. MAML should encourage the emergence of such general-purpose representations via searching for model parameters that are sensitive to changes in the task.
+\end{block}
+
+\begin{figure}
+    \centering
+    \includegraphics[keepaspectratio,width=.65\textwidth]{images/maml.png}
+\end{figure}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Model-Agnostic Meta Learning -- Formulation}
+
+Mathematically, MAML can be formulated as a (bi-level?) optimization problem
+\begin{align*}
+    & \text{minimize} \quad \sum\limits_{\mathcal{T}_i\sim p(\mathcal{T})} \mathcal{L}_{\mathcal{T}_i} (f_{\theta_i'}) \\
+    & \text{where} \quad \theta_i' = \theta - \alpha \nabla_{\theta} \mathcal{L}_{\mathcal{T}_i}(f_{\theta})
+\end{align*}
+
+\begin{figure}
+    \centering
+    \includegraphics[keepaspectratio,width=.65\textwidth]{images/maml.png}
+\end{figure}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Model-Agnostic Meta Learning -- Algorithm}
+
+\begin{algorithm}[H]
+\SetAlgoNoLine
+\DontPrintSemicolon
+{\bfseries Require:} $p(\mathcal{T})$ distribution over tasks\;
+{\bfseries Require:} $\alpha, \beta$ step size hyper-params\;
+randomly initialize model params $\theta$\;
+\While{not done}{
+    Sample batch of tasks $\mathcal{T}_i \sim p(\mathcal{T})$\;
+    \For{all $\mathcal{T}_i$}{
+        Evaluate $\nabla_{\theta} \mathcal{L}_{\mathcal{T}_i}(f_{\theta})$ w.r.t. $K$ samples\;
+        Compute adapted parameters with gradient descent $\theta'_i = \theta - \alpha \nabla_{\theta} \mathcal{L}_{\mathcal{T}_i}(f_{\theta})$\;
+    }
+    Update \colorbox{pink}{$\theta \leftarrow \theta - \beta \nabla_{\theta} \sum\limits_{\mathcal{T}_i\sim p(\mathcal{T})} \mathcal{L}_{\mathcal{T}_i} (f_{\theta_i'})$} (gradient through gradients, instead of ``naive'' averaging)\;
+}
+\caption{MAML\cite{finn2017maml}}
+\end{algorithm}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Model-Agnostic Meta Learning -- Applications}
+
+In deep learning, a very commonly used architecture is as follows:
+$$\text{input} \to \framebox{CNN (encoder)} ( \to \text{attn}) \to \text{task specific module}$$
+
+tasks can be one or more of
+\begin{itemize}
+    \item classification (global pooling + linear)
+    \item sequence labelling (linear)
+    \item segmentation (upsample)
+    \item object detection
+    \item etc.
+\end{itemize}
+or many sub-tasks of the above (current main concern for meta-learning).
+
+MAML forces the feature extractor (or called encoder, etc.) to capture general-purpose internal representations (features).
+
+\end{frame}
+
+%------------------------------------------------
+
+\subsection[FMTL]{Federated Multi-Task Learning}
+
+%------------------------------------------------
+% Page 15
+
+% \begin{frame}
+% \frametitle{Personalization for FL}
+
+% \begin{itemize}
+%     \item Mixture of global and local \cite{hanzely2020federated}:
+%     $$\text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + \dfrac{\lambda}{2} \sum\limits_{i=1}^N \lVert x_i - {\color{red} \overline{x}} \rVert^2$$
+%     \item pFedMe (bi-level) \cite{t2020pfedme} (and similarly EASGD\cite{zhang2015easgd}):
+%     \begin{align*}
+%         & \text{minimize} \quad \sum\limits_{i=1}^N F_i(x), \\
+%         & \text{where} \quad F_i(x) = \min \left\{ f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i - {\color{red} x}\rVert^2 \right\}
+%     \end{align*}
+%     \item FedU \cite{dinh2021fedu}:
+%     $$\text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + \dfrac{\lambda}{2} \sum\limits_{i=1}^N {\color{red} \sum\limits_{j\in\mathcal{N}_i}} \lVert x_i - {\color{red} x_j} \rVert^2$$
+% \end{itemize}
+
+% \end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Federated Multi-Task Learning}
+
+\begin{itemize}
+    \item pFedMe (bi-level) \cite{t2020pfedme} (and similarly EASGD\cite{zhang2015easgd}):
+    \begin{align*}
+        & \text{minimize} \quad \sum\limits_{i=1}^N F_i(x), \\
+        & \text{where} \quad F_i(x) = \min \left\{ f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i - {\color{red} x}\rVert^2 \right\}
+    \end{align*}
+    \pgfsetfillopacity{0.4}
+    \item FedU \cite{dinh2021fedu}:
+    $$\text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + \dfrac{\lambda}{2} \sum\limits_{i=1}^N {\color{red} \sum\limits_{j\in\mathcal{N}_i}} \lVert x_i - {\color{red} x_j} \rVert^2$$
+\end{itemize}
+
+\blfootnote{\tiny \cite{t2020pfedme}\bibentry{t2020pfedme}}
+\blfootnote{\tiny \cite{zhang2015easgd}\bibentry{zhang2015easgd}}
+\blfootnote{\tiny \cite{dinh2021fedu}\bibentry{dinh2021fedu}}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{pFedMe -- Formulation}
+
+pFedMe (Personalized Federated Learning with Moreau Envelopes (or proximity operator)) is formulated as the following bi-level optimization problem in \cite{t2020pfedme}
+
+\begin{align*}
+    & \text{minimize} \quad \sum\limits_{i=1}^N F_i(x), \\
+    & \text{where} \quad F_i(x) = \min \left\{ f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i - x \rVert^2 \right\}
+\end{align*}
+which is equivalent to (as in \cite{zhang2015easgd})
+\begin{align*}
+    & \text{minimize} \quad \sum\limits_{i=1}^N \left( f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i - x \rVert^2 \right)
+\end{align*}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{pFedMe -- Algorithm}
+
+\begin{algorithm}[H]
+\SetAlgoNoLine
+\DontPrintSemicolon
+{\bfseries Input:} $T,R,S,\lambda,\eta,\beta,x^0$\;
+\For{$t = 0,\cdots,T-1$}{
+    Server sends $x^t$ to all clients\;
+    \For{$i = 1,\cdots,N$}{
+        $x_{i,0}^t = x^t$\;
+        \For{$r = 0,\cdots, R-1$}{
+            Sample a fresh mini-batch $\mathcal{D}_i$, and find an approximate $x_i(x_{i,r}^t)$ to the problem $\text{min} \{ \ell_i(x_i;\mathcal{D}_i) + \frac{\lambda}{2}\lVert x_i-x_{i,r}^t \rVert^2 \}$\;
+            Local update $x_{i,r+1}^t = x_{i,r}^t - \eta\lambda(x_{i,r}^t-x_i(x_{i,r}^t))$\;
+        }
+        Server uniformly samples a subset of clients $\mathcal{S}^t$, each of which sends the local $x_{i,R}^t$ to the server\;
+    }
+    Sever update $x^{t+1} = (1-\beta)x^t + \beta \sum \frac{x_{i,R}^t}{\# \mathcal{S}^t}$
+}
+\caption{pFedMe\cite{t2020pfedme}}
+\end{algorithm}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{pFedMe -- Algorithm}
+
+\begin{block}{pFedMe observations}
+\begin{itemize}
+    \item global model $x$ converges (if converges) to the average of local models, which can be inferred from
+    $$x^* = \min_{x} \{ \sum\limits_{i=1}^N \left( f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i - x \rVert^2 \right) \} = \frac{1}{N} \sum\limits_{i=1}^N x_i$$
+    \item local updates are not ``totally local'', i.e. the loop $r = 0, \cdots, R$ computes the ``global objective'' $\min\{F_i(x)\}$ locally, to reduce communication.
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+%------------------------------------------------
+
+\subsection[Mixture FL]{Mixture Federated Learning}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Mixture FL}
+
+The {\color{red} ``weak'' consensus problem} (originally stated as ``mixture'' FL problem)
+$$\text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + \dfrac{\lambda}{2} \sum\limits_{i=1}^N \lVert x_i - \overline{x} \rVert^2$$
+can be reformulated as constrained optimization problems
+\begin{align*}
+    & \text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + \dfrac{\lambda}{2} \sum\limits_{i=1}^N \lVert x_i - z \rVert^2 \\
+    & \text{subject to} \quad Nz - \sum\limits_{i=1}^N x_i = 0
+\end{align*}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Mixture FL}
+
+or equivalently as the following problem,
+\begin{align*}
+    & \text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + \dfrac{\lambda}{2} \sum\limits_{i=1}^N \lVert x_i \rVert^2 -\dfrac{\lambda N}{2} \lVert z \rVert^2 \\
+    & \text{subject to} \quad Nz - \sum\limits_{i=1}^N x_i = 0
+\end{align*}
+which is a nonconvex sharing problem considered in \cite{hong2016convergence} (Eq. (3.2)). Note the difference of between formulations of a sharing problem in \cite{hong2016convergence} (Section 3) and in \cite{boyd2011distributed} (Section 7.3)
+
+\vspace{0.5em}
+
+The algorithm ``Flexible ADMM'' proposed in \cite{hong2016convergence} (Algorithm 4) updates $x_i$ using Gauss-Seidel method, which is non-trivial (or impossible) for parallelization. On the other hand, Jacobi method seems to have no guarantee of convergence.
+
+% \begin{question}
+% \begin{itemize}
+%     \item what is the case when $f_i$ being nonconvex
+%     \item inexact ADMM iterations (e.g. mini-batch SGD)
+% \end{itemize}
+% \end{question}
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Mixture FL}
+
+Under certain assumptions, this problem is a (split?) DC (difference-of-convex) programming problem {\color{red} with linear constraints}.
+
+\begin{align*}
+    & \text{minimize} \quad \colorbox{green}{$\sum\limits_{i=1}^N \left( f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i \rVert^2 \right)$} - \lambda \colorbox{pink}{$\dfrac{N}{2} \lVert z \rVert^2$} \\
+    & \text{subject to} \quad Nz - \sum\limits_{i=1}^N x_i = 0
+\end{align*}
+
+One writes $\widetilde{f}_i (x_i) =  f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i \rVert^2,$ and $r(z) = \frac{N}{2} \lVert z \rVert^2$.
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Mixture FL}
+
+The original unconstrained problem is studied in \cite{hanzely2020federated} using the so-called {\color{red} loopless} local gradient descent (L2GD) method, with the assumptions that
+\begin{itemize}
+    \item $f_i$ are Lipschitz $L$-smooth
+    % $$\lVert \nabla f_i(x) - \nabla f_i(y) \rVert \leqslant L \lVert x-y \rVert$$
+    $$f(y) \leqslant f(x) + \langle \nabla f(x), (y-x)\rangle + \dfrac{L}{2} \lVert x-y \rVert^2$$
+    \item $f_i$ are $\mu$-strongly convex
+    $$f(y) \geqslant f(x) + \langle \nabla f(x), (y-x)\rangle + \dfrac{\mu}{2} \lVert x-y \rVert^2$$
+\end{itemize}
+
+{\color{red} Looplessness} is the one of the key contribution of \cite{hanzely2020federated}, in which {\bfseries inner (local) loops are replaced with probabilistic gradient updates}.
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Mixture FL}
+
+Rewrite $\sum\limits_{i=1}^N f_i(x_i) + \frac{\lambda}{2} \sum\limits_{i=1}^N \lVert x_i - \overline{x} \rVert^2$ as $f(x) + \psi(x)$ with $x = (x_1,\cdots,x_N)$, the local step of L2GD at a client $i$ is
+$$x^{k+1} = x^k - \alpha G(x^k)$$
+where
+$$
+G(x^k) = \begin{cases}
+\dfrac{\nabla f(x^k)}{1-p} & \text{ with probability } 1-p \\
+\dfrac{\lambda \nabla \psi(x^k)}{p} & \text{ with probability } p 
+\end{cases}
+$$
+Locally, one has
+$$x_i^{k+1} = x_i^k - \beta \nabla f_i(x_i^k), \quad x_i^{k+1} = (1-\gamma)x_i^k + \gamma \overline{x}^k$$
+with probabilities $1-p$ and $p$ respectively.
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Mixture FL}
+
+\begin{block}{Questions}
+\begin{itemize}
+    \item[1.] Assumptions on the objective functions can be loosened?
+    \item[2.] DCA with linear constraints? (augmented) Lagrangian is
+    {\scriptsize
+    $$\mathcal{L}_{\rho}(x,z,y) = \sum\limits_{i=1}^N \widetilde{f}_i(x_i) - \lambda r(z) + \langle y, Nz - \sum\limits_{i=1}^N x_i \rangle + \framebox{$\dfrac{\rho}{2} \lVert Nz - \sum\limits_{i=1}^N x_i \rVert^2$} $$
+    }
+    \item[3.] DCA (or stochastic, accelerated variants) can have better convergence?
+    \item[4.] more
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Mixture FL --- Research}
+
+Because of the existence of the boxed term $\dfrac{\rho}{2} \lVert Nz - \sum\limits_{i=1}^N x_i \rVert^2$, the only choice to fit in the distributed settings is to update using the Jacobi method, as follows:
+{\footnotesize
+\begin{align*}
+    x_i^{k+1} & = \argmin_{x_i} \left\{ \widetilde{f}_i(x_i) - \langle y_i^k, x_i \rangle + \colorbox{pink}{$\displaystyle \frac{\rho}{2} \lVert Nz^k - \sum\limits_{j\neq i}^N x_j^k - x_i \rVert^2$} \right\} \\
+    z^{k+1} & = \argmin_{z} \left\{ \langle y^k, Nz \rangle + \frac{\rho}{2} \lVert Nz - \sum\limits_{i=1}^N x_i^{k+1} \rVert^2 - \lambda r(z) \right\} \\
+    y^{k+1} & = y^k + \beta (Nz^{k+1} - \sum\limits_{i=1}^N x_i^{k+1})
+\end{align*}
+}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Mixture FL --- Research II}
+
+One can add more intermediate variables and reformulates the DC-like sharing problem as
+\begin{align*}
+    & \text{minimize} \quad \sum\limits_{i=1}^N \widetilde{f}_i(x_i) - \lambda r(z) \\
+    & \text{subject to} \quad x_i' = x_i, \quad i=1,\cdots,N \\
+    & \phantom{subject to} \quad Nz = \sum\limits_{i=1}^N x_i'
+\end{align*}
+Augmented Lagrangian of the above problem is
+{\footnotesize
+\begin{multline*}
+    \sum\limits_{i=1}^N \widetilde{f}_i(x_i) - \lambda r(z) + \sum\limits_{i=1}^N \langle y_i, x_i'-x_i\rangle + \sum\limits_{i=1}^N \dfrac{\rho_i}{2} \lVert x_i'-x_i \rVert^2 \\
+    + \langle y, Nz-\sum\limits_{i=1}^N x_i'\rangle + \dfrac{\rho}{2} \left\lVert Nz-\sum\limits_{i=1}^N x_i' \right\rVert^2
+\end{multline*}
+}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Mixture FL --- Research II}
+
+ADMM iterations of the above problem are
+{\footnotesize
+\begin{align*}
+    x_i^{k+1} & = \argmin_{x_i} \left\{ \widetilde{f}_i(x_i) + \frac{\rho_i}{2} \lVert x_i-(x_i')^k \rVert^2 - \langle y_i^k, x_i \rangle \right\} \\
+    (x_i')^{k+1} & = \argmin_{x_i'} \left\{ \langle y_i^k-y^k, x_i' \rangle + \frac{\rho_i}{2} \lVert x_i^{k+1}-x_i' \rVert^2 \right. \\
+    & \hspace{7em} + \colorbox{pink}{$\displaystyle \frac{\rho}{2} \lVert Nz^k-\sum\limits_{j\neq i}^N (x_j')^{k} - x_i' \rVert^2$} \} \\
+    z^{k+1} & = \argmin_{z} \left\{ \langle y^k, Nz \rangle + \frac{\rho}{2} \lVert Nz - \sum\limits_{i=1}^N (x_i')^{k+1} \rVert^2 - \lambda r(z) \right\} \\
+    y_i^{k+1} & = y_i^k + \beta ((x_i')^{k+1} - x^{k+1}) \\
+    y^{k+1} & = y^k + \beta (Nz^{k+1} - \sum\limits_{i=1}^N (x_i')^{k+1})
+\end{align*}
+}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Mixture FL --- Research III}
+
+to update....
+
+% TODO: collect discussions on personalization via DC problem and more...
 
 \end{frame}
 
