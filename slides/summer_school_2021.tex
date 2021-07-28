@@ -49,7 +49,7 @@
 
 \title[Personalization]{Problems of Personalization in Federated Learning}
 \date{2021-07-29}
-\author[]{WEN Hao}
+\author[WEN Hao]{WEN Hao}
 
 % \institute[北京航空航天大学] % Your institution as it will appear on the bottom of every slide, may be shorthand to save space
 % {
@@ -92,7 +92,7 @@
 
 %------------------------------------------------
 
-\section{引言}
+\section[Introduction]{引言}
 
 %------------------------------------------------
 % Page 1
@@ -160,12 +160,12 @@ $$\expectation_{z\sim\mathcal{D}} \lVert M_{fed}(z) - M(z) \rVert \leqslant \del
     \begin{itemize}
         \item[$\bullet$] {\large\bfseries Optimization}
         \vspace{0.5em}
+        \item[$\bullet$] Compression
         \pause
         {\pgfsetfillopacity{0.4} \footnotesize
-        \item[$\bullet$] Compression
         }
     \end{itemize}
-    \vspace{1em}
+    \vspace{0.6em}
     {\pgfsetfillopacity{0.4} \footnotesize
     \item Privacy \& Security
     \begin{itemize}
@@ -188,7 +188,7 @@ $$\expectation_{z\sim\mathcal{D}} \lVert M_{fed}(z) - M(z) \rVert \leqslant \del
 
 %------------------------------------------------
 
-\section[联邦学习中的优化]{联邦学习中的优化问题与算法}
+\section[Optim in FL]{联邦学习中的优化问题与算法}
 
 %------------------------------------------------
 % Page 15
@@ -223,7 +223,7 @@ $$\expectation_{z\sim\mathcal{D}} \lVert M_{fed}(z) - M(z) \rVert \leqslant \del
 \begin{itemize}
     \item 多家医院的服务器
     % 这种情况下，数据来源（分布）可能是相同的（例如都是ImageNet），但是partition是固定的，需要区别于 datacenter 的情况
-    \item 多个移动设备（edge device）
+    \item 多个移动设备
     % 这种情况下，数据来源一般是不同的
 \end{itemize}
 
@@ -269,7 +269,6 @@ $$\expectation_{z\sim\mathcal{D}} \lVert M_{fed}(z) - M(z) \rVert \leqslant \del
 \draw[fill=pink] (0,0) rectangle (2.5,1.1) node[pos=.5] {client $i$};
 \draw[fill=green] (0.2,3.3) rectangle (2.8,4.5) node[pos=.5] {client $j$};
 \draw[fill=yellow] (0.3,0.9) rectangle (2.7,3.6) node[pos=.4] {client $k$};
-% \draw[->] (0,-0.4) edge (10, -0.4);
 \node at (1.35,-0.4) {特征维度};
 \end{tikzpicture}
 \end{figure}
@@ -422,8 +421,34 @@ Aggregate and global update:
 \end{frame}
 
 %------------------------------------------------
+% Page 15
 
-\section{FedOpt}  % gradient based methods
+\begin{frame}
+\frametitle{Another protocol}
+
+Transmit {\color{red} parameters} $\Rightarrow$ Transmit {\color{red} gradients}
+
+\pause
+\vspace{0.6em}
+
+风险：data leakage (\cite{zhu2019deep_leakage})。
+
+MWE: Consider the simplest model $y=ax+b$, updated using data point $(\widehat{x}, \widehat{y})$, with MSE loss
+$$f = \operatorname{loss} = (y-\widehat{y})^2 = (a\widehat{x}+b-\widehat{y})^2,$$
+One has
+\begin{align*}
+    \dfrac{\partial f}{\partial a} & = 2 \widehat{x} (a\widehat{x}+b-\widehat{y}) \\
+    \dfrac{\partial f}{\partial b} & = 2 (a\widehat{x}+b-\widehat{y})
+\end{align*}
+Knowing the gradients, $\widehat{x}, \widehat{y}$ can be easily recovered.
+
+\blfootnote{\tiny \cite{zhu2019deep_leakage}\bibentry{zhu2019deep_leakage}}
+
+\end{frame}
+
+%------------------------------------------------
+
+\section{FedAvg}  % gradient based methods
 
 %------------------------------------------------
 % Page 15
@@ -477,7 +502,7 @@ return $x$\;
 \begin{frame}
 \frametitle{FedSGD -- baseline}
 
-FedSGD: 在每个节点执行一次full-batch GD之后，即进行模型同步（平均）。
+FedSGD: 在每个节点执行一次full-batch (S)GD之后，即进行模型同步（平均）。
 
 \begin{figure}
 \centering
@@ -504,7 +529,7 @@ FedSGD: 在每个节点执行一次full-batch GD之后，即进行模型同步�
     \path[->,green] (x_\m_1) edge (x_t_1);
 }
 \draw[dashed,red,thick] ([xshift=-0.7cm,yshift=0.1cm]x_1_0.north) rectangle ([xshift=0.7cm,yshift=-0.1cm]x_n_1.south);
-\node[below right=0.3cm and -0.5cm of x_n_0.south] () {ONE local GD};
+\node[below right=0.3cm and -0.5cm of x_n_0.south] () {ONE local (S)GD};
 
 \node[above right = 1.5cm and 0.6cm of x_t_1] (x_11_0) {$x_{1,t+1}^0$};
 \node[below = 0.6cm of x_11_0] (x_12_0) {$x_{2,t+1}^0$};
@@ -526,7 +551,7 @@ FedSGD: 在每个节点执行一次full-batch GD之后，即进行模型同步�
     \path[->,green] (x_1\m_1) edge (x_t_2);
 }
 \draw[dashed,red,thick] ([xshift=-0.8cm,yshift=0.1cm]x_11_0.north) rectangle ([xshift=0.8cm,yshift=-0.1cm]x_1n_1.south);
-\node[below right=0.3cm and -0.5cm of x_1n_0.south] () {ONE local GD};
+\node[below right=0.3cm and -0.5cm of x_1n_0.south] () {ONE local (S)GD};
 \end{tikzpicture}
 \end{figure}
 
@@ -670,6 +695,27 @@ FedAvg: 每个节点执行$K$个mini-batch SGD之后，进行模型同步（平�
 \end{frame}
 
 %------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Convergence}
+
+\begin{figure}
+    \centering
+    \includegraphics[keepaspectratio,width=0.85\textwidth]{images/mingyi_hong_fedpd.png}
+\end{figure}
+上图来自洪明毅老师在第六十一期运筹千里纵横论坛所作的报告。
+
+\pause
+\vspace{0.4em}
+
+洪明毅老师最近的工作\cite{khanduri2021stem}，在进行local update的时候也用了momentum加速，进一步扩展了FedOpt。
+
+\blfootnote{\tiny \cite{khanduri2021stem}\bibentry{khanduri2021stem}}
+
+\end{frame}
+
+%------------------------------------------------
 
 \section{Personalization}
 
@@ -698,9 +744,9 @@ FedAvg: 每个节点执行$K$个mini-batch SGD之后，进行模型同步（平�
 
 {\bfseries Means of personalization:}
 \begin{itemize}
-    \item Federated Multi-Task Learning (+ regularization / proximal term), e.g. \cite{smith2017mocha}
-    \item Model-Agnostic Meta Learning, e.g. \cite{finn2017maml}
     \item Local Fine-tuning.
+    \item Model-Agnostic Meta Learning, e.g. \cite{finn2017maml}
+    \item Federated Multi-Task Learning (+ regularization / proximal term), e.g. \cite{smith2017mocha}
     \item etc.
 \end{itemize}
 
@@ -826,26 +872,6 @@ MAML forces the feature extractor (or called encoder, etc.) to capture general-p
 %------------------------------------------------
 % Page 15
 
-% \begin{frame}
-% \frametitle{Personalization for FL}
-
-% \begin{itemize}
-%     \item Mixture of global and local \cite{hanzely2020federated}:
-%     $$\text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + \dfrac{\lambda}{2} \sum\limits_{i=1}^N \lVert x_i - {\color{red} \overline{x}} \rVert^2$$
-%     \item pFedMe (bi-level) \cite{t2020pfedme} (and similarly EASGD\cite{zhang2015easgd}):
-%     \begin{align*}
-%         & \text{minimize} \quad \sum\limits_{i=1}^N F_i(x), \\
-%         & \text{where} \quad F_i(x) = \min \left\{ f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i - {\color{red} x}\rVert^2 \right\}
-%     \end{align*}
-%     \item FedU \cite{dinh2021fedu}:
-%     $$\text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + \dfrac{\lambda}{2} \sum\limits_{i=1}^N {\color{red} \sum\limits_{j\in\mathcal{N}_i}} \lVert x_i - {\color{red} x_j} \rVert^2$$
-% \end{itemize}
-
-% \end{frame}
-
-%------------------------------------------------
-% Page 15
-
 \begin{frame}
 \frametitle{Federated Multi-Task Learning}
 
@@ -856,8 +882,11 @@ MAML forces the feature extractor (or called encoder, etc.) to capture general-p
         & \text{where} \quad F_i(x) = \min \left\{ f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i - {\color{red} x}\rVert^2 \right\}
     \end{align*}
     \pgfsetfillopacity{0.4}
+    {\footnotesize
     \item FedU \cite{dinh2021fedu}:
     $$\text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + \dfrac{\lambda}{2} \sum\limits_{i=1}^N {\color{red} \sum\limits_{j\in\mathcal{N}_i}} \lVert x_i - {\color{red} x_j} \rVert^2$$
+    }
+    \pgfsetfillopacity{1}
 \end{itemize}
 
 \blfootnote{\tiny \cite{t2020pfedme}\bibentry{t2020pfedme}}
@@ -878,10 +907,12 @@ pFedMe (Personalized Federated Learning with Moreau Envelopes (or proximity oper
     & \text{minimize} \quad \sum\limits_{i=1}^N F_i(x), \\
     & \text{where} \quad F_i(x) = \min \left\{ f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i - x \rVert^2 \right\}
 \end{align*}
-which is equivalent to (as in \cite{zhang2015easgd})
+which is equivalent to
 \begin{align*}
     & \text{minimize} \quad \sum\limits_{i=1}^N \left( f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i - x \rVert^2 \right)
 \end{align*}
+
+\blfootnote{\tiny \cite{t2020pfedme}\bibentry{t2020pfedme}}
 
 \end{frame}
 
@@ -921,8 +952,10 @@ which is equivalent to (as in \cite{zhang2015easgd})
 \begin{block}{pFedMe observations}
 \begin{itemize}
     \item global model $x$ converges (if converges) to the average of local models, which can be inferred from
-    $$x^* = \min_{x} \{ \sum\limits_{i=1}^N \left( f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i - x \rVert^2 \right) \} = \frac{1}{N} \sum\limits_{i=1}^N x_i$$
+    $$x^* = \min_{x} \left\{ \sum\limits_{i=1}^N \left( f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i - x \rVert^2 \right) \right\} = \frac{1}{N} \sum\limits_{i=1}^N x_i$$
     \item local updates are not ``totally local'', i.e. the loop $r = 0, \cdots, R$ computes the ``global objective'' $\min\{F_i(x)\}$ locally, to reduce communication.
+    \item pFedMe = Method 1 proposed by Caihua Chen, i.e. outer line search of $x$, inner solving $\operatorname{Prox}$
+    \item What is Method 2 (randomization?) proposed by Caihua Chen?
 \end{itemize}
 \end{block}
 
@@ -961,16 +994,21 @@ or equivalently as the following problem,
 \end{align*}
 which is a nonconvex sharing problem considered in \cite{hong2016convergence} (Eq. (3.2)). Note the difference of between formulations of a sharing problem in \cite{hong2016convergence} (Section 3) and in \cite{boyd2011distributed} (Section 7.3)
 
-\vspace{0.5em}
+\blfootnote{\tiny \cite{hong2016convergence}\bibentry{hong2016convergence}}
+\blfootnote{\tiny \cite{boyd2011distributed}\bibentry{boyd2011distributed}}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Mixture FL}
 
 The algorithm ``Flexible ADMM'' proposed in \cite{hong2016convergence} (Algorithm 4) updates $x_i$ using Gauss-Seidel method, which is non-trivial (or impossible) for parallelization. On the other hand, Jacobi method seems to have no guarantee of convergence.
 
-% \begin{question}
-% \begin{itemize}
-%     \item what is the case when $f_i$ being nonconvex
-%     \item inexact ADMM iterations (e.g. mini-batch SGD)
-% \end{itemize}
-% \end{question}
+\blfootnote{\tiny \cite{hong2016convergence}\bibentry{hong2016convergence}}
+
 \end{frame}
 
 %------------------------------------------------
@@ -1007,6 +1045,8 @@ The original unconstrained problem is studied in \cite{hanzely2020federated} usi
 
 {\color{red} Looplessness} is the one of the key contribution of \cite{hanzely2020federated}, in which {\bfseries inner (local) loops are replaced with probabilistic gradient updates}.
 
+\blfootnote{\tiny \cite{hanzely2020federated}\bibentry{hanzely2020federated}}
+
 \end{frame}
 
 %------------------------------------------------
@@ -1034,7 +1074,7 @@ with probabilities $1-p$ and $p$ respectively.
 % Page 15
 
 \begin{frame}
-\frametitle{Mixture FL}
+\frametitle{Mixture FL --- ADMM}
 
 \begin{block}{Questions}
 \begin{itemize}
@@ -1054,7 +1094,7 @@ with probabilities $1-p$ and $p$ respectively.
 % Page 15
 
 \begin{frame}
-\frametitle{Mixture FL --- Research}
+\frametitle{Mixture FL --- ADMM}
 
 Because of the existence of the boxed term $\dfrac{\rho}{2} \lVert Nz - \sum\limits_{i=1}^N x_i \rVert^2$, the only choice to fit in the distributed settings is to update using the Jacobi method, as follows:
 {\footnotesize
@@ -1071,7 +1111,7 @@ Because of the existence of the boxed term $\dfrac{\rho}{2} \lVert Nz - \sum\lim
 % Page 15
 
 \begin{frame}
-\frametitle{Mixture FL --- Research II}
+\frametitle{Mixture FL --- ADMM}
 
 One can add more intermediate variables and reformulates the DC-like sharing problem as
 \begin{align*}
@@ -1093,7 +1133,7 @@ Augmented Lagrangian of the above problem is
 % Page 15
 
 \begin{frame}
-\frametitle{Mixture FL --- Research II}
+\frametitle{Mixture FL  --- ADMM}
 
 ADMM iterations of the above problem are
 {\footnotesize
@@ -1113,11 +1153,312 @@ ADMM iterations of the above problem are
 % Page 15
 
 \begin{frame}
-\frametitle{Mixture FL --- Research III}
+\frametitle{Huawei Noah FL Workshop}
 
-to update....
+\begin{figure}
+    \centering
+    \includegraphics[keepaspectratio,width=\textwidth]{images/huawei_noah_fl_workshop.png}
+\end{figure}
 
-% TODO: collect discussions on personalization via DC problem and more...
+\end{frame}
+
+%------------------------------------------------
+
+\section{Compression}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Compression in Federated Learning}
+
+As is discussed previously (e.g. in the study of ``GADMM'' to ``CQ-GGADMM''), one of the main bottleneck {\color{red} communication cost} can be reduced using
+\begin{itemize}
+    \item compression
+    \item {\pgfsetfillopacity{0.3}lazy aggregation (censoring)}
+    \item {\pgfsetfillopacity{0.3}etc.}
+\end{itemize}
+
+\pause
+\vspace{0.6em}
+
+\pgfsetfillopacity{1}
+The technique of compression mainly consists of
+\begin{itemize}
+    \item (randomized) quantization
+    \item sparsification
+\end{itemize}
+or their combination.
+
+\end{frame}
+
+%------------------------------------------------
+
+\subsection{Naive Compression Methods}
+
+%------------------------------------------------
+% Page 2
+
+\begin{frame}
+\frametitle{Deterministic Compression}
+
+compression can be naively done via fixed reduction of precision (fixed bit of quantization) of parameters and/or gradients, e.g. {\color{red} half precision} (\texttt{float32} $\to$ \texttt{float16}) or {\color{red} mixed precision}.
+
+\vspace{0.6em}
+
+This is the common practice for acceleration of ordinary (non-distributed) model training process. e.g. the \href{https://pytorch.org/blog/accelerating-training-on-nvidia-gpus-with-pytorch-automatic-mixed-precision/}{\beamergotobutton{PyTorch Post}} on mixed precision training.
+
+\end{frame}
+
+%------------------------------------------------
+% Page 3
+
+\begin{frame}
+\frametitle{TernGrad}
+
+One extreme case of compression is to take the {\color{red}sign} of each coordinate of the stochastic gradient vector, which makes it binary (1-bit, $\pm 1$) or ternary ($\{-1, 0, +1\}$).
+
+\vspace{0.4em}
+
+\begin{columns}
+\begin{column}{0.44\textwidth}
+\begin{figure}
+    \centering
+    \includegraphics[width=1\textwidth,keepaspectratio]{images/terngrad.png}
+\end{figure}
+\end{column}
+\begin{column}{0.52\textwidth}
+$\widetilde{g}_t^{(i)}$ is the {\color{red}ternarized} gradient
+$$g_t^{(i)} = \lVert g_t^{(i)} \rVert_{\infty} \cdot \operatorname{sign}(g_t^{(i)}) \odot \framebox{\color{red} $b_t$}$$
+where $b_t$ is a random binary vector satisfying some Bernoulli distribution $Be(\lvert g_{t,k}^{(i)} \rvert / s_t)$
+\end{column}
+\end{columns}
+
+\vspace{0.4em}
+
+Similar algorithms include 1-bit SGD \cite{seide2014_1bitsgd}, signSGD \cite{bernstein2018signsgd}
+
+\blfootnote{
+\tiny\cite{seide2014_1bitsgd} \bibentry{seide2014_1bitsgd}
+}
+\blfootnote{
+\tiny\cite{bernstein2018signsgd} \bibentry{bernstein2018signsgd}
+}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 3
+
+\begin{frame}
+\frametitle{QSGD}
+
+More generally, in QSGD \cite{alistarh2017qsgd}, randomized quantization (called ``low-precision quantizer'' in \cite{khirirat2018dcgd}) is performed on gradients $v$ via
+$$Q_s(v) = \lVert v \rVert_2 \cdot \operatorname{sign}(v) \odot \framebox{\color{red}$\xi(v,s)$},$$
+where the $i$-th element in vector $\xi(v,s)$ is defined by
+\begin{equation*}
+    \xi_i(v,s) = \begin{cases}
+    (\ell+1)/s, & \text{with prob. } (|v_i|/\lVert v \rVert_2) s - \ell \\
+    \ell/s, & \text{otherwise}
+    \end{cases}
+\end{equation*}
+$s$ controls the number of quantization levels, and $\ell$ ({\color{red} should be $\ell_i$?}) be s.t. $|v_i|/\lVert v \rVert_2 \in [\ell/s, (\ell+1)/s]$.
+
+\blfootnote{
+\tiny\cite{alistarh2017qsgd} \bibentry{alistarh2017qsgd}
+}
+\blfootnote{
+\tiny\cite{khirirat2018dcgd} \bibentry{khirirat2018dcgd}
+}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 3
+
+\begin{frame}
+\frametitle{DCGD}
+
+DCGD \cite{khirirat2018dcgd} generalized such operators $Q_s$ into an abstract concept
+
+\begin{Def}[Unbiased Random Quantizer (URQ)]
+A mapping $Q:\mathbb{R}^d \to \mathbb{R}^d$ is called an unbiased random quantizer if $\forall v \in \mathbb{R}^d$,
+\begin{itemize}
+    \item $\operatorname{supp}(Q(v)) \subseteq \operatorname{supp}(v)$
+    \item $\expectation [Q(v)] = v$
+    \item $\expectation [\lVert Q(v) \rVert_2^2] \leqslant \alpha \lVert v \rVert_2^2$ for some finite positive $\alpha$
+\end{itemize}
+\end{Def}
+
+And perhaps with more useful properties like
+\begin{itemize}
+    \item sparsity: $\expectation [\lVert Q(v) \rVert_0] \leqslant$ const
+    \item sign preserving: $Q(v)_i \cdot v_i \geqslant 0$
+\end{itemize}
+
+\blfootnote{
+\tiny\cite{khirirat2018dcgd} \bibentry{khirirat2018dcgd}
+}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 3
+
+\begin{frame}
+\frametitle{Examples of URQs}
+
+Despite the ternary quantizer and low-precision quantizer, one has \cite{lizhize2020adiana}
+
+\only<1>{
+\begin{block}{Random-$k$ sparsification}
+$$\mathcal{C}(v) = \dfrac{d}{k} (v \odot \xi_k)$$
+where $\xi_k \in \{0, 1\}^d$ is a uniformly random binary vector with $k$ nonzero entries, $v \in \mathbb{R}^d$.
+\end{block}
+}
+
+\only<2>{
+\begin{block}{$(p,s)$-quantization}
+$$\mathcal{C}_{p,s}(v) = \operatorname{sign}(v)\cdot \lVert v \rVert_p \cdot \dfrac{1}{s} \xi(v,s)$$
+where $\xi(v,s)$ is a random vector with i-th element
+\begin{equation*}
+\xi_i(v,s) = \begin{cases}
+\ell_i+1, & \text{with prob. } (|v_i|/\lVert v \rVert_2) s - \ell_i \\
+\ell_i, & \text{otherwise}
+\end{cases}
+\end{equation*}
+and $\ell_i$ be s.t. $|v_i|/\lVert v \rVert_2 \in [\ell_i/s, (\ell_i+1)/s]$
+\end{block}
+}
+
+\blfootnote{
+\tiny\cite{lizhize2020adiana} \bibentry{lizhize2020adiana}
+}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 3
+
+\begin{frame}
+\frametitle{Implementations of Quantizers}
+
+One can refer to \href{https://github.com/burlachenkok/marina}{\beamergotobutton{https://github.com/burlachenkok/marina}} for code and examples of various compressors, e.g. in files
+\begin{itemize}
+    \item \href{https://github.com/burlachenkok/marina/blob/main/linear_model_with_non_convex_loss/compressors.py}{\beamergotobutton{linear\_model\_with\_non\_convex\_loss/compressors.py}}
+    \item \href{https://github.com/burlachenkok/marina/blob/main/neural_nets_experiments/compressors.py}{\beamergotobutton{neural\_nets\_experiments/compressors.py}}
+\end{itemize}
+
+\vspace{0.8em}
+
+or \href{https://github.com/wenh06/fl_seminar/blob/master/code/compressors_test.ipynb}{\beamergotobutton{this simple jupyter notebook}}
+
+\end{frame}
+
+%------------------------------------------------
+
+\subsection{Recent Development}
+
+%------------------------------------------------
+% Page 3
+
+\begin{frame}
+\frametitle{(A)DIANA}
+
+The main contribution of (A)DIANA \cite{lizhize2020adiana,mishchenko2019diana} is that, instead of quantizing the gradients, the {\color{red} difference of gradient updates}, i.e. instead of
+$$\widetilde{g}^{(i)}_t = Q(g^{(i)}_t) = Q(\nabla f_i(x_t))$$
+one performs
+\begin{equation*}
+    \begin{cases}
+    \widetilde{g}^{(i)}_t = h^{(i)}_t + Q(\colorbox{pink}{$\nabla f_i(x_t) - h^{(i)}_t$}) \\
+    \colorbox{pink}{$h^{(i)}_{t+1} = h^{(i)}_t + \alpha Q(\nabla f_i(x_t) - h^{(i)}_t)$}
+    \end{cases}
+\end{equation*}
+
+$h^{(i)}$ are ``memory'' maintained locally, whose average is maintained in the central server.
+
+\blfootnote{
+\tiny\cite{lizhize2020adiana} \bibentry{lizhize2020adiana}
+}
+\blfootnote{
+\tiny\cite{mishchenko2019diana} \bibentry{mishchenko2019diana}
+}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 3
+
+\begin{frame}
+\frametitle{(A)DIANA}
+
+Another key point (feature) of (A)DIANA is the combination with acceleration (and variance reduction):
+
+\only<1>{
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\textwidth,keepaspectratio]{images/diana.png}
+\end{figure}
+
+{\footnotesize Note the ``Quant'' operator is a so-called ``block-quantizer'' or ``bucket-quantizer''\cite{alistarh2017qsgd} {\tiny \bibentry{alistarh2017qsgd}}
+}}
+\only<2>{
+\begin{figure}
+    \centering
+    \includegraphics[width=0.54\textwidth,keepaspectratio]{images/adiana.png}
+\end{figure}
+}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 3
+
+\begin{frame}
+\frametitle{MARINA}
+
+MARINA \cite{gorbunov2021marina} replaced the unbiased compressor by a {\color{red}biased} one, via replacing
+\begin{equation*}
+\begin{cases}
+\widetilde{g}^{(i)}_t = h^{(i)}_t + Q(\nabla f_i(x_t) - h^{(i)}_t) \\
+h^{(i)}_{t+1} = h^{(i)}_t + \alpha Q(\nabla f_i(x_t) - h^{(i)}_t)
+\end{cases}
+\end{equation*}
+by
+\begin{equation*}
+\widetilde{g}^{(i)}_t = 
+\begin{cases}
+\nabla f_i(x_t), & \text{with prob. } p \\
+\widetilde{g}^{(i)}_{t-1} + Q(\nabla f_i(x_t) - \nabla f_i(x_{t-1})), & \text{with prob. } 1-p
+\end{cases}
+\end{equation*}
+for some small $p$.
+
+\uncover<2->{
+As claimed by the authors, their intuition come from the rare (?) phenomenon in stochastic optimization that
+\begin{quote}
+`` the bias of the stochastic gradient helps to achieve better complexity''
+\end{quote}
+}
+
+\blfootnote{
+\tiny\cite{gorbunov2021marina} \bibentry{gorbunov2021marina}
+}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 3
+
+\begin{frame}
+\frametitle{MARINA}
+
+The basic MARINA algorithm is as follows:
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\textwidth,keepaspectratio]{images/marina.png}
+\end{figure}
 
 \end{frame}
 
@@ -1131,6 +1472,22 @@ to update....
 \bibliographystyle{ieeetr}
 \bibliography{references}
 }
+
+\end{frame}
+
+%------------------------------------------------
+
+\begin{frame}
+
+{\Huge{\centerline{\bfseries The End}}}
+
+\vspace{0.5em}
+
+{\Huge{\centerline{\phantom{a}\bfseries 谢谢！}}}
+
+\vfill
+
+\noindent 以上内容可以在\href{https://github.com/wenh06/fl_seminar}{\beamergotobutton{https://github.com/wenh06/fl\_seminar}}找到。
 
 \end{frame}
 
