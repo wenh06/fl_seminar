@@ -456,7 +456,7 @@ Knowing the gradients, $\widehat{x}, \widehat{y}$ can be easily recovered.
 \begin{frame}
 \frametitle{从FedAvg到FedOpt}
 
-Google研究人员McMahan等人在文章\cite{mcmahan2017fed_avg}中考察了普通的SGD在分布式下的平凡推广FedSGD，即在每次循环中，节点执行一次full-batch gradient descent，并做出了进一步推广，提出了FedAvg算法。FedAvg的具体做法就是在每次循环的client local computation中，执行多步mini-batch SGD。这样，既降低了通信开销（communication-efficient），同时也在实验上观察到了模型效果的提升。随后，McMahan等人进一步在文章\cite{reddi2020fed_opt}中，将Adam等自适应、加速算法融入联邦学习中，提出了更一般的FedOpt框架。
+Google研究人员McMahan等人在文章\cite{mcmahan2017fed_avg}中考察了普通的SGD在分布式下的平凡推广FedSGD，即在每次循环中，节点执行一次SGD，并做出了进一步推广，提出了FedAvg算法。FedAvg的具体做法就是在每次循环的client local computation中，执行多步mini-batch SGD。这样，既降低了通信开销（communication-efficient），同时也在实验上观察到了模型效果的提升。随后，McMahan等人进一步在文章\cite{reddi2020fed_opt}中，将Adam等自适应、加速算法融入联邦学习中，提出了更一般的FedOpt框架。
 
 \blfootnote{\tiny \cite{mcmahan2017fed_avg}\bibentry{mcmahan2017fed_avg}}
 \blfootnote{\tiny \cite{reddi2020fed_opt}\bibentry{reddi2020fed_opt}}
@@ -835,10 +835,14 @@ randomly initialize model params $\theta$\;
         Evaluate $\nabla_{\theta} \mathcal{L}_{\mathcal{T}_i}(f_{\theta})$ w.r.t. $K$ samples\;
         Compute adapted parameters with gradient descent $\theta'_i = \theta - \alpha \nabla_{\theta} \mathcal{L}_{\mathcal{T}_i}(f_{\theta})$\;
     }
-    Update \colorbox{pink}{$\theta \leftarrow \theta - \beta \nabla_{\theta} \sum\limits_{\mathcal{T}_i\sim p(\mathcal{T})} \mathcal{L}_{\mathcal{T}_i} (f_{\theta_i'})$} (gradient through gradients, instead of ``naive'' averaging)\;
+    Update \colorbox{pink}{$\theta \leftarrow \theta - \beta \nabla_{\theta} \framebox{$\sum\limits_{\mathcal{T}_i\sim p(\mathcal{T})}$} \mathcal{L}_{\mathcal{T}_i} (f_{\theta_i'})$} \;
 }
 \caption{MAML\cite{finn2017maml}}
 \end{algorithm}
+
+\pause
+
+``Extragradient method''!
 
 \end{frame}
 
