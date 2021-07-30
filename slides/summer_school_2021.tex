@@ -1117,41 +1117,62 @@ Because of the existence of the boxed term $\dfrac{\rho}{2} \lVert Nz - \sum\lim
 \begin{frame}
 \frametitle{Mixture FL --- ADMM}
 
-One can add more intermediate variables and reformulates the DC-like sharing problem as
-\begin{align*}
-    & \text{minimize} \quad \sum\limits_{i=1}^N \widetilde{f}_i(x_i) - \lambda r(z) \\
-    & \text{subject to} \quad x_i' = x_i, \quad i=1,\cdots,N \\
-    & \phantom{subject to} \quad Nz = \sum\limits_{i=1}^N x_i'
-\end{align*}
-Augmented Lagrangian of the above problem is
+Let $u_i = Nz - \sum\limits_{j\neq i}^N x_j$, the updates can be done as follows:
 {\footnotesize
-\begin{multline*}
-    \sum\limits_{i=1}^N \widetilde{f}_i(x_i) - \lambda r(z) + \sum\limits_{i=1}^N \langle y_i, x_i'-x_i\rangle + \sum\limits_{i=1}^N \dfrac{\rho_i}{2} \lVert x_i'-x_i \rVert^2 \\
-    + \langle y, Nz-\sum\limits_{i=1}^N x_i'\rangle + \dfrac{\rho}{2} \left\lVert Nz-\sum\limits_{i=1}^N x_i' \right\rVert^2
-\end{multline*}
+\begin{align*}
+    x_i^{k+1} & = \argmin_{x_i} \left\{ \widetilde{f}_i(x_i) - \langle y_i^k, x_i \rangle + \frac{\rho}{2} \lVert u_i^k - x_i \rVert^2 \right\} \\
+    z^{k+1} & = \argmin_{z} \left\{ \langle y^k, Nz \rangle + \frac{\rho}{2} \lVert Nz - \sum\limits_{i=1}^N x_i^{k+1} \rVert^2 - \lambda r(z) \right\} \\
+    y^{k+1} & = y^k + \beta (Nz^{k+1} - \sum\limits_{i=1}^N x_i^{k+1}) \\
+    u^{k+1}_i & = Nz^{k+1} - \sum\limits_{j\neq i}^N x_j^{k+1}
+\end{align*}
 }
+It should be noted that $u^{k+1}_i$ are computed {\color{red} in the server} and broadcast to the clients.
+
+{\color{red}TODO: More analysis on this update pattern}
 
 \end{frame}
 
 %------------------------------------------------
 % Page 15
 
-\begin{frame}
-\frametitle{Mixture FL  --- ADMM}
+% \begin{frame}
+% \frametitle{Mixture FL --- ADMM}
 
-ADMM iterations of the above problem are
-{\footnotesize
-\begin{align*}
-    x_i^{k+1} & = \argmin_{x_i} \left\{ \widetilde{f}_i(x_i) + \frac{\rho_i}{2} \lVert x_i-(x_i')^k \rVert^2 - \langle y_i^k, x_i \rangle \right\} \\
-    (x_i')^{k+1} & = \argmin_{x_i'} \left\{ \langle y_i^k-y^k, x_i' \rangle + \frac{\rho_i}{2} \lVert x_i^{k+1}-x_i' \rVert^2 \right. \\
-    & \hspace{7em} + \colorbox{pink}{$\displaystyle \frac{\rho}{2} \lVert Nz^k-\sum\limits_{j\neq i}^N (x_j')^{k} - x_i' \rVert^2$} \} \\
-    z^{k+1} & = \argmin_{z} \left\{ \langle y^k, Nz \rangle + \frac{\rho}{2} \lVert Nz - \sum\limits_{i=1}^N (x_i')^{k+1} \rVert^2 - \lambda r(z) \right\} \\
-    y_i^{k+1} & = y_i^k + \beta ((x_i')^{k+1} - x^{k+1}) \\
-    y^{k+1} & = y^k + \beta (Nz^{k+1} - \sum\limits_{i=1}^N (x_i')^{k+1})
-\end{align*}
-}
+% One can add more intermediate variables and reformulates the DC-like sharing problem as
+% \begin{align*}
+%     & \text{minimize} \quad \sum\limits_{i=1}^N \widetilde{f}_i(x_i) - \lambda r(z) \\
+%     & \text{subject to} \quad x_i' = x_i, \quad i=1,\cdots,N \\
+%     & \phantom{subject to} \quad Nz = \sum\limits_{i=1}^N x_i'
+% \end{align*}
+% Augmented Lagrangian of the above problem is
+% {\footnotesize
+% \begin{multline*}
+%     \sum\limits_{i=1}^N \widetilde{f}_i(x_i) - \lambda r(z) + \sum\limits_{i=1}^N \langle y_i, x_i'-x_i\rangle + \sum\limits_{i=1}^N \dfrac{\rho_i}{2} \lVert x_i'-x_i \rVert^2 \\
+%     + \langle y, Nz-\sum\limits_{i=1}^N x_i'\rangle + \dfrac{\rho}{2} \left\lVert Nz-\sum\limits_{i=1}^N x_i' \right\rVert^2
+% \end{multline*}
+% }
 
-\end{frame}
+% \end{frame}
+
+%------------------------------------------------
+% Page 15
+
+% \begin{frame}
+% \frametitle{Mixture FL  --- ADMM}
+
+% ADMM iterations of the above problem are
+% {\footnotesize
+% \begin{align*}
+%     x_i^{k+1} & = \argmin_{x_i} \left\{ \widetilde{f}_i(x_i) + \frac{\rho_i}{2} \lVert x_i-(x_i')^k \rVert^2 - \langle y_i^k, x_i \rangle \right\} \\
+%     (x_i')^{k+1} & = \argmin_{x_i'} \left\{ \langle y_i^k-y^k, x_i' \rangle + \frac{\rho_i}{2} \lVert x_i^{k+1}-x_i' \rVert^2 \right. \\
+%     & \hspace{7em} + \colorbox{pink}{$\displaystyle \frac{\rho}{2} \lVert Nz^k-\sum\limits_{j\neq i}^N (x_j')^{k} - x_i' \rVert^2$} \} \\
+%     z^{k+1} & = \argmin_{z} \left\{ \langle y^k, Nz \rangle + \frac{\rho}{2} \lVert Nz - \sum\limits_{i=1}^N (x_i')^{k+1} \rVert^2 - \lambda r(z) \right\} \\
+%     y_i^{k+1} & = y_i^k + \beta ((x_i')^{k+1} - x^{k+1}) \\
+%     y^{k+1} & = y^k + \beta (Nz^{k+1} - \sum\limits_{i=1}^N (x_i')^{k+1})
+% \end{align*}
+% }
+
+% \end{frame}
 
 %------------------------------------------------
 % Page 15
@@ -1167,6 +1188,42 @@ ADMM iterations of the above problem are
 \end{frame}
 
 %------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{pFedMac - Huawei Noah FL Workshop}
+
+pFedMac\cite{li2021pfedmac} modified the objective of pFedMe to
+\begin{align*}
+    & \text{minimize} \quad \sum\limits_{i=1}^N \left( f_i(x_i) - \lambda\langle x_i, x \rangle + \dfrac{\lambda}{2} \lVert x \rVert^2 \right),
+\end{align*}
+or equivalently
+\begin{align*}
+    & \text{minimize} \quad \sum\limits_{i=1}^N \left( f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i-x \rVert^2 - \dfrac{\lambda}{2} \lVert x_i \rVert^2 \right)
+\end{align*}
+
+{\color{red}TODO: analyze pFedMac and propose possible improvements}
+
+\blfootnote{\tiny \cite{li2021pfedmac}\bibentry{li2021pfedmac}}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{More on FL Personalization - Huawei Noah FL Workshop}
+
+\begin{itemize}
+    \item {\color{red} FedPHP (to add ref. latter)}
+    \item {\color{red} FedMGDA+\cite{hu2020fedmgda+} and Pareto optimality}
+\end{itemize}
+
+\blfootnote{\tiny \cite{hu2020fedmgda+}\bibentry{hu2020fedmgda+}}
+
+\end{frame}
+
+%------------------------------------------------
 
 \section{Compression}
 
@@ -1176,7 +1233,7 @@ ADMM iterations of the above problem are
 \begin{frame}
 \frametitle{Compression in Federated Learning}
 
-As is discussed previously (e.g. in the study of ``GADMM'' to ``CQ-GGADMM''), one of the main bottleneck {\color{red} communication cost} can be reduced using
+For federated learning, especially in the cross-device scenario, one of the main bottleneck {\color{red} communication cost} can be reduced using
 \begin{itemize}
     \item compression
     \item {\pgfsetfillopacity{0.3}lazy aggregation (censoring)}
@@ -1266,7 +1323,7 @@ where the $i$-th element in vector $\xi(v,s)$ is defined by
     \ell/s, & \text{otherwise}
     \end{cases}
 \end{equation*}
-$s$ controls the number of quantization levels, and $\ell$ ({\color{red} should be $\ell_i$?}) be s.t. $|v_i|/\lVert v \rVert_2 \in [\ell/s, (\ell+1)/s]$.
+$s$ controls the number of quantization levels, and $\ell$ ({\color{red} should be $\ell_i$}) be s.t. $|v_i|/\lVert v \rVert_2 \in [\ell/s, (\ell+1)/s]$.
 
 \blfootnote{
 \tiny\cite{alistarh2017qsgd} \bibentry{alistarh2017qsgd}
