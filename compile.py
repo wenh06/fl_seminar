@@ -144,6 +144,7 @@ def run(compiler:str, main:str, output:str, quiet:bool=False, timeout_hour:Real=
     cwd = os.path.dirname(os.path.abspath(__file__))
     build_dir = os.path.join(cwd, "tmp_build")
     os.makedirs(build_dir, exist_ok=True)
+    os.makedirs(os.path.join(build_dir, "tikz"), exist_ok=True)
     fmt = {
         "xe": "pdfxe",
         "pdf": "pdf",
@@ -179,9 +180,11 @@ def run(compiler:str, main:str, output:str, quiet:bool=False, timeout_hour:Real=
     cmd = shlex.split(cmd)
     if not quiet:
         print(f"cmd = {cmd}")
-    execute_cmd(cmd, timeout_hour=timeout_hour, quiet=quiet)
+    execute_cmd(cmd, timeout_hour=timeout_hour, quiet=quiet, raise_error=False)
     output_filename = f"{output}.{ext[compiler]}"
     os.rename(os.path.join(build_dir, output_filename), os.path.join(cwd, output_filename))
+    print(f"Compilation finishes and output file `{output_filename}` is produced.")
+    print("ignore the ending message from `execute_cmd`.")
     shutil.rmtree(build_dir, ignore_errors=True)
 
 
