@@ -3,9 +3,11 @@ federated seminar held at BUAA
 
 <!-- toc -->
 
-- [Time](#time)
-- [Venue](#venue)
-- [Programme](#programme-planned)
+- [fl_seminar](#fl_seminar)
+  - [Time](#time)
+  - [Venue](#venue)
+  - [Programme (planned)](#programme-planned)
+  - [Compilation](#compilation)
 - [More resources](#more-resources)
 
 <!-- tocstop -->
@@ -58,6 +60,18 @@ to turn into a table
 11. FedProx ([PDF](https://arxiv.org/abs/1812.06127))
 12. Federated Learning of a Mixture of Global and Local Models ([PDF](https://arxiv.org/abs/2002.05516))
 13. more....
+
+
+## Compilation
+The best way for compilation is to import this project into [Overleaf](https://www.overleaf.com/.
+For local compilation,
+
+```bash
+python compile.py
+```
+
+with `texlive-full` and `latexmk` etc. installed.
+
 
 # More resources
 1. A comprehensive survey article: Advances and open problems in federated learning ([PDF](https://arxiv.org/abs/1912.04977))
