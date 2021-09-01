@@ -63,7 +63,7 @@ to turn into a table
 
 
 ## Compilation
-The best way for compilation is to import this project into [Overleaf](https://www.overleaf.com/.
+The best way for compilation is to import this project into [Overleaf](https://www.overleaf.com/).
 For local compilation,
 
 ```bash
