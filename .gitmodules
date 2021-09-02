@@ -1,0 +1,6 @@
+[submodule "awesome_fl_from_fedml"]
+	path = awesome_fl_from_fedml
+	url = https://github.com/chaoyanghe/Awesome-Federated-Learning.git
+[submodule "awesome_fl_from_cat"]
+	path = awesome_fl_from_cat
+	url = https://github.com/innovation-cat/Awesome-Federated-Machine-Learning.git
