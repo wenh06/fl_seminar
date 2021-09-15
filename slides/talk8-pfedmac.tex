@@ -37,8 +37,92 @@
 % Page 1
 
 \begin{frame}
-\frametitle{To write}
+\frametitle{pFedMac - Motivations and Outlines}
 
+{\large
+\begin{itemize}
+    \item personalization \\
+    - via ``maximizing correlation''
+    \vspace{1em}
+    \item communication efficiency \\
+    - via ``sparse'' and/or ``hierarchical'' graphs
+\end{itemize}
+}
+
+\blfootnote{\tiny \cite{li2021pfedmac}\bibentry{li2021pfedmac}}
+
+\end{frame}
+
+%------------------------------------------------
+
+\section{Personalization}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Previous Work - pFedMe}
+
+pFedMe (Personalized Federated Learning with Moreau Envelopes (or proximity operator)) is formulated as the following bi-level optimization problem in \cite{t2020pfedme}
+
+\begin{align*}
+    & \text{minimize} \quad \sum\limits_{i=1}^N F_i(x), \\
+    & \text{where} \quad F_i(x) = \min \left\{ f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i - x \rVert^2 \right\}
+\end{align*}
+which is equivalent to
+\begin{align*}
+    & \text{minimize} \quad \sum\limits_{i=1}^N \left( f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i - x \rVert^2 \right)
+\end{align*}
+
+\blfootnote{\tiny \cite{t2020pfedme}\bibentry{t2020pfedme}}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Previous Work - Mixture FL}
+
+The ``weak'' consensus problem (originally stated as ``mixture'' FL problem)
+$$\text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + \dfrac{\lambda}{2} \sum\limits_{i=1}^N \lVert x_i - \overline{x} \rVert^2$$
+can be reformulated as constrained optimization problems
+\begin{align*}
+    & \text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + \dfrac{\lambda}{2} \sum\limits_{i=1}^N \lVert x_i \rVert^2 -\dfrac{\lambda N}{2} \lVert z \rVert^2 \\
+    & \text{subject to} \quad Nz - \sum\limits_{i=1}^N x_i = 0
+\end{align*}
+which is a nonconvex sharing problem.
+
+\blfootnote{\tiny \cite{hanzely2020federated}\bibentry{hanzely2020federated}}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Maximizing Correlation}
+
+Personalization is formulated in pFedMac \cite{li2021pfedmac} as
+\begin{align*}
+    & \text{minimize} \quad \sum\limits_{i=1}^N F_i(x), \\
+    & \text{where} \quad F_i(x) = \min \left\{ f_i(x_i) - \lambda \langle x_i, x \rangle  + \dfrac{\lambda}{2} \lVert x \rVert^2 \right\} \\
+    & \phantom{\text{where} \quad F_i(x)} = \min \left\{ \underbrace{f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i - x \rVert^2}_{\text{pFedme}} {\color{red}- \lVert x_i \rVert^2} \right\}
+\end{align*}
+
+\blfootnote{\tiny \cite{li2021pfedmac}\bibentry{li2021pfedmac}}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Maximizing Correlation}
+
+pFedMac can also be formulated as
+
+$$\text{minimize} \sum\limits_{i=1}^N \left\{ f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i - x \rVert^2 - \lVert x_i \rVert^2 \right\}$$
 
 \end{frame}
 
