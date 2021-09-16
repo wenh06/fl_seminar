@@ -69,7 +69,7 @@ pFedMe (Personalized Federated Learning with Moreau Envelopes (or proximity oper
     & \text{minimize} \quad \sum\limits_{i=1}^N F_i(x), \\
     & \text{where} \quad F_i(x) = \min \left\{ f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i - x \rVert^2 \right\}
 \end{align*}
-which is equivalent to
+which is closely related to
 \begin{align*}
     & \text{minimize} \quad \sum\limits_{i=1}^N \left( f_i(x_i) + {\color{green} \dfrac{\lambda}{2} \lVert x_i - x \rVert^2} \right)
 \end{align*}
@@ -165,6 +165,10 @@ $$\text{minimize} \sum\limits_{i=1}^N \left( f_i(x_i) - \lambda \langle x_i, x \
 or
 $$\text{minimize} \sum\limits_{i=1}^N \left( f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i - x \rVert^2 - \dfrac{\lambda}{2} \lVert x_i \rVert^2 \framebox{$+ \gamma \lVert x_i \rVert_1$} \right)$$
 
+\pause
+\vspace{0.5em}
+
+Sort of elastic net
 
 \end{frame}
 
@@ -264,6 +268,18 @@ $$\phi_{\rho}(z) = \rho\sum_{n=1}^d\log\cosh\left(\frac{z_n}{\rho}\right) = \rho
 The inner-most optimization problem
 $$\argmin\limits_{\theta_{i,j}} \left\{ \widetilde{f}_{i,j}(\theta_{i,j}; \mathcal{D}_{i,j}^k) - \lambda_1 \langle \theta_{i,j}, y_{i,j}^{t,r,k} \rangle + \gamma_1 \phi_{\rho}(\theta_{i,j}) \right\}$$
 can be solved using first-order methods, ref. \cite{lin2020accelerated}
+
+\pause
+\vspace{0.5em}
+
+An alternative to smoothing $\ell_1$-norm with $\phi_{\rho}$, one can use proximal gradient method via updating by
+$$\theta_{i,j}^{(s+1)} = \operatorname{prox}_{h, \alpha_s} (\theta_{i,j}^{(s)} - \alpha_s \nabla g_{i,j}(\theta_{i,j}^{(s)}))$$
+where
+\begin{gather*}
+    h(\theta_{i,j}) = \gamma_1 \lVert \theta_{i,j} \rVert_1 \\
+    g_{i,j}(\theta_{i,j}) = \widetilde{f}_{i,j}(\theta_{i,j}; \mathcal{D}_{i,j}^k) - \lambda_1 \langle \theta_{i,j}, y_{i,j}^{t,r,k} \rangle
+\end{gather*}
+Or using the Huber regularization.
 
 \blfootnote{\tiny \cite{lin2020accelerated}\bibentry{lin2020accelerated}}
 
