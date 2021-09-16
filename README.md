@@ -57,8 +57,8 @@ to turn into a table
     * time: 2021-09-09 Thursday 19:00
     * venue: E402
     * speaker: JIN Zhengfen
-    * [notes](notes/talk7-decentralized.tex) (updating)
-8. pFedMac
+    * [raw notes](notes/talk7-decentralized.tex) (updating)
+8. pFedMac ([main resource](https://arxiv.org/pdf/2107.05330))
     * time: 2021-09-16 Thursday 20:00
     * venue: E402
     * speaker: WEN Hao
