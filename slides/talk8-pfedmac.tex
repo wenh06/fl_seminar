@@ -71,7 +71,7 @@ pFedMe (Personalized Federated Learning with Moreau Envelopes (or proximity oper
 \end{align*}
 which is equivalent to
 \begin{align*}
-    & \text{minimize} \quad \sum\limits_{i=1}^N \left( f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i - x \rVert^2 \right)
+    & \text{minimize} \quad \sum\limits_{i=1}^N \left( f_i(x_i) + {\color{green} \dfrac{\lambda}{2} \lVert x_i - x \rVert^2} \right)
 \end{align*}
 
 \blfootnote{\tiny \cite{t2020pfedme}\bibentry{t2020pfedme}}
@@ -88,8 +88,8 @@ The ``weak'' consensus problem (originally stated as ``mixture'' FL problem)
 $$\text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + \dfrac{\lambda}{2} \sum\limits_{i=1}^N \lVert x_i - \overline{x} \rVert^2$$
 can be reformulated as constrained optimization problems
 \begin{align*}
-    & \text{minimize} \quad \sum\limits_{i=1}^N f_i(x_i) + \dfrac{\lambda}{2} \sum\limits_{i=1}^N \lVert x_i \rVert^2 -\dfrac{\lambda N}{2} \lVert z \rVert^2 \\
-    & \text{subject to} \quad Nz - \sum\limits_{i=1}^N x_i = 0
+    & \text{minimize} \quad \sum\limits_{i=1}^N \left( f_i(x_i) + {\color{brown} \dfrac{\lambda}{2} \lVert x_i \rVert^2 -\dfrac{\lambda}{2} \lVert x \rVert^2} \right) \\
+    & \text{subject to} \quad Nx - \sum\limits_{i=1}^N x_i = 0
 \end{align*}
 which is a nonconvex sharing problem.
 
@@ -101,13 +101,13 @@ which is a nonconvex sharing problem.
 % Page 15
 
 \begin{frame}
-\frametitle{Maximizing Correlation}
+\frametitle{Maximizing Correlation - pFedMac}
 
 Personalization is formulated in pFedMac \cite{li2021pfedmac} as
 \begin{align*}
     & \text{minimize} \quad \sum\limits_{i=1}^N F_i(x), \\
-    & \text{where} \quad F_i(x) = \min \left\{ f_i(x_i) - \lambda \langle x_i, x \rangle  + \dfrac{\lambda}{2} \lVert x \rVert^2 \right\} \\
-    & \phantom{\text{where} \quad F_i(x)} = \min \left\{ \underbrace{f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i - x \rVert^2}_{\text{pFedme}} {\color{red}- \lVert x_i \rVert^2} \right\}
+    & \text{where} \quad F_i(x) = \min \left\{ \framebox{$f_i(x_i) - \underbrace{\color{magenta} \lambda \langle x_i, x \rangle}_{\text{correlation}}$}  + \dfrac{\lambda}{2} \lVert x \rVert^2 \right\} \\
+    & \phantom{\text{where} \quad F_i(x)} = \min \left\{ \underbrace{f_i(x_i) + {\color{green} \dfrac{\lambda}{2} \lVert x_i - x \rVert^2}}_{\text{pFedMe}} {\color{red}- \dfrac{\lambda}{2} \lVert x_i \rVert^2} \right\}
 \end{align*}
 
 \blfootnote{\tiny \cite{li2021pfedmac}\bibentry{li2021pfedmac}}
@@ -118,11 +118,176 @@ Personalization is formulated in pFedMac \cite{li2021pfedmac} as
 % Page 15
 
 \begin{frame}
-\frametitle{Maximizing Correlation}
+\frametitle{Maximizing Correlation - pFedMac}
 
-pFedMac can also be formulated as
+\begin{align*}
+    F_i(x) & = \min_{x_i}\left\{ f_i(x_i) - \lambda \langle x_i, x \rangle \right\} + \dfrac{\lambda}{2} \lVert x \rVert^2 \\
+    & = \dfrac{\lambda}{2} \lVert x \rVert^2 - \max_{x_i} \left\{ \langle x_i, \lambda x \rangle - f_i(x_i) \right\} \\
+    & = \dfrac{\lambda}{2} \lVert x \rVert^2 - f_i^*(\lambda x)
+\end{align*}
+where $f_i^*$ is the conjugate function of $f_i$.
 
-$$\text{minimize} \sum\limits_{i=1}^N \left\{ f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i - x \rVert^2 - \lVert x_i \rVert^2 \right\}$$
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Comparison}
+
+Rewrite pFedMac
+
+$$\text{minimize} \sum\limits_{i=1}^N \left( f_i(x_i) + {\color{red} \dfrac{\lambda}{2} \lVert x_i - x \rVert^2 - \dfrac{\lambda}{2} \lVert x_i \rVert^2} \right)$$
+
+\pause
+{\smaller
+\begin{align*}
+    \phantom{aaaaaaaa} \text{Mixture FL} & \phantom{aaaa} {\color{brown} \dfrac{\lambda}{2} \lVert x_i \rVert^2 -\dfrac{\lambda}{2} \lVert x \rVert^2} \\
+    \phantom{aaaaaaaa} \text{pFedMe} & \phantom{aaaa} {\color{green} \dfrac{\lambda}{2} \lVert x_i - x \rVert^2}
+\end{align*}
+}
+
+\end{frame}
+
+%------------------------------------------------
+
+\section[Communication]{Communication Efficiency}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Sparsity Extension - pFedMac-S}
+
+By adding $\ell_1$ penalty of local model parameters, one has the sparse extension of pFedMac (pFedMac-S)
+
+$$\text{minimize} \sum\limits_{i=1}^N \left( f_i(x_i) - \lambda \langle x_i, x \rangle + \dfrac{\lambda}{2} \lVert x \rVert^2 \framebox{$+ \gamma \lVert x_i \rVert_1$} \right)$$
+or
+$$\text{minimize} \sum\limits_{i=1}^N \left( f_i(x_i) + \dfrac{\lambda}{2} \lVert x_i - x \rVert^2 - \dfrac{\lambda}{2} \lVert x_i \rVert^2 \framebox{$+ \gamma \lVert x_i \rVert_1$} \right)$$
+
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Hierarchical Extension - pFedMac-SH}
+
+The hierarchy is
+$$\text{\bf {\color{green}Client} $\to$ {\color{brown}Edge} $\to$ {\color{red}Central(Cloud)}}$$
+hence the problem is further split into 3 levels
+{\smaller
+\begin{align*}
+    & {\color{red}\text{minimize} \quad \sum\limits_{i=1}^N F_i(x)} \\
+    & \text{where} {\color{brown}\quad F_i(x) = \min_{x_i} \left\{ \dfrac{1}{J} \sum\limits_{j=1}^J F_{i,j}(x_i) - \lambda_2 \langle x_i, x \rangle  + \dfrac{\lambda_2}{2} \lVert x \rVert^2 \right\}} \\
+    & \text{and} \quad \ \ {\color{green}F_{i,j}(x_i) = \min_{x_{i,j}} \left\{ f_{i,j}(x_{i,j}) - \lambda_1 \langle x_{i,j}, x_i \rangle  + \dfrac{\lambda_1}{2} \lVert x_i \rVert^2 \framebox{$+ \gamma \lVert x_{i,j} \rVert_1$} \right\}}
+\end{align*}
+}
+
+\end{frame}
+
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{pFedMac - Algorithm}
+
+{\smaller
+\begin{algorithm}[H]
+\SetAlgoNoLine
+\DontPrintSemicolon
+{\bfseries {\color{red}Cloud server executes}:}\;
+    \Indp \For{$t = 0, 1, \cdots, T-1$}{
+        \For{$i=1,2,\cdots,N$ in parallel}{
+            $x_i^{t+1}$ $\gets$ {\bf \color{brown}EdgeUpdate}(i, $x^t$)\;
+        }
+        $\mathcal{S}^t$ $\gets$ (random set of $S$ edge servers)\;
+        $x^{t+1}$ $\gets$ $(1-\beta)x^t + \beta\frac{1}{S}\sum_{i\in\mathcal{S}^t}x_i^{t+1}$ \quad averaging
+    }
+\Indm
+\vspace{0.5em}
+{{\bf \color{brown}EdgeUpdate}(i, $x^t$):}\;
+    \Indp $y_i^{t,0} = x_i^{t,0} = x^t$\;
+    \For{$r = 0,1,\cdots,R-1$}{
+        \For{$j = 1,2,\cdots,J$}{
+            $y_{i,j}^{t,r+1}$ $\gets$ {\bf \color{green}ClientUpdate}(j, $y_{i,j}^{t,r}$)\;
+        }
+        $y_i^{t,r+1}$ $\gets$ $\frac{1}{J}\sum_{j=1}^J y_{i,j}^{t,r+1}$\;
+        $x_i^{t,r+1}$ $\gets$ $x_i^{t,r} - \eta_2\lambda_2 (x_i^{t,r}-y_i^{t,r+1})$ \quad (S)GD\;
+        return $x_i^{t,R}$
+    }
+\Indm
+\caption{pFedMac-SH}
+\end{algorithm}
+
+}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{pFedMac - Algorithm Continued}
+
+\setcounter{algocf}{0}
+
+{\smaller
+\begin{algorithm}[H]
+\SetAlgoNoLine
+\DontPrintSemicolon
+{{\bf \color{green}ClientUpdate}(j, $y_{i,j}^{t,r}$):}\;
+    \Indp $y_{i,j}^{t,r,0} \gets y_{i,j}^{t,r}$\;
+    \For{$k = 0,1,\cdots,K-1$}{
+        $\mathcal{D}_{i,j}^k$ $\gets$ (sample a mini batch with size $D$) \;
+        $\widetilde{\theta}_{i,j}^{t,r,k}$ $\gets$ \colorbox{pink}{$\argmin\limits_{\theta_{i,j}} \left\{ \widetilde{f}_{i,j}(\theta_{i,j}; \mathcal{D}_{i,j}^k) - \lambda_1 \langle \theta_{i,j}, y_{i,j}^{t,r,k} \rangle + \gamma_1 \framebox{$\phi_{\rho}(\theta_{i,j})$} \right\}$} \;
+        $y_{i,j}^{t,r,k+1}$ $\gets$ $y_{i,j}^{t,r,k} - \eta_1\lambda_2(y_{i,j}^{t,r,k} - \widetilde{\theta}_{i,j}^{t,r,k}) \quad (S)GD$
+    }
+    return $y_{i,j}^{t,r,K}$
+\caption{pFedMac-SH}
+\end{algorithm}
+
+$\widetilde{f}_{i,j}(\theta_{i,j}; \mathcal{D}_{i,j}^k)$ denotes objective function evaluated using data $\mathcal{D}_{i,j}^k$. $\phi_{\rho}$ is a twice continuously differentiable approximation of the $\ell_1$-norm:
+$$\phi_{\rho}(z) = \rho\sum_{n=1}^d\log\cosh\left(\frac{z_n}{\rho}\right) = \rho\sum_{n=1}^d\log \left( \frac{\exp(z_n/\rho) + \exp(-z_n/\rho)}{2} \right)$$
+}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{pFedMac - Algorithm Continued}
+
+The inner-most optimization problem
+$$\argmin\limits_{\theta_{i,j}} \left\{ \widetilde{f}_{i,j}(\theta_{i,j}; \mathcal{D}_{i,j}^k) - \lambda_1 \langle \theta_{i,j}, y_{i,j}^{t,r,k} \rangle + \gamma_1 \phi_{\rho}(\theta_{i,j}) \right\}$$
+can be solved using first-order methods, ref. \cite{lin2020accelerated}
+
+\blfootnote{\tiny \cite{lin2020accelerated}\bibentry{lin2020accelerated}}
+
+\end{frame}
+
+%------------------------------------------------
+
+\section{Problems}
+
+%------------------------------------------------
+% Page 15
+
+\begin{frame}
+\frametitle{Problems}
+
+\begin{itemize}
+    \item vanilla pFedMac: guarantee of finiteness of local (inner) problem $F_i(x) = \dfrac{\lambda}{2} \lVert x \rVert^2 - f_i^*(\lambda x)$, or finiteness of $f_i^*$ for arbitrary $f_i$?
+    \vspace{0.3em}
+    \item theoretical comparison (convergence, performance(?), etc.) of personalization methods (models), including ``mixture FL'', ``pFedMe'', ``pFedMac''
+    \vspace{0.3em}
+    \item hierarchical ADMM (if split)?
+    \vspace{0.3em}
+    \item hierarchical decentralized version (i.e. no central cloud server), and combination with techniques including gradient tracking and compression, etc.
+\end{itemize}
 
 \end{frame}
 
