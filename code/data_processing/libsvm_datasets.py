@@ -1,5 +1,5 @@
 """
-dataset readers, including datasets from LIBSVM library, Cifar, etc.
+dataset readers, for datasets from LIBSVM library
 """
 from typing import Tuple
 
