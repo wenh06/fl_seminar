@@ -3,9 +3,11 @@ federated seminar held at BUAA
 
 <!-- toc -->
 
-- [Time](#time)
-- [Venue](#venue)
-- [Programme](#programme-planned)
+- [fl_seminar](#fl_seminar)
+  - [Time](#time)
+  - [Venue](#venue)
+  - [Programme (planned)](#programme-planned)
+  - [Compilation](#compilation)
 - [More resources](#more-resources)
 
 <!-- tocstop -->
@@ -45,19 +47,41 @@ to turn into a table
     * time: 2021-06-24 Thursday 20:00
     * venue: E402
     * speaker: WEN Hao
-    * [slides](slides/talk5-gadmm.tex) (updating)
+    * [slides](slides/talk5-gadmm.tex)
 6. Compression (resources inside the [slides](slides/talk6-compression.tex))
     * time: 2021-07-15 Thursday 20:00
     * venue: E402
     * speaker: WEN Hao
-    * [slides](slides/talk6-compression.tex) (updating)
-7. FedAvg ([PDF](https://arxiv.org/abs/1602.05629))
-8. Local SGD Converges Fast and Communicates Little ([PDF](https://arxiv.org/abs/1805.09767))
-9. On the Convergence of FedAvg on Non-IID Data ([PDF](https://arxiv.org/abs/1907.02189))
-10. Adaptive Federated Optimization ([PDF](https://arxiv.org/abs/2003.00295))
-11. FedProx ([PDF](https://arxiv.org/abs/1812.06127))
-12. Federated Learning of a Mixture of Global and Local Models ([PDF](https://arxiv.org/abs/2002.05516))
-13. more....
+    * [slides](slides/talk6-compression.tex)
+7. Gradient Tracking in Decentralized Optimization
+    * time: 2021-09-09 Thursday 19:00
+    * venue: E402
+    * speaker: JIN Zhengfen
+    * [raw notes](notes/talk7-decentralized.tex) (updating)
+8. pFedMac ([main resource](https://arxiv.org/pdf/2107.05330))
+    * time: 2021-09-16 Thursday 20:00
+    * venue: E402
+    * speaker: WEN Hao
+    * [slides](slides/talk8-pfedmac.tex) (updating)
+<!--7. FedAvg ([PDF](https://arxiv.org/abs/1602.05629))-->
+<!--8. Local SGD Converges Fast and Communicates Little ([PDF](https://arxiv.org/abs/1805.09767))-->
+<!--9. On the Convergence of FedAvg on Non-IID Data ([PDF](https://arxiv.org/abs/1907.02189))-->
+<!--10. Adaptive Federated Optimization ([PDF](https://arxiv.org/abs/2003.00295))-->
+<!--11. FedProx ([PDF](https://arxiv.org/abs/1812.06127))-->
+<!--12. Federated Learning of a Mixture of Global and Local Models ([PDF](https://arxiv.org/abs/2002.05516))-->
+<!--13. more....-->
+
+
+## Compilation
+The best way for compilation is to import this project into [Overleaf](https://www.overleaf.com/).
+For local compilation,
+
+```bash
+python compile.py
+```
+
+with `texlive-full` and `latexmk` etc. installed.
+
 
 # More resources
 1. A comprehensive survey article: Advances and open problems in federated learning ([PDF](https://arxiv.org/abs/1912.04977))

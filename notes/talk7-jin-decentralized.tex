@@ -1,0 +1,54 @@
+
+\begin{document}
+
+\title{Talk 7: Gradient Tracking in Decentralized Optimization}
+\date{2021-9-9}
+\author{JIN Zhengfen}
+
+\maketitle
+
+{\bfseries Main Resource: \cite{li2021accelerated, song2021compressed, liao2021compressed, zhang2019decentralized, xin2020gradient, sun2020improving}}
+
+\vspace{2em}
+
+\noindent{\bf \large Key points:}
+\begin{itemize}
+    \item decentralized, gradient tracking, compression
+    \item (strongly) convex + smooth, non-convex + smooth
+    \item neural networks, empirical risk minimization
+\end{itemize}
+
+\vspace{2em}
+
+\noindent{\bf \large Gradient Tracking}
+
+problem
+$$\min_{\theta} f(\theta) = \dfrac{1}{n}\sum\limits_{i=1}^n f_i(\theta)$$
+
+DGD (decentralized gradient descent):
+$$\theta^i_{k+1} = \sum\limits_{r\in\mathcal{N}_i} w_{ir} \theta^r_k - \alpha_k \nabla f_i(\theta^i_k)$$
+
+GT(gradient tracking)-DGD:
+\begin{align*}
+    \theta^i_{k+1} & = \sum\limits_{r\in\mathcal{N}_i} w_{ir} \theta^r_k - \alpha_k d_k^i \\
+    \text{GT} \to d_{k+1}^i & = \framebox{$\sum\limits_{r\in\mathcal{N}_i} w_{ir}d_k^r$} + \nabla f_i(\theta^i_{k+1}) \ \framebox{$- f_i(\theta^i_k)$}
+\end{align*}
+
+$\rightsquigarrow$ DSDG, GT-DSGD, with gradients $\nabla f_i(\theta^i_{k+1})$, $f_i(\theta^i_k)$ replaced by stochastic gradients $\nabla f_{i,s_i^{k+1}}(\theta^i_{k+1})$, $f_{i,s_i^k}(\theta^i_k)$ resp.
+
+$\rightsquigarrow$ accelerated gradient tracking over {\bf time-varying graphs}.
+
+\begin{question}[TODO]
+Compare gradient tracking and variance reduction.
+\end{question}
+
+Gradient compression and error feedback (ref. Talk 6),
+\begin{itemize}
+    \item compressed gradient tracking \cite{liao2021compressed}
+    \item compressed push-pull \cite{song2021compressed}
+\end{itemize}
+
+\bibliographystyle{ieeetr}
+\bibliography{references}
+
+\end{document}
