@@ -56,7 +56,7 @@ class FedCIFAR(FedVisionDataset):
             self._client_ids_train = list(train_h5[self._EXAMPLE].keys())
             self._client_ids_test = list(test_h5[self._EXAMPLE].keys())
 
-    def _preload(self) -> NoReturn:
+    def _preload(self, datadir:Optional[str]=None) -> NoReturn:
         """
         """
         pass

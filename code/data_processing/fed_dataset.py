@@ -42,7 +42,7 @@ class FedVisionDataset(ABC):
         self._IMGAE = "image"
         self._LABEL = "label"
 
-        self._preload()
+        self._preload(datadir)
 
         assert all([
             self.datadir is not None,
@@ -63,7 +63,7 @@ class FedVisionDataset(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def _preload(self) -> NoReturn:
+    def _preload(self, datadir:Optional[str]=None) -> NoReturn:
         """
         """
         raise NotImplementedError
@@ -195,7 +195,7 @@ class FedNLPDataset(ABC):
         _batch_size = batch_size or self.DEFAULT_BATCH_SIZE
         if process_id == 0:
             # get global dataset
-            train_data_global, test_data_global = self.get_dataloader(batch_size, batch_size, process_id - 1)
+            train_data_global, test_data_global = self.get_dataloader(batch_size, batch_size)
             train_data_num = len(train_data_global.dataset)
             test_data_num = len(test_data_global.dataset)
             train_data_local = None
@@ -269,7 +269,18 @@ class FedNLPDataset(ABC):
         return retval
 
     @abstractmethod
-    def get_word_dict(self) -> int:
+    def get_word_dict(self) -> Dict[str,int]:
         """
         """
         raise NotImplementedError
+
+    def __repr__(self) -> str:
+        return default_class_repr(self)
+
+    def __str__(self) -> str:
+        return repr(self)
+
+    def extra_repr_keys(self) -> List[str]:
+        """
+        """
+        return ["datadir",]
