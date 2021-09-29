@@ -1,5 +1,5 @@
 """
-abstract classes of federated dataset provided by FedML, and more
+abstract base classes of federated dataset provided by FedML, and more
 """
 
 from abc import ABC, abstractmethod
