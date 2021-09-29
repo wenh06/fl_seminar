@@ -170,3 +170,4 @@ dmypy.json
 # compiled files
 *.mexa64
 
+.data_cache/
