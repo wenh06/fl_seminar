@@ -14,7 +14,7 @@ import torchvision.transforms as transforms
 from misc import CACHED_DATA_DIR, default_class_repr
 
 
-__all__ = ["FedCIFAR", "FedCIFAR100"]
+__all__ = ["FedCIFAR", "FedCIFAR100",]
 
 
 FED_CIFAR_DATA_DIRS = {
@@ -28,6 +28,7 @@ for n_class in [10, 100,]:
 
 class FedCIFAR(object):
     """
+    most methods in this class are modified from FedML
     """
     __name__ = "FedCIFAR"
 
