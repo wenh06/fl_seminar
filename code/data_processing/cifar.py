@@ -4,7 +4,7 @@ dataset readers, including Cifar10, Cifar100
 
 import os
 import json
-from typing import NoReturn, Optional, List, Callable, Tuple, Dict, Sequence
+from typing import NoReturn, Optional, Union, List, Callable, Tuple, Dict, Sequence
 
 import numpy as np
 import torch
@@ -13,7 +13,7 @@ import torch.utils.data as data
 import torchvision.transforms as transforms
 from torchvision.datasets import CIFAR10, CIFAR100
 
-from ..misc import CACHED_DATA_DIR
+from misc import CACHED_DATA_DIR, default_class_repr
 
 
 __all__ = [
@@ -103,6 +103,17 @@ class CIFAR_truncated(data.Dataset):
     def __len__(self) -> int:
         return len(self.data)
 
+    def __repr__(self) -> str:
+        return default_class_repr(self)
+
+    def __str__(self) -> str:
+        return repr(self)
+
+    def extra_repr_keys(self) -> List[str]:
+        """
+        """
+        return ["n_class", "root",]
+
 
 class CIFAR10_truncated(CIFAR_truncated):
     """
@@ -110,7 +121,7 @@ class CIFAR10_truncated(CIFAR_truncated):
     __name__ = "CIFAR10_truncated"
 
     def __init__(self,
-                 root:str,
+                 root:Optional[str]=None,
                  dataidxs:Optional[List[int]]=None,
                  train:bool=True,
                  transform:Optional[Callable]=None,
@@ -127,7 +138,7 @@ class CIFAR100_truncated(CIFAR_truncated):
     __name__ = "CIFAR100_truncated"
 
     def __init__(self,
-                 root:str,
+                 root:Optional[str]=None,
                  dataidxs:Optional[List[int]]=None,
                  train:bool=True,
                  transform:Optional[Callable]=None,
@@ -135,7 +146,7 @@ class CIFAR100_truncated(CIFAR_truncated):
                  download:bool=False) -> NoReturn:
         """
         """
-        super().__init__(root, 100, dataidxs, train, transform, target_transform, download)
+        super().__init__(100, root, dataidxs, train, transform, target_transform, download)
 
 
 class Cutout(object):
