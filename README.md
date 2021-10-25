@@ -63,6 +63,11 @@ to turn into a table
     * venue: E402
     * speaker: WEN Hao
     * [slides](slides/talk8-pfedmac.tex) (updating)
+9. Operator Splitting and FL (main resources: [FedSplit](https://arxiv.org/abs/2005.05238) and [FedDR](https://arxiv.org/abs/2103.03452))
+    * time (planned): 2021-10-28 Thursday 20:00
+    * venue: E402
+    * speaker: WEN Hao
+    * notes/slides (To update....)
 <!--7. FedAvg ([PDF](https://arxiv.org/abs/1602.05629))-->
 <!--8. Local SGD Converges Fast and Communicates Little ([PDF](https://arxiv.org/abs/1805.09767))-->
 <!--9. On the Convergence of FedAvg on Non-IID Data ([PDF](https://arxiv.org/abs/1907.02189))-->
