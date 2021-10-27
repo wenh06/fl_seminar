@@ -245,11 +245,29 @@ $$0 \in \nabla F(x) + \mathcal{N}_E(x)$$
 where
 \begin{align*}
 \mathcal{N}_E(x) & = \begin{cases} E^{\perp} & \text{ if } x \in E \\ \emptyset & \text{ otherwise } \end{cases} \text{normal cone} \\
-E & = \{x \ |\ x_1 = \cdots = x_m\} \\
-E^{\perp} & = \left\{ y \ \middle|\ \langle y, \widetilde{x} - x \rangle \leqslant 0 \ \forall \widetilde{x} \in E \right\} \\
-& = \left\{ y \ \middle|\ \langle \sum\limits_{j=1}^m y_j, \widetilde{x}_1 - x_1 \rangle \leqslant 0 \ \forall \widetilde{x}_1 \in \mathbb{R}^d \right\} \\
-& = \left\{ y \ \middle|\ \sum\limits_{j=1}^m y_j = 0 \right\}
+E & = \{x \ |\ x_1 = \cdots = x_m\}
 \end{align*}
+Indeed for $x\in E$,
+\begin{align*}
+\mathcal{N}_E(x) & = \left\{ y \ \middle|\ \langle y, \widetilde{x} - x \rangle \leqslant 0 \ \forall \widetilde{x} \in E \right\} \\
+& = \left\{ y \ \middle|\ \langle \sum\nolimits_{j=1}^m y_j, \widetilde{x}_1 - x_1 \rangle \leqslant 0 \ \forall \widetilde{x}_1 \in \mathbb{R}^d \right\} \\
+& = \left\{ y \ \middle|\ \sum\nolimits_{j=1}^m y_j = 0 \right\} = E^{\perp}
+\end{align*}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 1
+
+\begin{frame}
+\frametitle{FedSplit - Problem Reformulation}
+
+\begin{block}{Another Perspective of Problem Reformulation}
+Let $\iota_E$ be the indicator function of $E$, then the constrained problem can be reformulated as the following unconstrained one
+$$\min \ F(x) + \iota_E(x), \quad x \in \mathbb{R}^{md}$$
+The first-order optimal condition gives
+$$0 \in \nabla F(x) + \partial \iota_E(x) = \nabla F(x) + \mathcal{N}_E(x)$$
+\end{block}
 
 \end{frame}
 
@@ -280,13 +298,59 @@ i.e. we are reduced to finding fixed points of the nonexpansive operator $ C_AC_
 \frametitle{FedSplit - Operator Splitting}
 
 Now consider $\mathcal{F} = \nabla F + \mathcal{N}_E$, one is reduced to find fixed points of $C_AC_B$ with $A = \nabla F$, $B = \mathcal{N}_E$. One has
-$$R_{\nabla F} = \operatorname{prox}_{sF}, \quad R_{\mathcal{N}_E} = P_{E}$$
+$$R_{\nabla F} = \operatorname{prox}_{sF}, \quad R_{\mathcal{N}_E} = \Pi_{E}$$
 and
 \begin{align*}
 \operatorname{prox}_{sF}(x) & = \argmin_z \left\{ F(z) + \frac{1}{2s} \lVert z-x \rVert^2 \right\} \\
 & = \argmin_z \left\{ \sum_{j=1}^m f_j(z_j) + \frac{1}{2s} \sum_{j=1}^m \lVert z_j-x_j \rVert^2 \right\} \\
 & = (\operatorname{prox}_{sf_j}(x_j))_{j=1}^m
 \end{align*}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 1
+
+\begin{frame}
+\frametitle{FedSplit - Operator Splitting}
+
+\begin{itemize}
+    \item Peaceman-Rachford splitting
+    $$z^{(t+1)} = C_A C_B(z^{(t)})$$
+    \item Douglas-Rachford splitting
+    $$z^{(t+1)} = \frac12(I + C_A C_B)(z^{(t)})$$
+\end{itemize}
+
+\vspace{-0.8em}
+
+\begin{columns}
+\begin{column}{0.4\textwidth}
+\begin{block}{Peaceman-Rachford}
+\ 
+\vspace{-1.3em}
+\begin{align*}
+x^{(t+1/2)} & = R_B(z^{(t)}) \\
+z^{(t+1/2)} & = 2x^{(t+1/2)} - z^{(t)} \\
+x^{(t+1)} & = R_A(z^{(t+1/2)}) \\
+z^{(t+1)} & = z^{(t)} + 2x^{(t+1)} \\
+& \phantom{=} - 2x^{(t+1/2)}
+\end{align*}
+\end{block}
+\end{column}
+\begin{column}{0.4\textwidth}
+\begin{block}{Douglas-Rachford}
+\ 
+\vspace{-1.3em}
+\begin{align*}
+x^{(t+1/2)} & = R_B(z^{(t)}) \\
+z^{(t+1/2)} & = 2x^{(t+1/2)} - z^{(t)} \\
+x^{(t+1)} & = R_A(z^{(t+1/2)}) \\
+z^{(t+1)} & = z^{(t)} + x^{(t+1)} \\
+& \phantom{=} - x^{(t+1/2)}
+\end{align*}
+\end{block}
+\end{column}
+\end{columns}
 
 \end{frame}
 
@@ -308,7 +372,7 @@ and
         Local prox step: $z_j^{(t+1/2)} \gets$ $\texttt{prox\_update}_j(2x^{(t)} - z_j^{(t)})$\;
         Local centering step: $z_j^{(t+1)} \gets$ $z_j^{(t)} + 2(z_j^{(t+1/2)} - x^{(t)})$
         }
-    Compute global average: $x^{(t+1)} \gets \overline{z}{(t+1)}$\;
+    Compute global average: $x^{(t+1)} \gets \overline{z}^{(t+1)}$\;
     \If{meet convergent criteria}{
         $x^* \gets x^{(t+1)}$\;
         {\bfseries break}\;
@@ -318,6 +382,48 @@ return $x^*$\;
 \caption{FedSplit}
 \end{algorithm}
 }
+
+Note the difference against previous iteration form of Peaceman-Rachford:
+\begin{center}
+first step -> last step; 2, 3 step merges; parameters renamed
+\end{center}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 1
+
+\begin{frame}
+\frametitle{FedSplit - Correctness and Convergence}
+
+\begin{prop}[Correctness]
+If $z^* = (z_1^*, \cdots, z_m^*)$ is a fixed point of \texttt{FedSplit}, then $x^* := \Pi_E(z^*) = \frac{1}{m} \sum_{j=1}^m z_j^*$ is an optimal solution to the original problem $\min\limits_{x} \sum_{j=1}^m f_j(x)$.
+\end{prop}
+
+\begin{thm}[Convergence]
+Let $f_j$ be $\ell_j$-strongly convex and $L_j$-smooth, $\ell_* = \min \ell_j$, $L^* = \max L_j$, $\kappa = L^*/\ell_*$. {\color{red} Take step size $s = 1 / \sqrt{\ell_*L^*}$}, and assume $\lVert \texttt{prox\_update}_j(z) - \operatorname{prox}_{sf_j}(z) \rVert \leqslant b$, then
+$$\lVert x^{(t+1)} - x^* \rVert \leqslant \left( 1 - \frac{2}{\sqrt{\kappa}+1} \right)^t \frac{\lVert z^{(1)} - z^* \rVert}{\sqrt{m}} + (\sqrt{\kappa}+1)b$$
+\end{thm}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 1
+
+\begin{frame}
+\frametitle{FedSplit - Non Strongly Convex Case}
+
+Consider a suitable regularization
+\begin{align*}
+\min & F_{\lambda}(z) = \sum_{j=1}^m \left( f_j(z_j) + \frac{\lambda}{2}\lVert z_j - x^{(1)} \rVert^2 \right) \\
+\text{s.t.} & z_1 = \cdots z_m
+\end{align*}
+
+\begin{thm}
+Let $\lambda \in \left(0, \frac{\varepsilon}{m\lVert x^* - x^{(1)} \rVert^2}\right)$, error bound $F(\widehat{x}) - F^* \leqslant \varepsilon$, \texttt{FedSplit} with regularized objective $F_{\lambda}$ and step size $s = 1/\sqrt{\lambda(L^*+\lambda)}$ converges in at most
+$$O \left( \sqrt{\frac{L^*\lVert x^* - x^{(1)} \rVert^2}{\varepsilon}} \right)$$
+iterations
+\end{thm}
 
 \end{frame}
 
@@ -329,7 +435,25 @@ return $x^*$\;
 % Page 1
 
 \begin{frame}
-\frametitle{Motivation}
+\frametitle{Motivation and Formulation}
+
+\begin{block}{Motivation}
+\begin{itemize}
+    \item Nonconvex Douglas-Rachford splitting
+    \item randomized block-coordinate strategy
+\end{itemize}
+\end{block}
+
+\begin{block}{Problem Formulation}
+\ 
+\vspace{-1.3em}
+$$\min_x F(x) = f(x) + g(x) = \frac{1}{n} \sum_{i=1}^n f_i(x) + g(x)$$
+\vspace{-1.3em}
+\begin{itemize}
+    \item $f_i$ nonconvex, $L$-smooth,
+    \item $g$ closed proper convex
+\end{itemize}
+\end{block}
 
 
 \blfootnote{
