@@ -43,7 +43,7 @@
 
 \begin{block}{The Optimization Problem}
 Let $f_j$ be finite convex, with Lipschitz gradient.
-\vspace{-1em}
+\vspace{-0.6em}
 \begin{align*}
     \text{min} & \quad F(x) := \sum_{j=1}^m f_j(x_j) \\
     \text{s.t.} & \quad x_1 = \cdots = x_m \in \mathbb{R}^d, \quad x = (x_1, \cdots, x_m)
@@ -116,9 +116,9 @@ $$\sum\limits_{i=1}^e\sum\limits_{j=1}^m \nabla f_j(G_j^{i-1}(x^*)) = 0.$$
 Indeed, one has
 {\smaller
 \begin{align*}
-0 = & \frac{1}{m}\sum_{j=1}^m G^e_j(x^{*}) - x^{*} \\
-= & \frac{1}{m}\sum_{j=1}^m \left( G^{e-1}_j(x^{*}) - s\nabla F_j (G^{e-1}_j(x^{*})) \right) - x^{*} \\
-= & \frac{1}{m}\sum_{j=1}^m G^{e-1}_j(x^{*}) - x^{*} - \frac{s}{m}\sum_{j=1}^m\nabla F_j (G^{e-1}_j(x^{*})) \\
+0 = & \frac{1}{m}\sum_{j=1}^m G^e_j(x^{*}) - x^{*} = \frac{1}{m}\sum_{j=1}^m G_j(G^{e-1}_j(x^{*})) - x^{*} \\
+= & \frac{1}{m}\sum_{j=1}^m \left( G^{e-1}_j(x^{*}) - s\nabla f_j (G^{e-1}_j(x^{*})) \right) - x^{*} \\
+= & \frac{1}{m}\sum_{j=1}^m G^{e-1}_j(x^{*}) - x^{*} - \frac{s}{m}\sum_{j=1}^m\nabla f_j (G^{e-1}_j(x^{*})) \\
 & \hspace{3em} \vdots \\
 = & \frac{1}{m}\sum_{j=1}^m G^{0}_j(x^{*}) - x^{*} - \frac{s}{m}\sum\limits_{i=1}^e\sum\limits_{j=1}^m \nabla f_j(G_j^{i-1}(x^*)) \\
 = & - \frac{s}{m}\sum\limits_{i=1}^e\sum\limits_{j=1}^m \nabla f_j(G_j^{i-1}(x^*))
@@ -183,7 +183,7 @@ Hence
 \frametitle{Incorrectness for Least Square Problems}
 
 \begin{block}{Least Square Problem (LSP)}
-$f_j(x_j) = \frac12 \lVert A_jx_j-b_j \rVert^2$, and $A_j$ has full rank ($=d$).
+$f_j(x_j) = \frac12 \lVert A_jx_j-b_j \rVert^2$, and $A_j$ has ``full rank'' ($=d$).
 \end{block}
 
 LSP has unique solution
@@ -220,14 +220,14 @@ Settings: $m=25$, $d=100$, $A_j \in \operatorname{Mat}_{500\times 100}$, $(A_j)_
 % Page 1
 
 \begin{frame}
-\frametitle{FedSplit - Problem Reformulation}
+\frametitle{Problem Reformulation}
 
 The original problem can be reformulated as
 \begin{align*}
     \text{min} & \quad F(x) := \sum_{j=1}^m f_j(x_j) \\
     \text{s.t.} & \quad Ax = 0
 \end{align*}
-where $x = (x_1, \cdots, x_m), A = \text{{\smaller[3]$\begin{pmatrix} I & -I & & & & \\ & I & -I & & \\ & & \ddots & \ddots & \\ & & & \ddots & -I \\ -I & & & & I \end{pmatrix}$}}$
+where $x = (x_1, \cdots, x_m), A = \text{{\smaller[3]$\begin{pmatrix} I & -I & & & \\ & I & -I & & \\ & & \ddots & \ddots & \\ & & & \ddots & -I \\ -I & & & & I \end{pmatrix}$}}$
 
 Consider the first-order optimal condition for $L(x,y) = F(x) - \langle y, Ax \rangle$, i.e. $\nabla F(x) - A^Ty = 0$, or equiv.
 $$\nabla F(x) - \begin{pmatrix} y_1-y_m \\ \vdots \\ y_m-y_{m-1} \end{pmatrix} = 0$$
@@ -238,7 +238,7 @@ $$\nabla F(x) - \begin{pmatrix} y_1-y_m \\ \vdots \\ y_m-y_{m-1} \end{pmatrix} =
 % Page 1
 
 \begin{frame}
-\frametitle{FedSplit - Problem Reformulation}
+\frametitle{Problem Reformulation}
 
 Hence is a monotone inclusion problem
 $$0 \in \nabla F(x) + \mathcal{N}_E(x)$$
@@ -260,7 +260,7 @@ Indeed for $x\in E$,
 % Page 1
 
 \begin{frame}
-\frametitle{FedSplit - Problem Reformulation}
+\frametitle{Problem Reformulation}
 
 \begin{block}{Another Perspective of Problem Reformulation}
 Let $\iota_E$ be the indicator function of $E$, then the constrained problem can be reformulated as the following unconstrained one
@@ -275,7 +275,7 @@ $$0 \in \nabla F(x) + \partial \iota_E(x) = \nabla F(x) + \mathcal{N}_E(x)$$
 % Page 1
 
 \begin{frame}
-\frametitle{FedSplit - Operator Splitting}
+\frametitle{Operator Splitting}
 
 Let $\mathcal{F} = A+B$, with $A$, $B$ maximal monotone. Write
 \begin{gather*}
@@ -295,7 +295,7 @@ i.e. we are reduced to finding fixed points of the nonexpansive operator $ C_AC_
 % Page 1
 
 \begin{frame}
-\frametitle{FedSplit - Operator Splitting}
+\frametitle{Operator Splitting}
 
 Now consider $\mathcal{F} = \nabla F + \mathcal{N}_E$, one is reduced to find fixed points of $C_AC_B$ with $A = \nabla F$, $B = \mathcal{N}_E$. One has
 $$R_{\nabla F} = \operatorname{prox}_{sF}, \quad R_{\mathcal{N}_E} = \Pi_{E}$$
@@ -312,16 +312,12 @@ and
 % Page 1
 
 \begin{frame}
-\frametitle{FedSplit - Operator Splitting}
+\frametitle{Operator Splitting}
 
 \begin{itemize}
-    \item Peaceman-Rachford splitting
-    $$z^{(t+1)} = C_A C_B(z^{(t)})$$
-    \item Douglas-Rachford splitting
-    $$z^{(t+1)} = \frac12(I + C_A C_B)(z^{(t)})$$
+    \item Peaceman-Rachford $z^{(t+1)} = C_A C_B(z^{(t)})$
+    \item Douglas-Rachford $z^{(t+1)} = \frac12(I + C_A C_B)(z^{(t)})$
 \end{itemize}
-
-\vspace{-0.8em}
 
 \begin{columns}
 \begin{column}{0.4\textwidth}
@@ -352,13 +348,45 @@ z^{(t+1)} & = z^{(t)} + x^{(t+1)} \\
 \end{column}
 \end{columns}
 
+More generally, $z^{(t+1)} = z^{(t)} + \alpha (x^{(t+1)} - x^{(t+1/2)})$
+
 \end{frame}
 
 %------------------------------------------------
 % Page 1
 
 \begin{frame}
-\frametitle{FedSplit - The Algorithm}
+\frametitle{Operator Splitting}
+
+By adjusting ordering and change of variable names
+
+\begin{block}{More General and Compressed Form 1}
+\ 
+\vspace{-1.3em}
+\begin{align*}
+z^{(t+1/2)} & = R_A(2x^{(t)} - z^{(t)}) \\
+z^{(t+1)} & = z^{(t)} + \alpha (z^{(t+1/2)} - x^{(t)}) \\
+x^{(t+1)} & = R_B(z^{(t+1)})
+\end{align*}
+\end{block}
+
+\begin{block}{More General and Compressed Form 2}
+\ 
+\vspace{-1.3em}
+\begin{align*}
+z^{(t+1)} & = z^{(t)} + \alpha (y^{(t)} - x^{(t)}) \\
+x^{(t+1)} & = R_B(z^{(t+1)}) \\
+y^{(t+1)} & = R_A(2x^{(t+1)} - z^{(t+1)})
+\end{align*}
+\end{block}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 1
+
+\begin{frame}
+\frametitle{The FedSplit Algorithm}
 
 {
 \smaller
@@ -394,7 +422,7 @@ first step -> last step; 2, 3 step merges; parameters renamed
 % Page 1
 
 \begin{frame}
-\frametitle{FedSplit - Correctness and Convergence}
+\frametitle{Correctness and Convergence}
 
 \begin{prop}[Correctness]
 If $z^* = (z_1^*, \cdots, z_m^*)$ is a fixed point of \texttt{FedSplit}, then $x^* := \Pi_E(z^*) = \frac{1}{m} \sum_{j=1}^m z_j^*$ is an optimal solution to the original problem $\min\limits_{x} \sum_{j=1}^m f_j(x)$.
@@ -411,7 +439,7 @@ $$\lVert x^{(t+1)} - x^* \rVert \leqslant \left( 1 - \frac{2}{\sqrt{\kappa}+1} \
 % Page 1
 
 \begin{frame}
-\frametitle{FedSplit - Non Strongly Convex Case}
+\frametitle{Non Strongly Convex Case}
 
 Consider a suitable regularization
 \begin{align*}
@@ -455,9 +483,131 @@ $$\min_x F(x) = f(x) + g(x) = \frac{1}{n} \sum_{i=1}^n f_i(x) + g(x)$$
 \end{itemize}
 \end{block}
 
-
 \blfootnote{
 \tiny\cite{tran2021feddr} \bibentry{tran2021feddr}
+}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 1
+
+\begin{frame}
+\frametitle{Problem Reformulation}
+
+\begin{block}{Block Split Constrained Reformulation}
+\ 
+\vspace{-1.3em}
+\begin{align*}
+    \text{min} & \quad F(X) = f(X) + g(X) = \sum_{i=1}^n f_i(x_i) + g(x_{n+1}) \\
+    \text{s.t.} & \quad x_1 = \cdots = x_{n+1} \in \mathbb{R}^d, \quad X = (x_1, \cdots, x_{n+1})
+\end{align*}
+\end{block}
+
+\begin{block}{Block Split Unconstrained Reformulation}
+\ 
+\vspace{-1.3em}
+\begin{align*}
+    \text{min} \ \quad F(X) & = f(X) + g(X) + \iota_E(X) \\
+    & = \sum_{i=1}^n f_i(x_i) + g(x_{n+1}) + \iota_E(x)
+\end{align*}
+\end{block}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 1
+
+\begin{frame}
+\frametitle{Optimal Condition and Operator Splitting}
+
+\begin{block}{Optimal Condition}
+\ 
+\vspace{-1.3em}
+$$0 \in \nabla f(X) + \partial (g + \iota_E)(X)$$
+\end{block}
+
+\begin{block}{Douglas-Rachford Splitting}
+Let $B = \nabla f, A = \partial (g + \iota_E)$, then $R_B = \operatorname{prox}_{nsf}$, $R_A = \operatorname{prox}_{ns(g + \iota_E)}$. Iteration of DR splitting is
+\begin{align*}
+Y^{(t+1)} & = Y^{(t)} + \alpha (\overline{X}^{(t)} - X^{(t)}) \\
+X^{(t+1)} & = \operatorname{prox}_{nsf}(Y^{(t+1)}) \\
+\overline{X}^{(t+1)} & = \operatorname{prox}_{ns(g + \iota_E)}(2X^{(t+1)} - Y^{(t+1)})
+\end{align*}
+\end{block}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 1
+
+\begin{frame}
+\frametitle{Operator Splitting - Further Analysis}
+
+\begin{itemize}
+    \item $f = \frac{1}{n}\sum_{i=1}^n f_i(x_i)$ splits, hence
+    \begin{align*}
+        X^{(t+1)} = \operatorname{prox}_{nsf}(Y^{(t+1)}) \Rightarrow & x_i^{(t+1)} = \operatorname{prox}_{sf_i}(y_i^{(t+1)}), i\in [n]; \\
+        & x_{n+1}^{(t+1)} = y_{n+1}^{(t+1)} =: y^{(t+1)}
+    \end{align*}
+    \item write $\widehat{X}^{(t+1)} = 2X^{(t+1)} - Y^{(t+1)}$, $\widetilde{x}^{(t+1)} = \frac{1}{n}\sum_{i=1}^n \widehat{x}_k^{(t+1)}$, then $\overline{X}^{(t+1)} = \operatorname{prox}_{ns(g + \iota_E)}(2X^{(t+1)} - Y^{(t+1)})$ can be simplified
+    \begin{align*}
+        \overline{x}^{(t+1)} & = \overline{x}_i^{(t+1)} = \operatorname{prox}_{\frac{ns}{n+1}g} \left( \frac{1}{n+1} \sum_{i=1}^{n+1} \widehat{x}_i^{(t+1)} \right) \\
+        & = \operatorname{prox}_{\frac{ns}{n+1}g} \left( \frac{n}{n+1} \widetilde{x}^{(t+1)} + \frac{1}{n+1} y^{(t+1)} \right)
+    \end{align*}
+\end{itemize}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 1
+
+\begin{frame}
+\frametitle{Operator Splitting - Further Analysis}
+
+\begin{block}{Parallel DR}
+\ 
+\vspace{-1.3em}
+\begin{align*}
+y_i^{(t+1)} & = y_i^{(t)} + \alpha (\overline{x}^{(t)} - x_i^{(t)}) \\
+x_i^{(t+1)} & = \operatorname{prox}_{sf_i} (y_i^{(t+1)}) \\
+\widehat{x}_i^{(t+1)} & = 2x_i^{(t+1)} - y_i^{(t+1)} \\
+\widetilde{x}^{(t+1)} & = \frac{1}{n}\sum\nolimits_{i=1}^n \widehat{x}_i^{(t+1)} \\
+y^{(t+1)} & =  y^{(t)} + \alpha (\overline{x}^{(t)} - y^{(t)}) \\
+\overline{x}^{(t+1)} & = \operatorname{prox}_{\frac{ns}{n+1}g} \left( \frac{n}{n+1} \widetilde{x}^{(t+1)} + \frac{1}{n+1} y^{(t+1)} \right)
+\end{align*}
+\end{block}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 1
+
+\begin{frame}
+\frametitle{The FedDR Algorithm}
+
+{
+\smaller
+\begin{algorithm}[H]
+\SetAlgoNoLine
+\DontPrintSemicolon
+{\bfseries Initiation:} $x^{(0)}\in \operatorname{dom}(F)$, $s > 0$, $\alpha > 0$, $\varepsilon_{i,0} \geqslant 0$ \\
+\hspace{2em}Init server: $\overline{x}^{(0)} = \widetilde{x}^{(0)} = y^{(0)} = x^{(0)}$\\
+\hspace{2em}Init users: $y_i^{(0)} = x^{(0)}$, $x_i^{(0)} \approx \operatorname{prox}_{sf_i}(y_i^{(0)})$, $\widehat{x}_i^{(0)} = 2x_i^{(0)} - y_i^{(0)}$\;
+\For{$t = 1, 2, \cdots, T$}{
+    [Active users] Sample $\mathcal{S}_t \subseteq [n]$\;
+    [Comm] Each user $i\in\mathcal{S}_t$ receives $\overline{x}^{(t)}$ from server\;
+    [Local update] \For{each user $i\in\mathcal{S}_t$}{
+        Choose $\varepsilon_{i,t+1} \geqslant 0$, update 
+        $y_i^{(t+1)} \gets y_i^{(t)} + \alpha(\overline{x}^{(t)} - x_i^{(t)}),$ \;
+        $x_i^{(t+1)} \approx \operatorname{prox}_{sf_i}(y_i^{(t+1)}), \ \widehat{x}_i^{(t+1)} \gets 2x_i^{(t+1)} - y_i^{(t+1)}$ \;
+        }
+    [Comm] Each user $i\in\mathcal{S}_t$ sends $\Delta \widehat{x}_i^{(t)} = \widehat{x}_i^{(t+1)} - \widehat{x}_i^{(t)}$ to server\;
+    [Server update]: $y^{(t+1)} \gets y^{(t)} + \alpha (\overline{x}^{(t)} - y^{(t)})$, $\widetilde{x}^{(t+1)} \gets \widetilde{x}^{(t)} + \frac{1}{n}\sum_{i\in\mathcal{S}_t}\Delta \widehat{x}_i^{(t)}$, $\overline{x}^{(t+1)} \gets \operatorname{prox}_{\frac{ns}{n+1}g} (\frac{n}{n+1}\widetilde{x}^{(t+1)} + \frac{1}{n+1}y^{(t+1)})$ \;
+}
+return $x^{(T+1)}$\;
+\caption{FedDR}
+\end{algorithm}
 }
 
 \end{frame}
