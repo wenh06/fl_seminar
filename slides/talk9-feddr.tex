@@ -207,6 +207,28 @@ By previous propositions,
 \begin{frame}
 \frametitle{Incorrectness for Least Square Problems}
 
+Indeed, for example for \texttt{FedGD}, one has
+\begin{align*}
+\nabla f_j(x_j) & = A_j^TA_jx_j - A^T_jb_j \\
+G_j(x_j) & = x_j - s f_j(x_j) =  (I - sA_j^TA_j)x_j + sA^T_jb_j \\
+G_j^{e+1}(x_j) & = G_j(G_j^e(x_j)) = (I - sA_j^TA_j)G_j^e(x_j) + sA^T_jb_j
+\end{align*}
+Hence
+\begin{align*}
+G_j^e(x_j) & = (I - sA_j^TA_j)^e x_j + (I-(I - sA_j^TA_j)^e) (A_j^TA_j)^{-1} A_j^T b_j \\
+& = (I - sA_j^TA_j)^e x_j + (A_j^TA_j)^{-1} (I-(I - sA_j^TA_j)^e) A_j^T b_j
+\end{align*}
+From the fixed point relation {\smaller$\sum\limits_{i=1}^e\sum\limits_{j=1}^m \nabla f_j(G_j^{i-1}(x^*)) = 0$}, one has
+$$0 = \sum\limits_{i=1}^e \sum\limits_{j=1}^m \left( A_j^TA_j (I - sA_j^TA_j)^{i-1} x^* - (I - sA_j^TA_j)^{i-1}A_j^Tb_j \right).$$
+
+\end{frame}
+
+%------------------------------------------------
+% Page 1
+
+\begin{frame}
+\frametitle{Incorrectness for Least Square Problems}
+
 Settings: $m=25$, $d=100$, $A_j \in \operatorname{Mat}_{500\times 100}$, $(A_j)_{kl} \sim N(0,1)$, $b_j = A_jx_0 + \varepsilon_j$ with $\varepsilon_j \sim N(0,0.25I)$
 
 \begin{figure}
@@ -609,6 +631,15 @@ return $x^{(T+1)}$\;
 \caption{FedDR}
 \end{algorithm}
 }
+
+\end{frame}
+
+%------------------------------------------------
+% Page 1
+
+\begin{frame}
+
+TO BE CONTINUED ...
 
 \end{frame}
 
