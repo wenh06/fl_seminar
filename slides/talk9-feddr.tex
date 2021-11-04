@@ -515,6 +515,33 @@ $$\min_x F(x) = f(x) + g(x) = \frac{1}{n} \sum_{i=1}^n f_i(x) + g(x)$$
 % Page 1
 
 \begin{frame}
+\frametitle{Optimal Condition}
+
+\begin{block}{Necessary Optimal Condition}
+\ 
+\vspace{-1.3em}
+$$0 \in \nabla f(x) + \partial g(x)$$
+\end{block}
+
+This Condition has equivalent forms:
+\begin{align*}
+    0 \in \nabla f(x) + \partial g(x) & \Longleftrightarrow x - \beta \nabla f(x) \in (I + \beta \partial g) (x) \\
+    \Longleftrightarrow & (I + \beta \partial g)^{-1}(x - \beta \nabla f(x)) = x \\
+    \Longleftrightarrow & \frac{1}{\beta} (x - \operatorname{prox}_{\beta g}(x - \beta \nabla f(x))) = 0
+\end{align*}
+
+\begin{block}{Gradient mapping}
+\ 
+\vspace{-1.3em}
+$$\mathcal{G}_{\beta}(x) := \frac{1}{\beta} (x - \operatorname{prox}_{\beta g}(x - \beta \nabla f(x)))$$
+\end{block}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 1
+
+\begin{frame}
 \frametitle{Problem Reformulation}
 
 \begin{block}{Block Split Constrained Reformulation}
@@ -543,7 +570,7 @@ $$\min_x F(x) = f(x) + g(x) = \frac{1}{n} \sum_{i=1}^n f_i(x) + g(x)$$
 \begin{frame}
 \frametitle{Optimal Condition and Operator Splitting}
 
-\begin{block}{Optimal Condition}
+\begin{block}{Necessary Optimal Condition}
 \ 
 \vspace{-1.3em}
 $$0 \in \nabla f(X) + \partial (g + \iota_E)(X)$$
@@ -569,12 +596,12 @@ X^{(t+1)} & = \operatorname{prox}_{nsf}(Y^{(t+1)}) \\
 \begin{itemize}
     \item $f = \frac{1}{n}\sum_{i=1}^n f_i(x_i)$ splits, hence
     \begin{align*}
-        X^{(t+1)} = \operatorname{prox}_{nsf}(Y^{(t+1)}) \Rightarrow & x_i^{(t+1)} = \operatorname{prox}_{sf_i}(y_i^{(t+1)}), i\in [n]; \\
-        & x_{n+1}^{(t+1)} = y_{n+1}^{(t+1)} =: y^{(t+1)}
+        X^{(t+1)} = \operatorname{prox}_{nsf}(Y^{(t+1)}) \Rightarrow & \begin{cases} x_i^{(t+1)} = \operatorname{prox}_{sf_i}(y_i^{(t+1)}), i\in [n] \\
+        x_{n+1}^{(t+1)} = y_{n+1}^{(t+1)} =: y^{(t+1)} \end{cases}
     \end{align*}
-    \item write $\widehat{X}^{(t+1)} = 2X^{(t+1)} - Y^{(t+1)}$, $\widetilde{x}^{(t+1)} = \frac{1}{n}\sum_{i=1}^n \widehat{x}_k^{(t+1)}$, then $\overline{X}^{(t+1)} = \operatorname{prox}_{ns(g + \iota_E)}(2X^{(t+1)} - Y^{(t+1)})$ can be simplified
+    \item write $\widehat{X}^{(t+1)} = 2X^{(t+1)} - Y^{(t+1)}$, $\widetilde{x}^{(t+1)} = \frac{1}{n}\sum_{i=1}^n \widehat{x}_k^{(t+1)}$, then $\overline{X}^{(t+1)} = \operatorname{prox}_{ns(g + \iota_E)}(2X^{(t+1)} - Y^{(t+1)})$ can be simplified (for all $i\in[n+1]$)
     \begin{align*}
-        \overline{x}^{(t+1)} & = \overline{x}_i^{(t+1)} = \operatorname{prox}_{\frac{ns}{n+1}g} \left( \frac{1}{n+1} \sum_{i=1}^{n+1} \widehat{x}_i^{(t+1)} \right) \\
+        \overline{x}^{(t+1)} & := \overline{x}_i^{(t+1)} = \operatorname{prox}_{\frac{ns}{n+1}g} \left( \frac{1}{n+1} \sum_{i=1}^{n+1} \widehat{x}_i^{(t+1)} \right) \\
         & = \operatorname{prox}_{\frac{ns}{n+1}g} \left( \frac{n}{n+1} \widetilde{x}^{(t+1)} + \frac{1}{n+1} y^{(t+1)} \right)
     \end{align*}
 \end{itemize}
@@ -587,16 +614,18 @@ X^{(t+1)} & = \operatorname{prox}_{nsf}(Y^{(t+1)}) \\
 \begin{frame}
 \frametitle{Operator Splitting - Further Analysis}
 
-\begin{block}{Parallel DR}
+Hence the $(n+1)d$-dim. DRS splits (reduces) to $d$-dim. parallel DRS
+
+\begin{block}{Parallel DRS}
 \ 
 \vspace{-1.3em}
 \begin{align*}
-y_i^{(t+1)} & = y_i^{(t)} + \alpha (\overline{x}^{(t)} - x_i^{(t)}) \\
-x_i^{(t+1)} & = \operatorname{prox}_{sf_i} (y_i^{(t+1)}) \\
-\widehat{x}_i^{(t+1)} & = 2x_i^{(t+1)} - y_i^{(t+1)} \\
+y_i^{(t+1)} & = y_i^{(t)} + \alpha (\overline{x}^{(t)} - x_i^{(t)}), \ i \in [n] \\
+{\color{green} x_i^{(t+1)} } & = \operatorname{prox}_{sf_i} (y_i^{(t+1)}), \ i \in [n] \\
+\widehat{x}_i^{(t+1)} & = 2x_i^{(t+1)} - y_i^{(t+1)}, \ i \in [n] \\
 \widetilde{x}^{(t+1)} & = \frac{1}{n}\sum\nolimits_{i=1}^n \widehat{x}_i^{(t+1)} \\
 y^{(t+1)} & =  y^{(t)} + \alpha (\overline{x}^{(t)} - y^{(t)}) \\
-\overline{x}^{(t+1)} & = \operatorname{prox}_{\frac{ns}{n+1}g} \left( \frac{n}{n+1} \widetilde{x}^{(t+1)} + \frac{1}{n+1} y^{(t+1)} \right)
+{\color{red} \overline{x}^{(t+1)} } & = \operatorname{prox}_{\frac{ns}{n+1}g} \left( \frac{n}{n+1} \widetilde{x}^{(t+1)} + \frac{1}{n+1} y^{(t+1)} \right)
 \end{align*}
 \end{block}
 
@@ -615,7 +644,7 @@ y^{(t+1)} & =  y^{(t)} + \alpha (\overline{x}^{(t)} - y^{(t)}) \\
 \DontPrintSemicolon
 {\bfseries Initiation:} $x^{(0)}\in \operatorname{dom}(F)$, $s > 0$, $\alpha > 0$, $\varepsilon_{i,0} \geqslant 0$ \\
 \hspace{2em}Init server: $\overline{x}^{(0)} = \widetilde{x}^{(0)} = y^{(0)} = x^{(0)}$\\
-\hspace{2em}Init users: $y_i^{(0)} = x^{(0)}$, $x_i^{(0)} \approx \operatorname{prox}_{sf_i}(y_i^{(0)})$, $\widehat{x}_i^{(0)} = 2x_i^{(0)} - y_i^{(0)}$\;
+\hspace{2em}Init users: $y_i^{(0)} = x^{(0)}$, {\color{red}$x_i^{(0)} \approx \operatorname{prox}_{sf_i}(y_i^{(0)})$}, $\widehat{x}_i^{(0)} = 2x_i^{(0)} - y_i^{(0)}$\;
 \For{$t = 1, 2, \cdots, T$}{
     [Active users] Sample $\mathcal{S}_t \subseteq [n]$\;
     [Comm] Each user $i\in\mathcal{S}_t$ receives $\overline{x}^{(t)}$ from server\;
@@ -627,7 +656,7 @@ y^{(t+1)} & =  y^{(t)} + \alpha (\overline{x}^{(t)} - y^{(t)}) \\
     [Comm] Each user $i\in\mathcal{S}_t$ sends $\Delta \widehat{x}_i^{(t)} = \widehat{x}_i^{(t+1)} - \widehat{x}_i^{(t)}$ to server\;
     [Server update]: $y^{(t+1)} \gets y^{(t)} + \alpha (\overline{x}^{(t)} - y^{(t)})$, $\widetilde{x}^{(t+1)} \gets \widetilde{x}^{(t)} + \frac{1}{n}\sum_{i\in\mathcal{S}_t}\Delta \widehat{x}_i^{(t)}$, $\overline{x}^{(t+1)} \gets \operatorname{prox}_{\frac{ns}{n+1}g} (\frac{n}{n+1}\widetilde{x}^{(t+1)} + \frac{1}{n+1}y^{(t+1)})$ \;
 }
-return $x^{(T+1)}$\;
+% return $\overline{x}^{(T+1)}$\;
 \caption{FedDR}
 \end{algorithm}
 }
@@ -638,8 +667,74 @@ return $x^{(T+1)}$\;
 % Page 1
 
 \begin{frame}
+\frametitle{The FedDR Algorithm - Convergence}
 
-TO BE CONTINUED ...
+As in \texttt{FedSplit}, inexact proximal operator is used
+$$x_i^{(t)} \approx \operatorname{prox}_{sf_i}(y_i^{(t)}) =: z_i^{(t)}$$
+approximated up to a given accuracy $\varepsilon_{i,t}$, i.e.
+$$x_i^{(t)} = z_i^{(t)} + e_i^{(t)}, \quad \text{ with } \lVert e_i^{(t)} \rVert \leqslant \varepsilon_{i,t}$$
+
+\begin{block}{Convergence Results}
+Let $\{ (\overline{x}^{(t)}, x_i^{(t)}) \}$ be the sequence generated by \texttt{FedDR}, then
+\begin{itemize}
+    \item Global-Local Difference ($\gamma_1 > 0$)
+    {\smaller[2]
+    \begin{multline*}
+    \lVert \overline{x}^{(t)} - x_i^{(t)} \rVert^2 \leqslant \frac{2(1+s^2L^2)}{\alpha} \left[ (1+\gamma_1) \lVert x_i^{(t+1)} - x_i^{(t)} \rVert^2 \right. \\
+    \left. + \frac{2(1+\gamma_1)}{\gamma_1}(\lVert e_i^{(t+1)} \rVert^2 + \lVert e_i^{(t)} \rVert^2) \right]
+    \end{multline*}
+    }
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+%------------------------------------------------
+% Page 1
+
+\begin{frame}
+\frametitle{The FedDR Algorithm - Convergence}
+
+\begin{block}{Convergence Results (Continued)}
+\begin{itemize}
+    \item Bounded Global Gradient Mapping ($\gamma_2 > 0$)
+    {\smaller[2]
+    \begin{multline*}
+    \lVert \mathcal{G}_{\frac{ns}{n+1}} (\overline{x}^{(t)}) \rVert^2 \leqslant \frac{n+1}{n^2s^2} \left\{ (1+sL)^2 \sum_{i=1}^n (1+\gamma_2) \left[ \lVert \overline{x}^{(t)} - x_i^{(t)} \rVert^2 \right. \right. \\
+    \left. \left. + \frac{1+\gamma_2}{\gamma_2} \lVert e_i^{(t)} \rVert^2 \right] + \lVert y^{(t)} - \overline{x}^{(t)} \rVert^2 \right\}
+    \end{multline*}
+    }
+    \item {\color{red}Global Convergence} ($C_1,C_2,C_3$ are constants)
+    {\smaller[2]
+    \begin{multline*}
+    \dfrac{1}{T+1} \sum_{t=1}^T \expectation \left[ \lVert \mathcal{G}_{\frac{ns}{n+1}} (\overline{x}^{(t)}) \rVert^2 \right] \leqslant \frac{C_1(F(x^{(0)} - F^*)}{T+1} \\
+    + \frac{1}{n(T+1)} \sum_{t=1}^T \sum_{i=1}^n (C_2 \varepsilon_{i,t}^2 + C_3 \varepsilon_{i,t+1}^2)
+    \end{multline*}
+    }
+\end{itemize}
+\end{block}
+
+\end{frame}
+
+%------------------------------------------------
+
+\section{Extension}
+
+%------------------------------------------------
+% Page 1
+
+\begin{frame}
+\frametitle{Personalization and Operator Splitting}
+
+Consider a general form of personalization in FL
+$$\sum_{i=1}^n \{ f_i(x_i) + g(x_i,x) \}$$
+or for the most cases where $g(x_i,x)$ can be expressed as $g(x_i-x)$
+$$\sum_{i=1}^n \{ f_i(x_i) + g(x_i-x) \}$$
+which can be reformulated as a constrained problem
+\begin{align*}
+    \min & \quad \sum_{i=1}^n \{ f_i(x_i) + g(y_i) \} \\
+    \text{s.t.} & \quad u_i = x_i-y_i, u_1 = \cdots = u_n
+\end{align*}
 
 \end{frame}
 
