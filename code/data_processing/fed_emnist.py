@@ -22,6 +22,10 @@ FED_EMNIST_DATA_DIR = os.path.join(CACHED_DATA_DIR, "fed_emnist")
 os.makedirs(FED_EMNIST_DATA_DIR, exist_ok=True)
 
 
+_label_mapping = {i: str(i) for i in range(10)}
+_label_mapping.update({i+10:c for i,c in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ")})
+_label_mapping.update({i+36:c for i,c in enumerate("abcdefghijklmnopqrstuvwxyz")})
+
 class FedEMNIST(FedVisionDataset):
     """
     most methods in this class are modified from FedML
@@ -98,3 +102,11 @@ class FedEMNIST(FedVisionDataset):
         """
         """
         return ["n_class",] + super().extra_repr_keys()
+
+    def get_class(self, label:Tensor) -> str:
+        """
+        """
+        return _label_mapping[label.item()]
+
+    def get_classes(self, labels:Tensor) -> List[str]:
+        return [_label_mapping[l] for l in labels.cpu().numpy()]
