@@ -19,6 +19,7 @@ __all__ = ["FedShakespeare",]
 
 
 FED_SHAKESPEARE_DATA_DIR = os.path.join(CACHED_DATA_DIR, "fed_shakespeare")
+os.makedirs(FED_SHAKESPEARE_DATA_DIR, exist_ok=True)
 
 
 class FedShakespeare(FedNLPDataset):

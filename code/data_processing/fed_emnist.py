@@ -19,6 +19,7 @@ __all__ = ["FedEMNIST",]
 
 
 FED_EMNIST_DATA_DIR = os.path.join(CACHED_DATA_DIR, "fed_emnist")
+os.makedirs(FED_EMNIST_DATA_DIR, exist_ok=True)
 
 
 class FedEMNIST(FedVisionDataset):
