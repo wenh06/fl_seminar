@@ -34,7 +34,7 @@ class FedCIFAR(FedVisionDataset):
     def __init__(self, n_class:int=100, datadir:Optional[str]=None) -> NoReturn:
         """
         """
-        self.n_class = n_class
+        self._n_class = n_class
         assert self.n_class in [100,]
         self.datadir = datadir or FED_CIFAR_DATA_DIRS[n_class]
 
@@ -65,7 +65,7 @@ class FedCIFAR(FedVisionDataset):
                        train_bs:int,
                        test_bs:int,
                        client_idx:Optional[int]=None,) -> Tuple[data.DataLoader, data.DataLoader]:
-        """
+        """ get local dataloader at client `client_idx` or get the global dataloader
         """
         train_h5 = h5py.File(os.path.join(self.datadir, self.DEFAULT_TRAIN_FILE), "r")
         test_h5 = h5py.File(os.path.join(self.datadir, self.DEFAULT_TEST_FILE), "r")

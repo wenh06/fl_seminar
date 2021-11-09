@@ -50,7 +50,7 @@ class FedEMNIST(FedVisionDataset):
         with h5py.File(train_file_path, "r") as train_h5, h5py.File(test_file_path, "r") as test_h5:
             self._client_ids_train = list(train_h5[self._EXAMPLE].keys())
             self._client_ids_test = list(test_h5[self._EXAMPLE].keys())
-            self.n_class = len(np.unique([
+            self._n_class = len(np.unique([
                 train_h5[self._EXAMPLE][self._client_ids_train[idx]][self._LABEL][0] \
                     for idx in range(self.DEFAULT_TRAIN_CLIENTS_NUM)
             ]))
@@ -103,10 +103,10 @@ class FedEMNIST(FedVisionDataset):
         """
         return ["n_class",] + super().extra_repr_keys()
 
-    def get_class(self, label:Tensor) -> str:
+    def get_class(self, label:torch.Tensor) -> str:
         """
         """
         return _label_mapping[label.item()]
 
-    def get_classes(self, labels:Tensor) -> List[str]:
+    def get_classes(self, labels:torch.Tensor) -> List[str]:
         return [_label_mapping[l] for l in labels.cpu().numpy()]

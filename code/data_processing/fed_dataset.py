@@ -69,7 +69,7 @@ class FedVisionDataset(ABC):
         raise NotImplementedError
 
     def load_partition_data_distributed(self, process_id:int, batch_size:Optional[int]=None) -> tuple:
-        """
+        """ get local dataloader at client `process_id` or get global dataloader
         """
         _batch_size = batch_size or self.DEFAULT_BATCH_SIZE
         if process_id == 0:
@@ -95,7 +95,7 @@ class FedVisionDataset(ABC):
         return retval
 
     def load_partition_data(self, batch_size:Optional[int]=None) -> tuple:
-        """
+        """ partition data into all local clients
         """
         _batch_size = batch_size or self.DEFAULT_BATCH_SIZE
         # get local dataset
@@ -152,6 +152,10 @@ class FedVisionDataset(ABC):
         """
         return ["datadir",]
 
+    @property
+    def n_class(self) -> int:
+        return self._n_class
+
 
 class FedNLPDataset(ABC):
     """
@@ -190,7 +194,7 @@ class FedNLPDataset(ABC):
         raise NotImplementedError
 
     def load_partition_data_distributed(self, process_id:int, batch_size:Optional[int]=None) -> tuple:
-        """
+        """ get local dataloader at client `process_id` or get global dataloader
         """
         _batch_size = batch_size or self.DEFAULT_BATCH_SIZE
         if process_id == 0:
@@ -220,7 +224,7 @@ class FedNLPDataset(ABC):
         return retval
 
     def load_partition_data(self, batch_size:Optional[int]=None) -> tuple:
-        """
+        """ partition data into all local clients
         """
         _batch_size = batch_size or self.DEFAULT_BATCH_SIZE
 
