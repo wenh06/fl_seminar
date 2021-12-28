@@ -286,7 +286,7 @@ For the $x_i$-update, one similarly has
     & A_i^T (v_i-A_ix_i^{k+1}) = \dfrac{\lambda}{\rho} \partial \lVert x_i^{k+1} \rVert_2 \begin{cases} = \dfrac{\lambda}{\rho} \cdot \dfrac{x_i^{k+1}}{\lVert x_i^{k+1} \rVert_2} & \text{ if } x_i^{k+1} \neq 0 \\ \in \dfrac{\lambda}{\rho} \cdot \mathbb{B}(0,1) & \text{ if } x_i^{k+1} = 0 \end{cases}
 \end{align*}
 i.e.
-$$x_i^{k+1} = (A_i^TA_i + \tilde{\lambda})^{-1} A_i^Tv_i \quad \text{ with $\tilde{\lambda}$ satisfying } \tilde{\lambda}\rho \lVert x_i^{k+1} \rVert_2 = \lambda \text{ if } x_i^{k+1} != 0.$$
+$$x_i^{k+1} = (A_i^TA_i + \tilde{\lambda})^{-1} A_i^Tv_i \quad \text{ with $\tilde{\lambda}$ satisfying } \tilde{\lambda}\rho \lVert x_i^{k+1} \rVert_2 = \lambda \text{ if } x_i^{k+1} \neq 0.$$
 Again, it's claimed that (note the difference with ordinary Lasso on the penalty term)
 $$x^{k+1}_i = 0 \Longleftrightarrow \lVert A_i^T v_i \rVert_2 \leqslant \dfrac{\lambda}{\rho}$$
 
