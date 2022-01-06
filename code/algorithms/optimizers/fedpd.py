@@ -5,21 +5,36 @@ from typing import Iterable, Union, NoReturn, Optional
 
 import torch
 from torch import Tensor
+from torch.nn import Parameter
 from torch.optim.optimizer import Optimizer
 
+
+__all__ = [
+    "FedPD_VR", "FedPD_SGD",
+    "PSVRG", "PSGD",
+]
 
 
 class FedPD_VR(Optimizer):
     """
     """
     def __init__(self,
-                 params:Iterable[Union[dict,Tensor]],
+                 params:Iterable[Union[dict,Parameter]],
                  lr:float=1e-3, mu:float=1.0, freq_1:int=10, freq_2:int=10,) -> NoReturn:
         """
 
         Parameters
         ----------
-        to write
+        params: iterable of dict or Parameter,
+            the parameters to optimize
+        lr: float, default: 1e-3,
+            the learning rate
+        mu: float, default: 1.0,
+            the hyperparameter for the update
+        freq_1: int, default: 10,
+            the frequency of the inner loop
+        freq_2: int, default: 10,
+            the frequency of the outer loop
         """
         if lr < 0.0:
             raise ValueError(f"Invalid learning rate: {lr}")
@@ -35,12 +50,12 @@ class FedPD_VR(Optimizer):
         Parameters
         ----------
         closure: callable, optional,
-            A closure that reevaluates the model and returns the loss.
+            a closure that reevaluates the model and returns the loss
 
         Returns
         -------
         loss: Tensor, optional,
-            The loss after the step.
+            the loss after the step
         """
         loss = None
         if closure is not None:
@@ -102,13 +117,20 @@ class FedPD_SGD(Optimizer):
     """
 
     def __init__(self,
-                 params:Iterable[Union[dict,Tensor]],
+                 params:Iterable[Union[dict,Parameter]],
                  lr:float=1e-3, mu:float=1.0, freq:int=10,) -> NoReturn:
         """
 
         Parameters
         ----------
-        to write
+        params: iterable of dict or Parameter,
+            the parameters to optimize
+        lr: float, default: 1e-3,
+            the learning rate
+        mu: float, default: 1.0,
+            the hyperparameter for the update
+        freq: int, default: 10,
+            the frequency of the inner loop
         """
         if lr < 0.0:
             raise ValueError(f"Invalid learning rate: {lr}")
@@ -123,12 +145,12 @@ class FedPD_SGD(Optimizer):
         Parameters
         ----------
         closure: callable, optional,
-            A closure that reevaluates the model and returns the loss.
+            a closure that reevaluates the model and returns the loss
 
         Returns
         -------
         loss: Tensor, optional,
-            The loss after the step.
+            the loss after the step
         """
         loss = None
         if closure is not None:
@@ -183,17 +205,24 @@ class FedPD_SGD(Optimizer):
 
 class PSVRG(Optimizer):
     """
-    might mistake for FSVRG, to check
+    FedProx with variance reduction
     """
 
     def __init__(self,
-                 params:Iterable[Union[dict,Tensor]],
+                 params:Iterable[Union[dict,Parameter]],
                  lr:float=1e-3, mu:float=1.0, freq:int=10,) -> NoReturn:
         """
 
         Parameters
         ----------
-        to write
+        params: iterable of dict or Parameter,
+            the parameters to optimize
+        lr: float, default: 1e-3,
+            the learning rate
+        mu: float, default: 1.0,
+            the hyperparameter for the update
+        freq: int, default: 10,
+            the frequency of the inner loop
         """
         if lr < 0.0:
             raise ValueError(f"Invalid learning rate: {lr}")
@@ -208,12 +237,12 @@ class PSVRG(Optimizer):
         Parameters
         ----------
         closure: callable, optional,
-            A closure that reevaluates the model and returns the loss.
+            a closure that reevaluates the model and returns the loss
 
         Returns
         -------
         loss: Tensor, optional,
-            The loss after the step.
+            the loss after the step
         """
         loss = None
         if closure is not None:
@@ -253,17 +282,24 @@ class PSVRG(Optimizer):
 
 class PSGD(Optimizer):
     """
-    might mistake for PR-SGD, to check
+    FedProx
     """
     
     def __init__(self,
-                 params:Iterable[Union[dict,Tensor]],
+                 params:Iterable[Union[dict,Parameter]],
                  lr:float=1e-3, mu:float=1.0, freq:int=2,) -> NoReturn:
         """
 
         Parameters
         ----------
-        to write
+        params: iterable of dict or Parameter,
+            the parameters to optimize
+        lr: float, default: 1e-3,
+            the learning rate
+        mu: float, default: 1.0,
+            the hyperparameter for the update
+        freq: int, default: 2,
+            the frequency of the inner loop
         """
         if lr < 0.0:
             raise ValueError(f"Invalid learning rate: {lr}")
@@ -278,12 +314,12 @@ class PSGD(Optimizer):
         Parameters
         ----------
         closure: callable, optional,
-            A closure that reevaluates the model and returns the loss.
+            a closure that reevaluates the model and returns the loss
 
         Returns
         -------
         loss: Tensor, optional,
-            The loss after the step.
+            the loss after the step
         """
         loss = None
         if closure is not None:
