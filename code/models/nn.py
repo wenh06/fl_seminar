@@ -2,7 +2,7 @@
 simple neural network models
 """
 
-from typing import NoReturn
+from typing import NoReturn, Optional
 
 import torch
 from torch import nn, Tensor
@@ -10,8 +10,10 @@ import torch.nn.functional as F
 import einops
 from einops.layers.torch import Rearrange
 
+from .utils import SizeMixin
 
-class MLP(nn.Sequential):
+
+class MLP(SizeMixin, nn.Sequential):
     """
     modified from FedPD/models.py
     """
@@ -27,7 +29,7 @@ class MLP(nn.Sequential):
         self.add_module("layer_hidden", nn.Linear(dim_hidden, dim_out))
 
 
-class CNNMnist(nn.Sequential):
+class CNNMnist(SizeMixin, nn.Sequential):
     """
     modified from FedPD/models.py
 
@@ -52,7 +54,7 @@ class CNNMnist(nn.Sequential):
         self.add_module("fc2", nn.Linear(50, num_classes))
 
 
-class CNNFEMnist(nn.Sequential):
+class CNNFEMnist(SizeMixin, nn.Sequential):
     """
     modified from FedPD/models.py
 
@@ -90,7 +92,7 @@ class CNNFEMnist(nn.Sequential):
         )
 
 
-class CNNCifar(nn.Sequential):
+class CNNCifar(SizeMixin, nn.Sequential):
     """
     modified from FedPD/models.py
     
@@ -129,7 +131,7 @@ class CNNCifar(nn.Sequential):
         )
 
 
-class RNN_OriginalFedAvg(nn.Module):
+class RNN_OriginalFedAvg(SizeMixin, nn.Module):
     """Creates a RNN model using LSTM layers for Shakespeare language models (next character prediction task).
       This replicates the model structure in the paper:
       Communication-Efficient Learning of Deep Networks from Decentralized Data
@@ -165,7 +167,7 @@ class RNN_OriginalFedAvg(nn.Module):
         return output
 
 
-class RNN_StackOverFlow(nn.Module):
+class RNN_StackOverFlow(SizeMixin, nn.Module):
     """Creates a RNN model using LSTM layers for StackOverFlow (next word prediction task).
       This replicates the model structure in the paper:
       "Adaptive Federated Optimization. ICML 2020" (https://arxiv.org/pdf/2003.00295.pdf)
