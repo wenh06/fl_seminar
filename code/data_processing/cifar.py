@@ -2,8 +2,8 @@
 dataset readers, including Cifar10, Cifar100
 """
 
-import os
 import json
+from pathlib import Path
 from typing import NoReturn, Optional, Union, List, Callable, Tuple, Dict, Sequence
 
 import numpy as np
@@ -22,14 +22,14 @@ __all__ = [
 ]
 
 CIFAR_DATA_DIRS = {
-    n_class:os.path.join(CACHED_DATA_DIR, f"CIFAR{n_class}") for n_class in [10, 100,]
+    n_class: (CACHED_DATA_DIR / f"CIFAR{n_class}") for n_class in [10, 100,]
 }
 CIFAR_NONIID_CACHE_DIRS = {
-    n_class:os.path.join(CACHED_DATA_DIR, "non-iid-distribution", f"CIFAR{n_class}") for n_class in [10, 100,]
+    n_class: (CACHED_DATA_DIR / "non-iid-distribution" / f"CIFAR{n_class}") for n_class in [10, 100,]
 }
 for n_class in [10, 100,]:
-    os.makedirs(CIFAR_DATA_DIRS[n_class], exist_ok=True)
-    os.makedirs(CIFAR_NONIID_CACHE_DIRS[n_class], exist_ok=True)
+    CIFAR_DATA_DIRS[n_class].mkdir(exist_ok=True)
+    CIFAR_NONIID_CACHE_DIRS[n_class].mkdir(exist_ok=True)
 
 
 class CIFAR_truncated(data.Dataset):
@@ -40,7 +40,7 @@ class CIFAR_truncated(data.Dataset):
 
     def __init__(self,
                  n_class:int=10,
-                 root:Optional[str]=None,
+                 root:Optional[Union[str,Path]]=None,
                  dataidxs:Optional[List[int]]=None,
                  train:bool=True,
                  transform:Optional[Callable]=None,
@@ -49,7 +49,7 @@ class CIFAR_truncated(data.Dataset):
         """
         """
         self.n_class = n_class
-        self.root = root or CIFAR_DATA_DIRS[n_class]
+        self.root = Path(root or CIFAR_DATA_DIRS[n_class])
         assert self.n_class in [10, 100]
         self.dataidxs = dataidxs
         self.train = train
@@ -121,7 +121,7 @@ class CIFAR10_truncated(CIFAR_truncated):
     __name__ = "CIFAR10_truncated"
 
     def __init__(self,
-                 root:Optional[str]=None,
+                 root:Optional[Union[str,Path]]=None,
                  dataidxs:Optional[List[int]]=None,
                  train:bool=True,
                  transform:Optional[Callable]=None,
@@ -138,7 +138,7 @@ class CIFAR100_truncated(CIFAR_truncated):
     __name__ = "CIFAR100_truncated"
 
     def __init__(self,
-                 root:Optional[str]=None,
+                 root:Optional[Union[str,Path]]=None,
                  dataidxs:Optional[List[int]]=None,
                  train:bool=True,
                  transform:Optional[Callable]=None,
@@ -198,7 +198,7 @@ def _data_transforms_cifar() -> Tuple[Callable, Callable]:
     return train_transform, test_transform
 
 
-def load_cifar_data(n_class:int, datadir:Optional[str]=None, to_numpy:bool=False) -> Tuple[Union[np.ndarray,torch.Tensor],...]:
+def load_cifar_data(n_class:int, datadir:Optional[Union[str,Path]]=None, to_numpy:bool=False) -> Tuple[Union[np.ndarray,torch.Tensor],...]:
     """
     """
     train_transform, test_transform = _data_transforms_cifar()
@@ -227,11 +227,11 @@ def record_net_data_stats(y_train:torch.Tensor, net_dataidx_map:Dict[int,List[in
 
 
 def partition_cifar_data(dataset:CIFAR_truncated,
-                         datadir:str,
                          partition:str,
                          n_net:int,
                          alpha:float,
-                         to_numpy:bool=False,) -> tuple:
+                         to_numpy:bool=False,
+                         datadir:Optional[Union[str,Path]]=None,) -> tuple:
     """
     """
     n_class = dataset.n_class
@@ -272,16 +272,16 @@ def partition_cifar_data(dataset:CIFAR_truncated,
             net_dataidx_map[j] = idx_batch[j]
 
     elif partition == "hetero-fix":
-        dataidx_map_file_path = os.path.join(CIFAR_NONIID_CACHE_DIRS[n_class], "net_dataidx_map.json")
+        dataidx_map_file_path = CIFAR_NONIID_CACHE_DIRS[n_class] / "net_dataidx_map.json"
         with open(dataidx_map_file_path, "r") as f:
             net_dataidx_map = json.load(dataidx_map_file_path)
 
     if partition == "hetero-fix":
-        distribution_file_path = os.path.join(CIFAR_NONIID_CACHE_DIRS[n_class], "distribution.json")
+        distribution_file_path = CIFAR_NONIID_CACHE_DIRS[n_class] / "distribution.json"
         with open(distribution_file_path, "r") as f:
             traindata_cls_counts = json.load(distribution_file_path)
     else:
-        distribution_file_path = os.path.join(CIFAR_NONIID_CACHE_DIRS[n_class], "distribution.json")
+        distribution_file_path = CIFAR_NONIID_CACHE_DIRS[n_class] / "distribution.json"
         with open(distribution_file_path, "w") as f:
             traindata_cls_counts = json.dump(traindata_cls_counts, distribution_file_path, ensure_ascii=False)
 

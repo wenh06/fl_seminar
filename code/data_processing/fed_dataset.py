@@ -3,7 +3,7 @@ abstract base classes of federated dataset provided by FedML, and more
 """
 
 from abc import ABC, abstractmethod
-import os
+from pathlib import Path
 from typing import NoReturn, Optional, Union, List, Callable, Tuple, Dict, Sequence
 
 import h5py
@@ -16,20 +16,54 @@ from misc import CACHED_DATA_DIR, default_class_repr
 
 
 __all__ = [
+    "FedDataset",
     "FedVisionDataset",
     "FedNLPDataset",
 ]
 
 
-class FedVisionDataset(ABC):
+class FedDataset(ABC):
+    """
+    """
+    __name__ = "FedDataset"
+
+    @abstractmethod
+    def get_dataloader(self,
+                       train_bs:int,
+                       test_bs:int,
+                       client_idx:Optional[int]=None,) -> Tuple[data.DataLoader, data.DataLoader]:
+        """
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def _preload(self, datadir:Optional[str]=None) -> NoReturn:
+        """
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def load_partition_data_distributed(self, process_id:int, batch_size:Optional[int]=None) -> tuple:
+        """ get local dataloader at client `process_id` or get global dataloader
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def load_partition_data(self, batch_size:Optional[int]=None) -> tuple:
+        """ partition data into all local clients
+        """
+        raise NotImplementedError
+
+
+class FedVisionDataset(FedDataset, ABC):
     """
     """
     __name__ = "FedVisionDataset"
 
-    def __init__(self, datadir:Optional[str]=None) -> NoReturn:
+    def __init__(self, datadir:Optional[Union[Path,str]]=None) -> NoReturn:
         """
         """
-        self.datadir = datadir
+        self.datadir = Path(datadir) if datadir is not None else None
 
         self.DEFAULT_TRAIN_CLIENTS_NUM = None
         self.DEFAULT_TEST_CLIENTS_NUM = None
@@ -157,15 +191,15 @@ class FedVisionDataset(ABC):
         return self._n_class
 
 
-class FedNLPDataset(ABC):
+class FedNLPDataset(FedDataset, ABC):
     """
     """
     __name__ = "FedNLPDataset"
 
-    def __init__(self, datadir:Optional[str]=None) -> NoReturn:
+    def __init__(self, datadir:Optional[Union[str,Path]]=None) -> NoReturn:
         """
         """
-        self.datadir = datadir
+        self.datadir = Path(datadir) if datadir is not None else None
 
         self.DEFAULT_TRAIN_CLIENTS_NUM = None
         self.DEFAULT_TEST_CLIENTS_NUM = None

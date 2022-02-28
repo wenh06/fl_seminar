@@ -1,7 +1,7 @@
 """
 """
 
-import os, sys
+import pathlib
 
 
 __all__ = [
@@ -10,11 +10,11 @@ __all__ = [
 ]
 
 
-PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PROJECT_DIR = pathlib.Path(__file__).absolute().parent.parent
 
-BUILTIN_DATA_DIR = os.path.join(PROJECT_DIR, "data")
+BUILTIN_DATA_DIR = PROJECT_DIR / "data"
 
-CACHED_DATA_DIR = os.path.join(PROJECT_DIR, ".data_cache")
+CACHED_DATA_DIR = PROJECT_DIR / ".data_cache"
 
 
 def default_class_repr(c:object, align:str="center") -> str:

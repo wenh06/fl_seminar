@@ -1,6 +1,7 @@
 """
 """
-import os
+
+from pathlib import Path
 from collections import OrderedDict
 from itertools import repeat
 from typing import NoReturn, Optional, Union, List, Callable, Tuple, Dict, Sequence
@@ -18,8 +19,8 @@ from .fed_dataset import FedNLPDataset
 __all__ = ["FedShakespeare",]
 
 
-FED_SHAKESPEARE_DATA_DIR = os.path.join(CACHED_DATA_DIR, "fed_shakespeare")
-os.makedirs(FED_SHAKESPEARE_DATA_DIR, exist_ok=True)
+FED_SHAKESPEARE_DATA_DIR = CACHED_DATA_DIR / "fed_shakespeare"
+FED_SHAKESPEARE_DATA_DIR.mkdir(exist_ok=True)
 
 
 class FedShakespeare(FedNLPDataset):
@@ -27,10 +28,10 @@ class FedShakespeare(FedNLPDataset):
     """
     __name__ = "FedShakespeare"
 
-    def _preload(self, datadir:Optional[str]=None) -> NoReturn:
+    def _preload(self, datadir:Optional[Union[str,Path]]=None) -> NoReturn:
         """
         """
-        self.datadir = datadir or FED_SHAKESPEARE_DATA_DIR
+        self.datadir = Path(datadir or FED_SHAKESPEARE_DATA_DIR)
 
         self.SEQUENCE_LENGTH = 80  # from McMahan et al AISTATS 2017
         # Vocabulary re-used from the Federated Learning for Text Generation tutorial.
@@ -58,9 +59,9 @@ class FedShakespeare(FedNLPDataset):
         self._EXAMPLE = "examples"
         self._SNIPPETS = "snippets"
 
-        train_file_path = os.path.join(self.datadir, self.DEFAULT_TRAIN_FILE)
-        test_file_path = os.path.join(self.datadir, self.DEFAULT_TEST_FILE)
-        with h5py.File(train_file_path, "r") as train_h5, h5py.File(test_file_path, "r") as test_h5:
+        train_file_path = self.datadir / self.DEFAULT_TRAIN_FILE
+        test_file_path = self.datadir / self.DEFAULT_TEST_FILE
+        with h5py.File(str(train_file_path), "r") as train_h5, h5py.File(str(test_file_path), "r") as test_h5:
             self._client_ids_train = list(train_h5[self._EXAMPLE].keys())
             self._client_ids_test = list(test_h5[self._EXAMPLE].keys())
 
@@ -70,8 +71,8 @@ class FedShakespeare(FedNLPDataset):
                        client_idx:Optional[int]=None,) -> Tuple[data.DataLoader, data.DataLoader]:
         """
         """
-        train_h5 = h5py.File(os.path.join(self.datadir, self.DEFAULT_TRAIN_FILE), "r")
-        test_h5 = h5py.File(os.path.join(self.datadir, self.DEFAULT_TEST_FILE), "r")
+        train_h5 = h5py.File(str(self.datadir / self.DEFAULT_TRAIN_FILE), "r")
+        test_h5 = h5py.File(str(self.datadir / self.DEFAULT_TEST_FILE), "r")
         train_ds = []
         test_ds = []
 

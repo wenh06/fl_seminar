@@ -2,7 +2,7 @@
 federated Cifar10, Cifar100
 """
 
-import os
+from pathlib import Path
 from typing import NoReturn, Optional, Union, List, Callable, Tuple, Dict, Sequence
 
 import h5py
@@ -19,10 +19,10 @@ __all__ = ["FedCIFAR", "FedCIFAR100",]
 
 
 FED_CIFAR_DATA_DIRS = {
-    n_class:os.path.join(CACHED_DATA_DIR, f"fed_cifar{n_class}") for n_class in [10, 100,]
+    n_class: (CACHED_DATA_DIR / f"fed_cifar{n_class}") for n_class in [10, 100,]
 }
 for n_class in [10, 100,]:
-    os.makedirs(FED_CIFAR_DATA_DIRS[n_class], exist_ok=True)
+    FED_CIFAR_DATA_DIRS[n_class].mkdir(exist_ok=True)
 
 
 class FedCIFAR(FedVisionDataset):
@@ -31,12 +31,12 @@ class FedCIFAR(FedVisionDataset):
     """
     __name__ = "FedCIFAR"
 
-    def __init__(self, n_class:int=100, datadir:Optional[str]=None) -> NoReturn:
+    def __init__(self, n_class:int=100, datadir:Optional[Union[str,Path]]=None) -> NoReturn:
         """
         """
         self._n_class = n_class
         assert self.n_class in [100,]
-        self.datadir = datadir or FED_CIFAR_DATA_DIRS[n_class]
+        self.datadir = Path(datadir or FED_CIFAR_DATA_DIRS[n_class])
 
         self.DEFAULT_TRAIN_CLIENTS_NUM = 500
         self.DEFAULT_TEST_CLIENTS_NUM = 100
@@ -50,13 +50,13 @@ class FedCIFAR(FedVisionDataset):
         self._LABEL = "label"
 
         #client id list
-        train_file_path = os.path.join(self.datadir, self.DEFAULT_TRAIN_FILE)
-        test_file_path = os.path.join(self.datadir, self.DEFAULT_TEST_FILE)
-        with h5py.File(train_file_path, "r") as train_h5, h5py.File(test_file_path, "r") as test_h5:
+        train_file_path = self.datadir / self.DEFAULT_TRAIN_FILE
+        test_file_path = self.datadir / self.DEFAULT_TEST_FILE
+        with h5py.File(str(train_file_path), "r") as train_h5, h5py.File(str(test_file_path), "r") as test_h5:
             self._client_ids_train = list(train_h5[self._EXAMPLE].keys())
             self._client_ids_test = list(test_h5[self._EXAMPLE].keys())
 
-    def _preload(self, datadir:Optional[str]=None) -> NoReturn:
+    def _preload(self, datadir:Optional[Union[str,Path]]=None) -> NoReturn:
         """
         """
         pass
@@ -67,8 +67,8 @@ class FedCIFAR(FedVisionDataset):
                        client_idx:Optional[int]=None,) -> Tuple[data.DataLoader, data.DataLoader]:
         """ get local dataloader at client `client_idx` or get the global dataloader
         """
-        train_h5 = h5py.File(os.path.join(self.datadir, self.DEFAULT_TRAIN_FILE), "r")
-        test_h5 = h5py.File(os.path.join(self.datadir, self.DEFAULT_TEST_FILE), "r")
+        train_h5 = h5py.File(str(self.datadir / self.DEFAULT_TRAIN_FILE), "r")
+        test_h5 = h5py.File(str(self.datadir / self.DEFAULT_TEST_FILE), "r")
         train_x, train_y, test_x, test_y = [], [], [], []
         
         # load data in numpy format from h5 file
@@ -127,7 +127,7 @@ class FedCIFAR100(FedCIFAR):
     """
     __name__ = "FedCIFAR100"
 
-    def __init__(self, datadir:Optional[str]=None) -> NoReturn:
+    def __init__(self, datadir:Optional[Union[str,Path]]=None) -> NoReturn:
         """
         """
         super().__init__(100, datadir)

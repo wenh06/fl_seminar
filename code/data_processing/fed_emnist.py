@@ -26,6 +26,7 @@ _label_mapping = {i: str(i) for i in range(10)}
 _label_mapping.update({i+10:c for i,c in enumerate("ABCDEFGHIJKLMNOPQRSTUVWXYZ")})
 _label_mapping.update({i+36:c for i,c in enumerate("abcdefghijklmnopqrstuvwxyz")})
 
+
 class FedEMNIST(FedVisionDataset):
     """
     most methods in this class are modified from FedML
