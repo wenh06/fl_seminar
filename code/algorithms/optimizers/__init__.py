@@ -1,6 +1,11 @@
 """
 """
 
+from typing import Iterable, Union, Any
+
+from torch.nn.parameter import Parameter
+from torch.optim import Optimizer
+
 from .fedpd import FedPD_SGD, FedPD_VR, PSGD, PSVRG
 from .pfedme import pFedMeOptimizer as pFedMe
 

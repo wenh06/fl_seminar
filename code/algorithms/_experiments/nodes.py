@@ -52,7 +52,8 @@ class ClientConfig:
                  optimizer:str,
                  batch_size:int,
                  lr:float,
-                 num_epochs:int,) -> NoReturn:
+                 num_epochs:int,
+                 num_steps:int=-1) -> NoReturn:
         """
         """
         self.client_cls = client_cls
@@ -61,6 +62,7 @@ class ClientConfig:
         self.batch_size = batch_size
         self.lr = lr
         self.num_epochs = num_epochs
+        self.num_steps = num_steps
 
 
 class Node(ABC):
@@ -186,11 +188,22 @@ class Client(Node):
                 batch_losses.append(loss.item())
             epoch_losses.append(sum(batch_losses) / len(batch_losses))
 
+    def sample_data(self) -> Tuple[Tensor, Tensor]:
+        """
+        sample data for training
+        """
+        return next(iter(self.train_loader))
+
     @abstractmethod
     def evaluate(self) -> NoReturn:
         """
         """
         raise NotImplementedError
+
+    def get_parameters(self) -> Iterable[Parameter]:
+        """
+        """
+        return self.model.parameters()
 
     def set_parameters(self, model:nn.Module) -> NoReturn:
         """
@@ -203,7 +216,7 @@ class Client(Node):
         for param , new_param in zip(self.model.parameters(), new_params):
             param.data = new_param.data.clone()
 
-    def get_grads(self) -> List[Tensor]:
+    def get_gradients(self) -> List[Tensor]:
         """
         """
         grads = []
