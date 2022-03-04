@@ -12,6 +12,7 @@ from torch import nn
 __all__ = [
     "compute_module_size",
     "SizeMixin",
+    "top_n_accuracy",
 ]
 
 
@@ -68,3 +69,11 @@ class SizeMixin(object):
         return compute_module_size(
             self, human=True, dtype=dtype,
         )
+
+
+def top_n_accuracy(preds:Tensor, labels:Tensor, n:int=1) -> float:
+    """
+    """
+    _, indices = torch.topk(preds, n, dim=1)  # of shape (N, n)
+    correct = torch.sum(indices == labels.repeat(n, 1).T)
+    return correct.item() / preds.shape[0]
