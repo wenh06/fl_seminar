@@ -159,11 +159,13 @@ class RNN_OriginalFedAvg(SizeMixin, nn.Module):
         # leaving the first hidden state zero `self.lstm(embeds, None)`.
         lstm_out, _ = self.lstm(embeds)
         # use the final hidden state as the next character prediction
-        final_hidden_state = lstm_out[:, -1]
-        output = self.fc(final_hidden_state)
+        # final_hidden_state = lstm_out[:, -1]
+        # output = self.fc(final_hidden_state)
         # For fed_shakespeare
-        # output = self.fc(lstm_out[:,:])
-        # output = torch.transpose(output, 1, 2)
+        output = einops.rearrange(
+            self.fc(lstm_out),
+            "batch length vocab -> batch vocab length"
+        )
         return output
 
 
@@ -197,7 +199,9 @@ class RNN_StackOverFlow(SizeMixin, nn.Module):
         """
         embeds = self.word_embeddings(input_seq)
         lstm_out, hidden_state = self.lstm(embeds, hidden_state)
-        fc1_output = self.fc1(lstm_out[:,:])
-        output = self.fc2(fc1_output)
-        output = torch.transpose(output, 1, 2)
+        fc1_output = self.fc1(lstm_out)
+        output = einops.rearrange(
+            self.fc2(fc1_output),
+            "batch length vocab -> batch vocab length"
+        )
         return output
