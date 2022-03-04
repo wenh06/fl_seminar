@@ -81,7 +81,7 @@ class pFedMeOptimizer(Optimizer):
         if closure is not None:
             loss = closure()
         for group in self.param_groups:
-            for p, localweight in zip( group["params"], local_weight_updated):
+            for p, localweight in zip(group["params"], local_weight_updated):
                 p.data = localweight.data.clone()
         #return  p.data
         return  group["params"]

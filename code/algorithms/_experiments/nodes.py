@@ -34,13 +34,16 @@ class SeverConfig:
                  algorithm:str,
                  num_iters:int,
                  num_clients:int,
-                 clients_sample_ratio:float) -> NoReturn:
+                 clients_sample_ratio:float,
+                 **kwargs:Any) -> NoReturn:
         """
         """
         self.algorithm = algorithm
         self.num_iters = num_iters
         self.num_clients = num_clients
         self.clients_sample_ratio = clients_sample_ratio
+        for k, v in kwargs.items():
+            setattr(self, k, v)
 
 
 class ClientConfig:
@@ -51,18 +54,19 @@ class ClientConfig:
                  algorithm:str,
                  optimizer:str,
                  batch_size:int,
-                 lr:float,
                  num_epochs:int,
-                 num_steps:int=-1) -> NoReturn:
+                 lr:float,
+                 **kwargs:Any) -> NoReturn:
         """
         """
         self.client_cls = client_cls
         self.algorithm = algorithm
         self.optimizer = optimizer
         self.batch_size = batch_size
-        self.lr = lr
         self.num_epochs = num_epochs
-        self.num_steps = num_steps
+        self.lr = lr
+        for k, v in kwargs.items():
+            setattr(self, k, v)
 
 
 class Node(ABC):
@@ -81,6 +85,19 @@ class Node(ABC):
         """
         update model parameters, gradients, etc.
         according to `self._reveived_messages`
+        """
+        raise NotImplementedError
+
+    def __post_init(self) -> NoReturn:
+        """
+        check if all required field in the config are set
+        """
+        return all([hasattr(self.config, k) for k in self.required_config_fields])
+
+    @property
+    @abstractmethod
+    def required_config_fields(self) -> List[str]:
+        """
         """
         raise NotImplementedError
 
@@ -103,6 +120,8 @@ class Server(Node):
         self._clients = self._setup_clients(dataset, client_config)
 
         self._received_messages = []
+
+        self.__post_init()
 
     def _setup_clients(self, dataset:FedDataset, client_config:ClientConfig) -> List[Node]:
         """
@@ -142,6 +161,12 @@ class Server(Node):
                     client.communicate(self)
                 self.update()
 
+    def add_parameters(self, params:Iterable[Parameter], ratio:float) -> NoReturn:
+        """
+        """
+        for server_param, param in zip(self.model.parameters(), params):
+            server_param.data.add_(param.data.detach().clone(), ratio)
+
 
 class Client(Node):
     """
@@ -168,8 +193,11 @@ class Client(Node):
         self.train_loader, self.val_loader = \
             self.dataset.get_data_loaders(self.config.batch_size, self.config.batch_size, self.client_id)
 
-        self._global_model = None
+        self._server_parameters = None
+        self._client_parameters = None
         self._received_messages = {}
+
+        self.__post_init()
 
     def train(self) -> NoReturn:
         """
@@ -205,16 +233,11 @@ class Client(Node):
         """
         return self.model.parameters()
 
-    def set_parameters(self, model:nn.Module) -> NoReturn:
+    def set_parameters(self, params:Iterable[Parameter]) -> NoReturn:
         """
         """
-        self.update_parameters(new_params=model.parameters())
-
-    def update_parameters(self, new_params:Iterable[Parameter]) -> NoReturn:
-        """
-        """
-        for param , new_param in zip(self.model.parameters(), new_params):
-            param.data = new_param.data.clone()
+        for client_param , param in zip(self.model.parameters(), params):
+            client_param.data = param.data.detach().clone()
 
     def get_gradients(self) -> List[Tensor]:
         """
