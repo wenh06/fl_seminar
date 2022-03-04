@@ -55,7 +55,7 @@ class FedDataset(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def evaluate(self, preds:torch.Tensor, truths:torch.Tensor) -> Dict[str, float]:
+    def evaluate(self, probs:torch.Tensor, truths:torch.Tensor) -> Dict[str, float]:
         """ 
         """
         raise NotImplementedError

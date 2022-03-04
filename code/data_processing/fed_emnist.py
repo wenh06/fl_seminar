@@ -115,13 +115,13 @@ class FedEMNIST(FedVisionDataset):
     def get_classes(self, labels:torch.Tensor) -> List[str]:
         return [_label_mapping[l] for l in labels.cpu().numpy()]
 
-    def evaluate(self, preds:torch.Tensor, truths:torch.Tensor) -> Dict[str, float]:
+    def evaluate(self, probs:torch.Tensor, truths:torch.Tensor) -> Dict[str, float]:
         """
         """
         return {
-            "acc": top_n_accuracy(preds, truths, 1),
-            "top3_acc": top_n_accuracy(preds, truths, 3),
-            "top5_acc": top_n_accuracy(preds, truths, 5),
-            "loss": self.criterion(preds, truths).item(),
-            "num_examples": preds.shape[0],
+            "acc": top_n_accuracy(probs, truths, 1),
+            "top3_acc": top_n_accuracy(probs, truths, 3),
+            "top5_acc": top_n_accuracy(probs, truths, 5),
+            "loss": self.criterion(probs, truths).item(),
+            "num_examples": probs.shape[0],
         }

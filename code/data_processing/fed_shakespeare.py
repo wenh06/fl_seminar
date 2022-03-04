@@ -13,6 +13,7 @@ import torch.utils.data as data
 import torchvision.transforms as transforms
 
 from misc import CACHED_DATA_DIR, default_class_repr
+from models.utils import top_n_accuracy
 from .fed_dataset import FedNLPDataset
 
 
@@ -166,7 +167,13 @@ class FedShakespeare(FedNLPDataset):
     def get_word_dict(self) -> Dict[str,int]:
         return self.word_dict
 
-    def evaluate(self, preds:torch.Tensor, truths:torch.Tensor) -> Dict[str, float]:
+    def evaluate(self, probs:torch.Tensor, truths:torch.Tensor) -> Dict[str, float]:
         """
         """
-        pass
+        return {
+            "acc": top_n_accuracy(probs, truths, 1),
+            "top3_acc": top_n_accuracy(probs, truths, 3),
+            "top5_acc": top_n_accuracy(probs, truths, 5),
+            "loss": self.criterion(probs, truths).item(),
+            "num_examples": probs.shape[0],
+        }
