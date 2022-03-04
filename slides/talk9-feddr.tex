@@ -743,9 +743,22 @@ How can operator splitting applied in such problems?
 % Page 1
 
 \begin{frame}
-\frametitle{Personalization and Operator Splitting}
+\frametitle{Customized DR}
 
-TO BE CONTINUED...
+\begin{block}{Customized DR Model}
+\vspace{-1em}
+\begin{align*}
+\text{min} & \quad F(x) + G(y) \\
+\text{s.t.} & \quad Ax + By = b \\
+& \quad x \in \mathcal{X}, y \in \mathcal{Y}
+\end{align*}
+\end{block}
+
+Let $F(x) = \sum_{i=1}^n f_i(x_i),$ $G(y) = \sum_{i=1}^n g(y_i)$, $A = \text{{\smaller[5]$\begin{pmatrix} I & -I & & & \\ & I & -I & & \\ & & \ddots & \ddots & \\ & & & \ddots & -I \\ -I & & & & I \end{pmatrix}$}}$, then the personalization problem can be stated as
+\begin{align*}
+\text{min} & \quad F(x) + G(y) \\
+\text{s.t.} & \quad Ax - Ay = 0
+\end{align*}
 
 \end{frame}
 
