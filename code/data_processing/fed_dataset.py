@@ -54,6 +54,12 @@ class FedDataset(ABC):
         """
         raise NotImplementedError
 
+    @abstractmethod
+    def evaluate(self, preds:torch.Tensor, truths:torch.Tensor) -> Dict[str, float]:
+        """ 
+        """
+        raise NotImplementedError
+
 
 class FedVisionDataset(FedDataset, ABC):
     """
@@ -79,6 +85,7 @@ class FedVisionDataset(FedDataset, ABC):
         self._preload(datadir)
 
         assert all([
+            self.criterion is not None,
             self.datadir is not None,
             self.DEFAULT_TRAIN_CLIENTS_NUM is not None,
             self.DEFAULT_TEST_CLIENTS_NUM is not None,
@@ -210,6 +217,7 @@ class FedNLPDataset(FedDataset, ABC):
         self._preload()
 
         assert all([
+            self.criterion is not None,
             self.datadir is not None,
             self.DEFAULT_TRAIN_CLIENTS_NUM is not None,
             self.DEFAULT_TEST_CLIENTS_NUM is not None,

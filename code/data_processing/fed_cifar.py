@@ -12,6 +12,7 @@ import torch.utils.data as data
 import torchvision.transforms as transforms
 
 from misc import CACHED_DATA_DIR, default_class_repr
+from models.utils import top_n_accuracy
 from .fed_dataset import FedVisionDataset
 
 
@@ -36,8 +37,11 @@ class FedCIFAR(FedVisionDataset):
         """
         self._n_class = n_class
         assert self.n_class in [100,]
-        self.datadir = Path(datadir or FED_CIFAR_DATA_DIRS[n_class])
+        super().__init__(datadir=Path(datadir or FED_CIFAR_DATA_DIRS[n_class]))
 
+    def _preload(self, datadir:Optional[Union[str,Path]]=None) -> NoReturn:
+        """
+        """
         self.DEFAULT_TRAIN_CLIENTS_NUM = 500
         self.DEFAULT_TEST_CLIENTS_NUM = 100
         self.DEFAULT_BATCH_SIZE = 20
@@ -49,17 +53,14 @@ class FedCIFAR(FedVisionDataset):
         self._IMGAE = "image"
         self._LABEL = "label"
 
+        self.criterion = torch.nn.CrossEntropyLoss()
+
         #client id list
         train_file_path = self.datadir / self.DEFAULT_TRAIN_FILE
         test_file_path = self.datadir / self.DEFAULT_TEST_FILE
         with h5py.File(str(train_file_path), "r") as train_h5, h5py.File(str(test_file_path), "r") as test_h5:
             self._client_ids_train = list(train_h5[self._EXAMPLE].keys())
             self._client_ids_test = list(test_h5[self._EXAMPLE].keys())
-
-    def _preload(self, datadir:Optional[Union[str,Path]]=None) -> NoReturn:
-        """
-        """
-        pass
 
     def get_dataloader(self,
                        train_bs:int,
@@ -121,6 +122,17 @@ class FedCIFAR(FedVisionDataset):
         """
         return ["n_class",] + super().extra_repr_keys()
 
+    def evaluate(self, preds:torch.Tensor, truths:torch.Tensor) -> Dict[str, float]:
+        """
+        """
+        return {
+            "acc": top_n_accuracy(preds, truths, 1),
+            "top3_acc": top_n_accuracy(preds, truths, 3),
+            "top5_acc": top_n_accuracy(preds, truths, 5),
+            "loss": self.criterion(preds, truths).item(),
+            "num_examples": preds.shape[0],
+        }
+
 
 class FedCIFAR100(FedCIFAR):
     """
@@ -135,8 +147,8 @@ class FedCIFAR100(FedCIFAR):
 
 def _data_transforms_fed_cifar(mean:Optional[Sequence[float]]=None,
                                std:Optional[Sequence[float]]=None,
-                               train:bool=True,
-                               crop_size:Sequence[int]=(24,24),) -> Callable:
+                               train:bool=True,) -> Callable:
+                            #    crop_size:Sequence[int]=(24,24),) -> Callable:
     """
     """
     CIFAR_MEAN = [0.49139968, 0.48215827, 0.44653124]
@@ -147,12 +159,12 @@ def _data_transforms_fed_cifar(mean:Optional[Sequence[float]]=None,
         std = CIFAR_STD
     if train:
         return transforms.Compose([
-            transforms.RandomCrop(crop_size),
+            # transforms.RandomCrop(crop_size),
             transforms.RandomHorizontalFlip(),
             transforms.Normalize(mean=mean, std=std),
         ])
     else:
         return transforms.Compose([
-            transforms.CenterCrop(crop_size),
+            # transforms.CenterCrop(crop_size),
             transforms.Normalize(mean=mean, std=std),
         ])

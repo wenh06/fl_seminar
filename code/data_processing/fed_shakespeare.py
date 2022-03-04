@@ -59,6 +59,8 @@ class FedShakespeare(FedNLPDataset):
         self._EXAMPLE = "examples"
         self._SNIPPETS = "snippets"
 
+        self.criterion = torch.nn.CrossEntropyLoss(ignore_index=0)
+
         train_file_path = self.datadir / self.DEFAULT_TRAIN_FILE
         test_file_path = self.datadir / self.DEFAULT_TEST_FILE
         with h5py.File(str(train_file_path), "r") as train_h5, h5py.File(str(test_file_path), "r") as test_h5:
@@ -163,3 +165,8 @@ class FedShakespeare(FedNLPDataset):
 
     def get_word_dict(self) -> Dict[str,int]:
         return self.word_dict
+
+    def evaluate(self, preds:torch.Tensor, truths:torch.Tensor) -> Dict[str, float]:
+        """
+        """
+        pass
