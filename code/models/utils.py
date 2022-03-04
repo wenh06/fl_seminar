@@ -4,6 +4,7 @@
 from typing import Union
 
 import numpy as np
+import einops
 import torch
 from torch import Tensor
 from torch import nn
@@ -73,7 +74,16 @@ class SizeMixin(object):
 
 def top_n_accuracy(preds:Tensor, labels:Tensor, n:int=1) -> float:
     """
+    preds of shape (batch_size, n_classes) or (batch_size, n_classes, d_1, ..., d_n)
+    labels of shape (batch_size,) or (batch_size, d_1, ..., d_n)
     """
-    _, indices = torch.topk(preds, n, dim=1)  # of shape (N, n)
-    correct = torch.sum(indices == labels.repeat(n, 1).T)
-    return correct.item() / preds.shape[0]
+    assert preds.shape[0] == labels.shape[0]
+    batch_size, n_classes, *extra_dims = preds.shape
+    _, indices = torch.topk(preds, n, dim=1)  # of shape (batch_size, n) or (batch_size, n, d_1, ..., d_n)
+    pattern = " ".join([f"d_{i+1}" for i in range(len(extra_dims))])
+    pattern = f"batch_size {pattern} -> batch_size n {pattern}"
+    correct = torch.sum(indices == einops.repeat(labels, pattern, n=n))
+    acc =  correct.item() / preds.shape[0]
+    for d in extra_dims:
+        acc = acc / d
+    return acc
