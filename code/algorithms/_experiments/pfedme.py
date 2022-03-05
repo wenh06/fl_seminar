@@ -18,6 +18,7 @@ from .optimizer import get_optimizer
 
 __all__ = [
     "pFedMeServer", "pFedMeClient",
+    "pFedMeServerConfig", "pFedMeClientConfig",
 ]
 
 

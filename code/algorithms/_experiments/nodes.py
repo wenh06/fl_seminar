@@ -25,6 +25,7 @@ from .optimizer import get_optimizer
 
 __all__ = [
     "Server", "Client",
+    "SeverConfig", "ClientConfig",
 ]
 
 
