@@ -77,6 +77,19 @@ class Node(ABC):
     def communicate(self, target:"Node") -> NoReturn:
         """
         communicate model parameters, gradients, etc. to `target` node
+        for example, for a client node, communicate model parameters to server node via
+        ```python
+        target._received_messages.append(
+            {
+                "parameters": deepcopy(list(self.model.parameters())),
+                "train_samples": self.config.num_epochs * self.config.num_steps * self.config.batch_size,
+            }
+        )
+        ```
+        for a server node, communicate model parameters to clients via
+        ```python
+        target._received_messages = {"parameters": deepcopy(list(self.model.parameters()))}
+        ```python
         """
         raise NotImplementedError
 
@@ -88,7 +101,7 @@ class Node(ABC):
         """
         raise NotImplementedError
 
-    def __post_init(self) -> NoReturn:
+    def _post_init(self) -> NoReturn:
         """
         check if all required field in the config are set
         """
@@ -115,13 +128,14 @@ class Server(Node):
         """
         self.model = model
         self.criterion = criterion
+        self.dataset = dataset
         self.config = config
 
         self._clients = self._setup_clients(dataset, client_config)
 
         self._received_messages = []
 
-        self.__post_init()
+        self._post_init()
 
     def _setup_clients(self, dataset:FedDataset, client_config:ClientConfig) -> List[Node]:
         """
@@ -149,7 +163,43 @@ class Server(Node):
         k = int(self.config.num_clients * self.config.clients_sample_ratio)
         return random.sample(range(self.config.num_clients), k)
 
-    def train(self) -> NoReturn:
+    def train(self, mode:str="federated") -> NoReturn:
+        """
+        """
+        if mode == "federated":
+            self.train_federated()
+        elif mode == "centralized":
+            self.train_centralized()
+        else:
+            raise ValueError(f"mode {mode} is not supported")
+
+    def train_centralized(self) -> NoReturn:
+        """
+        """
+        train_loader, val_loader = \
+            self.dataset.get_dataloader(
+                self.config.batch_size, self.config.batch_size, None
+            )
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        criterion = deepcopy(self.dataset.criterion)
+
+        self.model.train()
+        epoch_losses = []
+        with tqdm(range(self.config.num_iters), total=self.config.num_iters) as pbar:
+            epoch_loss = []
+            for i in pbar:
+                batch_losses = []
+                for data, target in train_loader:
+                    data, target = data.to(device), target.to(device)
+                    output = self.model(data)
+                    loss = criterion(output, target)
+                    self.optimizer.zero_grad()
+                    loss.backward()
+                    batch_losses.append(loss.item())
+                    self.optimizer.step()
+                epoch_loss.append(sum(batch_losses) / len(batch_losses))
+
+    def train_federated(self) -> NoReturn:
         """
         """
         with tqdm(range(self.config.num_iters), total=self.config.num_iters) as pbar:
@@ -175,7 +225,6 @@ class Client(Node):
                  client_id:int,
                  device:torch.device,
                  model:nn.Module,
-                 criterion:nn.Module,
                  dataset:FedDataset,
                  config:ClientConfig,) -> NoReturn:
         """
@@ -183,21 +232,21 @@ class Client(Node):
         self.client_id = client_id
         self.device = device
         self.model = model
-        self.criterion = criterion
+        self.criterion = deepcopy(dataset.criterion)
         self.dataset = dataset
         self.config = config
 
-        self._optimizer = get_optimizer(
+        self.optimizer = get_optimizer(
             optimizer_name=config.optimizer, params=self.model.parameters(), config=config
         )
         self.train_loader, self.val_loader = \
-            self.dataset.get_data_loaders(self.config.batch_size, self.config.batch_size, self.client_id)
+            self.dataset.get_dataloader(self.config.batch_size, self.config.batch_size, self.client_id)
 
         self._server_parameters = None
         self._client_parameters = None
         self._received_messages = {}
 
-        self.__post_init()
+        self._post_init()
 
     def train(self) -> NoReturn:
         """
@@ -208,11 +257,11 @@ class Client(Node):
             batch_losses = []
             for batch_idx, (data, target) in enumerate(self.train_loader):
                 data, target = data.to(self.device), target.to(self.device)
-                self._optimizer.zero_grad()
+                self.optimizer.zero_grad()
                 output = self.model(data)
                 loss = self.criterion(output, target)
                 loss.backward()
-                self._optimizer.step()
+                self.optimizer.step()
                 batch_losses.append(loss.item())
             epoch_losses.append(sum(batch_losses) / len(batch_losses))
 
