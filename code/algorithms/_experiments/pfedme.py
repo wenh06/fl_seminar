@@ -3,7 +3,14 @@ pFedMe re-implemented in the experiment framework
 """
 
 from copy import deepcopy
-from typing import List, NoReturn
+import warnings
+from typing import List, NoReturn, Dict
+
+import torch
+try:
+    from tqdm.auto import tqdm
+except ImportError:
+    from tqdm import tqdm
 
 from .nodes import Server, Client, SeverConfig, ClientConfig
 from .optimizer import get_optimizer
@@ -27,7 +34,8 @@ class pFedMeServerConfig(SeverConfig):
         """
         """
         super().__init__(
-            "pFedMe", num_iters, num_clients, clients_sample_ratio,
+            "pFedMe",
+            num_iters, num_clients, clients_sample_ratio,
             beta=beta,
         )
 
@@ -47,7 +55,7 @@ class pFedMeClientConfig(ClientConfig):
         """
         """
         super().__init__(
-            "pFedMeClient", "pFedMe", "pFedMe",
+            "pFedMe", "pFedMe",
             batch_size, num_epochs, lr,
             num_steps=num_steps, lamda=lamda, mu=mu,
         )
@@ -59,6 +67,10 @@ class pFedMeServer(Server):
     __name__ = "pFedMeServer"
 
     @property
+    def client_cls(self) -> "Client":
+        return pFedMeClient
+
+    @property
     def required_config_fields(self) -> List[str]:
         """
         """
@@ -67,13 +79,19 @@ class pFedMeServer(Server):
     def communicate(self, target:"pFedMeClient") -> NoReturn:
         """
         """
-        target._received_messages = {"parameters": deepcopy(self.model.parameters())}
+        target._received_messages = {"parameters": deepcopy(list(self.model.parameters()))}
+        self._num_communications += 1
 
     def update(self) -> NoReturn:
         """
         """
+        if len(self._received_messages) == 0:
+            warnings.warn("No message received from the clients, unable to update server model")
+            return
         # store previous parameters
         previous_param = deepcopy(list(self.model.parameters()))
+        for p in previous_param:
+            p = p.to(self.device)
 
         # sum of received parameters, with self.model.parameters() as its container
         for param in self.model.parameters():
@@ -84,8 +102,9 @@ class pFedMeServer(Server):
 
         # aaggregate avergage model with previous model using parameter beta 
         for pre_param, param in zip(previous_param, self.model.parameters()):
-            param.data = (1 - self.beta) * pre_param.data.detach().clone() + self.beta * param.data
+            param.data = (1 - self.config.beta) * pre_param.data.detach().clone() + self.config.beta * param.data
 
+        # clear received messages
         del pre_param
         self._received_messages = []
 
@@ -106,7 +125,7 @@ class pFedMeClient(Client):
         """
         target._received_messages.append(
             {
-                "parameters": deepcopy(self.model.parameters()),
+                "parameters": deepcopy(list(self.model.parameters())),
                 "train_samples": self.config.num_epochs * self.config.num_steps * self.config.batch_size,
             }
         )
@@ -115,33 +134,49 @@ class pFedMeClient(Client):
     def update(self) -> NoReturn:
         """
         """
-        self._client_parameters = deepcopy(self._received_messages["parameters"])
+        try:
+            self._client_parameters = deepcopy(self._received_messages["parameters"])
+        except KeyError:
+            warnings.warn("No parameters received from server")
+            warnings.warn("Using current model parameters as initial parameters")
+            self._client_parameters = deepcopy(list(self.model.parameters()))
+        self._client_parameters = [p.to(self.device) for p in self._client_parameters]
         self.train()
 
     def train(self) -> NoReturn:
         """
         """
         self.model.train()
-        for epoch in range(self.config.num_epochs):  # local update
-            # self.model.train()
-            X, y = self.sample_data()
+        with tqdm(range(self.config.num_epochs), total=self.config.num_epochs) as pbar:
+            for epoch in pbar:  # local update
+                self.model.train()
+                X, y = self.sample_data()
+                X, y = X.to(self.device), y.to(self.device)
+                # personalized steps
+                for i in range(self.config.num_steps):
+                    self.optimizer.zero_grad()
+                    output = self.model(X)
+                    loss = self.criterion(output, y)
+                    loss.backward()
+                    updated_parameters, _ = self.optimizer.step(self._client_parameters)
 
-            # personalized steps
-            for i in range(self.config.num_steps):
-                self.optimizer.zero_grad()
-                output = self.model(X)
-                loss = self.loss(output, y)
-                loss.backward()
-                updated_parameters, _ = self.optimizer.step(self._client_parameters)
+                # update local weight after finding aproximate theta
+                for up, cp in zip(updated_parameters, self._client_parameters):
+                    cp.data.add_(cp.data - up.data, alpha=-self.config.lamda * self.config.lr)
 
-            # update local weight after finding aproximate theta
-            for up, cp in zip(updated_parameters, self._client_parameters):
-                cp.data.add_(cp.data - up.data, -self.config.lamda * self.config.lr)
+                # update local model
+                self.set_parameters(self._client_parameters)
 
-            # update local model
-            self.set_parameters(self._client_parameters)
-
-    def evaluate(self) -> NoReturn:
+    def evaluate(self) -> Dict[str, float]:
         """
         """
         self.model.eval()
+        _metrics = []
+        for X, y in self.val_loader:
+            logits = self.model(X)
+            _metrics.append(self.dataset.evaluate(logits, y))
+        metrics = {"num_examples": sum([m["num_examples"] for m in _metrics]),}
+        for k in _metrics[0]:
+            if k != "num_examples":  # average over all metrics
+                metrics[k] = sum([m[k] * m["num_examples"] for m in _metrics]) / metrics["num_examples"]
+        return metrics
