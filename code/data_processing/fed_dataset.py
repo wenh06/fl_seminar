@@ -12,7 +12,7 @@ import torch
 import torch.utils.data as data
 import torchvision.transforms as transforms
 
-from misc import CACHED_DATA_DIR, default_class_repr
+from misc import CACHED_DATA_DIR, ReprMixin
 
 
 __all__ = [
@@ -22,7 +22,7 @@ __all__ = [
 ]
 
 
-class FedDataset(ABC):
+class FedDataset(ReprMixin, ABC):
     """
     """
     __name__ = "FedDataset"
@@ -59,6 +59,11 @@ class FedDataset(ABC):
         """ 
         """
         raise NotImplementedError
+
+    def extra_repr_keys(self) -> List[str]:
+        """
+        """
+        return super().extra_repr_keys() + ["datadir",]
 
 
 class FedVisionDataset(FedDataset, ABC):
@@ -181,17 +186,6 @@ class FedVisionDataset(FedDataset, ABC):
         )
 
         return retval
-
-    def __repr__(self) -> str:
-        return default_class_repr(self)
-
-    def __str__(self) -> str:
-        return repr(self)
-
-    def extra_repr_keys(self) -> List[str]:
-        """
-        """
-        return ["datadir",]
 
     @property
     def n_class(self) -> int:
@@ -319,14 +313,3 @@ class FedNLPDataset(FedDataset, ABC):
         """
         """
         raise NotImplementedError
-
-    def __repr__(self) -> str:
-        return default_class_repr(self)
-
-    def __str__(self) -> str:
-        return repr(self)
-
-    def extra_repr_keys(self) -> List[str]:
-        """
-        """
-        return ["datadir",]

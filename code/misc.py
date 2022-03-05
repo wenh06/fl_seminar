@@ -2,11 +2,12 @@
 """
 
 import pathlib
+from typing import List
 
 
 __all__ = [
     "PROJECT_DIR", "BUILTIN_DATA_DIR", "CACHED_DATA_DIR",
-    "default_class_repr",
+    "default_class_repr", "ReprMixin",
 ]
 
 
@@ -31,3 +32,19 @@ def default_class_repr(c:object, align:str="center") -> str:
     else:
         extra_str = ""
     return f"{c.__class__.__name__}{extra_str}"
+
+
+class ReprMixin(object):
+    """
+    Mixin for enhanced __repr__ and __str__.
+    """
+
+    def __repr__(self) -> str:
+        return default_class_repr(self)
+
+    __str__ = __repr__
+
+    def extra_repr_keys(self) -> List[str]:
+        """
+        """
+        return []

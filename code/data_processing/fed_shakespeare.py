@@ -12,7 +12,7 @@ import torch
 import torch.utils.data as data
 import torchvision.transforms as transforms
 
-from misc import CACHED_DATA_DIR, default_class_repr
+from misc import CACHED_DATA_DIR
 from models.utils import top_n_accuracy
 from .fed_dataset import FedNLPDataset
 

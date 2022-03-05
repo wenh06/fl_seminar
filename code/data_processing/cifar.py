@@ -13,7 +13,7 @@ import torch.utils.data as data
 import torchvision.transforms as transforms
 from torchvision.datasets import CIFAR10, CIFAR100
 
-from misc import CACHED_DATA_DIR, default_class_repr
+from misc import CACHED_DATA_DIR, ReprMixin
 
 
 __all__ = [
@@ -32,7 +32,7 @@ for n_class in [10, 100,]:
     CIFAR_NONIID_CACHE_DIRS[n_class].mkdir(exist_ok=True)
 
 
-class CIFAR_truncated(data.Dataset):
+class CIFAR_truncated(ReprMixin, data.Dataset):
     """
     this class is modified from FedML
     """
@@ -103,16 +103,10 @@ class CIFAR_truncated(data.Dataset):
     def __len__(self) -> int:
         return len(self.data)
 
-    def __repr__(self) -> str:
-        return default_class_repr(self)
-
-    def __str__(self) -> str:
-        return repr(self)
-
     def extra_repr_keys(self) -> List[str]:
         """
         """
-        return ["n_class", "root",]
+        return super().extra_repr_keys() + ["n_class", "root",]
 
 
 class CIFAR10_truncated(CIFAR_truncated):

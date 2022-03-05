@@ -18,6 +18,7 @@ try:
 except ImportError:
     from tqdm import tqdm
 
+from misc import ReprMixin
 from data_processing.fed_dataset import FedDataset
 from .optimizer import get_optimizer
 
@@ -27,9 +28,11 @@ __all__ = [
 ]
 
 
-class SeverConfig:
+class SeverConfig(ReprMixin):
     """
     """
+    __name__ = "SeverConfig"
+
     def __init__(self,
                  algorithm:str,
                  num_iters:int,
@@ -45,10 +48,17 @@ class SeverConfig:
         for k, v in kwargs.items():
             setattr(self, k, v)
 
+    def extra_repr_keys(self) -> List[str]:
+        """
+        """
+        return super().extra_repr_keys() + list(self.__dict__)
 
-class ClientConfig:
+
+class ClientConfig(ReprMixin):
     """
     """
+    __name__ = "ClientConfig"
+
     def __init__(self,
                  client_cls:str,
                  algorithm:str,
@@ -68,10 +78,16 @@ class ClientConfig:
         for k, v in kwargs.items():
             setattr(self, k, v)
 
+    def extra_repr_keys(self) -> List[str]:
+        """
+        """
+        return super().extra_repr_keys() + list(self.__dict__)
 
-class Node(ABC):
+
+class Node(ReprMixin, ABC):
     """
     """
+    __name__ = "Node"
 
     @abstractmethod
     def communicate(self, target:"Node") -> NoReturn:
@@ -118,6 +134,8 @@ class Node(ABC):
 class Server(Node):
     """
     """
+    __name__ = "Server"
+
     def __init__(self,
                  model:nn.Module,
                  criterion:nn.Module,
@@ -134,6 +152,7 @@ class Server(Node):
         self._clients = self._setup_clients(dataset, client_config)
 
         self._received_messages = []
+        self._num_communications = 0
 
         self._post_init()
 
@@ -217,10 +236,17 @@ class Server(Node):
         for server_param, param in zip(self.model.parameters(), params):
             server_param.data.add_(param.data.detach().clone(), ratio)
 
+    def extra_repr_keys(self) -> List[str]:
+        """
+        """
+        return super().extra_repr_keys() + ["config", "client_config",]
+
 
 class Client(Node):
     """
     """
+    __name__ = "Client"
+
     def __init__(self,
                  client_id:int,
                  device:torch.device,
@@ -298,3 +324,8 @@ class Client(Node):
             else:
                 grads.append(param.grad.data)
         return grads
+
+    def extra_repr_keys(self) -> List[str]:
+        """
+        """
+        return super().extra_repr_keys() + ["client_id", "config",]
