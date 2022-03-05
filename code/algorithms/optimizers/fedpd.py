@@ -94,13 +94,13 @@ class FedPD_VR(Optimizer):
                 g_ex.add_(d_p) # g_ex = g_ex + (h-h')
 
                 if (self.counter_in > 0): # first inner loop, only switch x_0 and x_i
-                    p.data.add_(-group["lr"]*mu, p.data-x_0)
-                    p.data.add_(-group["lr"], g_ex + lamb)
+                    p.data.add_(p.data - x_0, alpha=-group["lr"]*mu)
+                    p.data.add_(g_ex + lamb, alpha=-group["lr"])
 
                 if (self.counter_in+1 == freq_1): # last inner loop, perform update on lambda and x_0
-                    lamb.add_(mu, p.data - x_0)
+                    lamb.add_(p.data - x_0, alpha=mu)
                     x_0.copy_(p.data)
-                    p.data.add_(1./mu, lamb)
+                    p.data.add_(lamb, alpha=1./mu)
                 
         self.flag = True
         self.counter_in += 1    
@@ -182,13 +182,13 @@ class FedPD_SGD(Optimizer):
                         x_0.copy_(temp)
 
                 if (self.counter_in > 0): # first inner loop, only switch x_0 and x_i
-                    p.data.add_(-group["lr"]*mu, p.data-x_0)
-                    p.data.add_(-group["lr"], d_p+ lamb)
+                    p.data.add_(p.data - x_0, alpha=-group["lr"]*mu)
+                    p.data.add_(d_p + lamb, alpha=-group["lr"])
 
                 if (self.counter_in+1 == freq): # last inner loop, perform update on lambda and x_0
-                    lamb.add_(mu, p.data - x_0)
+                    lamb.add_(p.data - x_0, alpha=mu)
                     x_0.copy_(p.data)
-                    p.data.add_(1./mu, lamb)
+                    p.data.add_(lamb, alpha=1./mu)
                 
         self.flag = True
         self.counter_in += 1    
@@ -270,8 +270,8 @@ class PSVRG(Optimizer):
                 
                 g_ex.add_(d_p)
 
-                p.data.add_(-group["lr"]*mu, p.data-x_0)
-                p.data.add_(-group["lr"], g_ex)
+                p.data.add_(p.data - x_0, alpha=-group["lr"]*mu)
+                p.data.add_(g_ex, alpha=-group["lr"])
 
         self.flag = True
         self.counter += 1    
@@ -342,8 +342,8 @@ class PSGD(Optimizer):
                 if self.counter == 0:
                     x_0.copy_(p.data)
 
-                p.data.add_(-group["lr"]*mu, p.data-x_0)
-                p.data.add_(-group["lr"], d_p)
+                p.data.add_(p.data-x_0, alpha=-group["lr"]*mu)
+                p.data.add_(d_p, alpha=-group["lr"])
 
         self.flag = True
         self.counter += 1    
