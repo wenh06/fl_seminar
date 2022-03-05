@@ -60,7 +60,6 @@ class ClientConfig(ReprMixin):
     __name__ = "ClientConfig"
 
     def __init__(self,
-                 client_cls:str,
                  algorithm:str,
                  optimizer:str,
                  batch_size:int,
@@ -69,7 +68,6 @@ class ClientConfig(ReprMixin):
                  **kwargs:Any) -> NoReturn:
         """
         """
-        self.client_cls = client_cls
         self.algorithm = algorithm
         self.optimizer = optimizer
         self.batch_size = batch_size
@@ -138,16 +136,16 @@ class Server(Node):
 
     def __init__(self,
                  model:nn.Module,
-                 criterion:nn.Module,
                  dataset:FedDataset,
                  config:SeverConfig,
                  client_config:ClientConfig,) -> NoReturn:
         """
         """
         self.model = model
-        self.criterion = criterion
         self.dataset = dataset
+        self.criterion = deepcopy(dataset.criterion)
         self.config = config
+        self.device = torch.device("cpu")
 
         self._clients = self._setup_clients(dataset, client_config)
 
@@ -160,9 +158,9 @@ class Server(Node):
         """
         setup clients
         """
-        client_cls = eval(client_config.client_cls)
+        print(f"setup clients...")
         return [
-            client_cls(client_id, device, deepcopy(self.model), deepcopy(self.criterion), dataset, client_config) \
+            self.client_cls(client_id, device, deepcopy(self.model), dataset, client_config) \
                 for client_id, device in zip(range(self.config.num_clients), self._allocate_devices())
         ]
 
@@ -170,6 +168,7 @@ class Server(Node):
         """
         allocate devices for clients, can be used in `_setup_clients`
         """
+        print(f"allocate devices...")
         num_gpus = torch.cuda.device_count()
         if num_gpus == 0:
             return list(repeat(torch.device("cpu"), self.config.num_clients))
@@ -234,12 +233,19 @@ class Server(Node):
         """
         """
         for server_param, param in zip(self.model.parameters(), params):
-            server_param.data.add_(param.data.detach().clone(), ratio)
+            server_param.data.add_(param.data.detach().clone().to(self.device), alpha=ratio)
 
     def extra_repr_keys(self) -> List[str]:
         """
         """
         return super().extra_repr_keys() + ["config", "client_config",]
+
+    @property
+    @abstractmethod
+    def client_cls(self) -> "Client":
+        """
+        """
+        raise NotImplementedError
 
 
 class Client(Node):
@@ -258,6 +264,7 @@ class Client(Node):
         self.client_id = client_id
         self.device = device
         self.model = model
+        self.model.to(self.device)
         self.criterion = deepcopy(dataset.criterion)
         self.dataset = dataset
         self.config = config
