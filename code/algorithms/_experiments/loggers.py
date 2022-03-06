@@ -536,7 +536,10 @@ class LoggerManager(ReprMixin):
         -------
         LoggerManager
         """
-        lm =  cls(config.get("log_dir", None), config.get("log_suffix", None))
+        lm =  cls(
+            config["algorithm"], config["dataset"], config["model"],
+            config.get("log_dir", None), config.get("log_suffix", None)
+        )
         if config.get("txt_logger", True):
             lm._add_txt_logger()
         if config.get("csv_logger", True):

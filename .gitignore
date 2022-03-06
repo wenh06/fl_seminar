@@ -171,3 +171,4 @@ dmypy.json
 *.mexa64
 
 .data_cache/
+.logs/
