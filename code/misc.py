@@ -6,7 +6,7 @@ from typing import List
 
 
 __all__ = [
-    "PROJECT_DIR", "BUILTIN_DATA_DIR", "CACHED_DATA_DIR",
+    "PROJECT_DIR", "BUILTIN_DATA_DIR", "CACHED_DATA_DIR", "LOG_DIR",
     "default_class_repr", "ReprMixin",
 ]
 
@@ -16,6 +16,12 @@ PROJECT_DIR = pathlib.Path(__file__).absolute().parent.parent
 BUILTIN_DATA_DIR = PROJECT_DIR / "data"
 
 CACHED_DATA_DIR = PROJECT_DIR / ".data_cache"
+
+LOG_DIR = PROJECT_DIR / ".logs"
+
+
+CACHED_DATA_DIR.mkdir(exist_ok=True)
+LOG_DIR.mkdir(exist_ok=True)
 
 
 def default_class_repr(c:object, align:str="center") -> str:
