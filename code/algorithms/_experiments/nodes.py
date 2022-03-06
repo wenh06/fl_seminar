@@ -21,6 +21,7 @@ except ImportError:
 from misc import ReprMixin
 from data_processing.fed_dataset import FedDataset
 from .optimizer import get_optimizer
+from .loggers import LoggerManager
 
 
 __all__ = [
@@ -39,6 +40,8 @@ class SeverConfig(ReprMixin):
                  num_iters:int,
                  num_clients:int,
                  clients_sample_ratio:float,
+                 txt_logger:bool=True,
+                 csv_logger:bool=True,
                  **kwargs:Any) -> NoReturn:
         """
         """
@@ -46,6 +49,8 @@ class SeverConfig(ReprMixin):
         self.num_iters = num_iters
         self.num_clients = num_clients
         self.clients_sample_ratio = clients_sample_ratio
+        self.txt_logger = txt_logger
+        self.csv_logger = csv_logger
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -149,6 +154,14 @@ class Server(Node):
         self.device = torch.device("cpu")
 
         self._clients = self._setup_clients(dataset, client_config)
+        logger_config = dict(
+            txt_logger=self.config.txt_logger,
+            csv_logger=self.config.csv_logger,
+            algorithm=self.config.algorithm,
+            model=self.model.__class__.__name__,
+            dataset=dataset.__class__.__name__,
+        )
+        self._logger_manager = LoggerManager.from_config(logger_config)
 
         self._received_messages = []
         self._num_communications = 0
