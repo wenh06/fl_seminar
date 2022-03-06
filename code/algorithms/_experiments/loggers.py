@@ -4,7 +4,8 @@ loggers, including (planned) CSVLogger
 with reference to `loggers` of `textattack` and `loggers` of `pytorch-lightning`
 """
 
-import os, logging, csv, importlib, re
+import logging, csv, importlib, re, sys
+from pathlib import Path
 from datetime import datetime
 from abc import ABC, abstractmethod
 from typing import NoReturn, Optional, Union, List, Any, Dict
@@ -140,7 +141,7 @@ class TxtLogger(BaseLogger):
                  algorithm:str,
                  dataset:str,
                  model:str,
-                 log_dir:Optional[str]=None,
+                 log_dir:Optional[Union[str,Path]]=None,
                  log_suffix:Optional[str]=None,) -> NoReturn:
         """
 
@@ -156,7 +157,7 @@ class TxtLogger(BaseLogger):
         assert all([isinstance(x, str) for x in [algorithm, dataset, model]]), \
             "algorithm, dataset, model must be str"
         log_prefix = re.sub("[\s]+", "_", f"{algorithm}-{dataset}-{model}")
-        self._log_dir = log_dir or LOG_DIR
+        self._log_dir = Path(log_dir or LOG_DIR)
         if log_suffix is None:
             log_suffix = ""
         else:
@@ -275,7 +276,7 @@ class TxtLogger(BaseLogger):
     def filename(self) -> str:
         """
         """
-        return os.path.join(self.log_dir, self.log_file)
+        return str(self.log_dir / self.log_file)
 
 
 class CSVLogger(BaseLogger):
@@ -287,7 +288,7 @@ class CSVLogger(BaseLogger):
                  algorithm:str,
                  dataset:str,
                  model:str,
-                 log_dir:Optional[str]=None,
+                 log_dir:Optional[Union[str,Path]]=None,
                  log_suffix:Optional[str]=None,) -> NoReturn:
         """
 
@@ -303,7 +304,7 @@ class CSVLogger(BaseLogger):
         assert all([isinstance(x, str) for x in [algorithm, dataset, model]]), \
             "algorithm, dataset, model must be str"
         log_prefix = re.sub("[\s]+", "_", f"{algorithm}-{dataset}-{model}")
-        self._log_dir = log_dir or LOG_DIR
+        self._log_dir = Path(log_dir or LOG_DIR)
         if log_suffix is None:
             log_suffix = ""
         else:
@@ -360,6 +361,7 @@ class CSVLogger(BaseLogger):
         """
         if not self._flushed:
             self.logger.to_csv(self.filename, quoting=csv.QUOTE_NONNUMERIC, index=False)
+            print(f"CSV log file saved to {self.filename}")
             self._flushed = True
 
     def close(self) -> NoReturn:
@@ -383,7 +385,7 @@ class CSVLogger(BaseLogger):
     def filename(self) -> str:
         """
         """
-        return os.path.join(self.log_dir, self.log_file)
+        return str(self.log_dir / self.log_file)
 
 
 class LoggerManager(ReprMixin):
@@ -395,7 +397,7 @@ class LoggerManager(ReprMixin):
                  algorithm:str,
                  dataset:str,
                  model:str,
-                 log_dir:Optional[str]=None,
+                 log_dir:Optional[Union[str,Path]]=None,
                  log_suffix:Optional[str]=None,) -> NoReturn:
         """
 
@@ -411,7 +413,7 @@ class LoggerManager(ReprMixin):
         self._algorith = algorithm
         self._dataset = dataset
         self._model = model
-        self._log_dir = log_dir or LOG_DIR
+        self._log_dir = Path(log_dir or LOG_DIR)
         self._log_suffix = log_suffix
         self._loggers = []
 
@@ -554,7 +556,11 @@ class LoggerManager(ReprMixin):
 
 
 
-def init_logger(log_dir:str, log_file:Optional[str]=None, log_name:Optional[str]=None, mode:str="a", verbose:int=0) -> logging.Logger:
+def init_logger(log_dir:Union[str,Path],
+                log_file:Optional[str]=None,
+                log_name:Optional[str]=None,
+                mode:str="a",
+                verbose:int=0) -> logging.Logger:
     """ finished, checked,
 
     Parameters
@@ -574,14 +580,15 @@ def init_logger(log_dir:str, log_file:Optional[str]=None, log_name:Optional[str]
     -------
     logger: Logger
     """
+    log_dir = Path(log_dir)
     if log_file is None:
         log_file = f"log_{get_date_str()}.txt"
-    if not os.path.exists(log_dir):
-        os.makedirs(log_dir)
-    log_file = os.path.join(log_dir, log_file)
-    print(f"log file path: {log_file}")
+    if not log_dir.exists():
+        log_dir.mkdir()
+    log_file = log_dir / log_file
+    print(f"log file path: {str(log_file)}")
 
-    logger = logging.getLogger(log_name or DEFAULTS.prefix)  # "ECG" to prevent from using the root logger
+    logger = logging.getLogger("FL")  # "FL" to prevent from using the root logger
 
     c_handler = logging.StreamHandler(sys.stdout)
     f_handler = logging.FileHandler(log_file)
@@ -626,6 +633,6 @@ def get_date_str(fmt:Optional[str]=None):
     date_str: str,
         current time in the `str` format
     """
-    now = datetime.datetime.now()
+    now = datetime.now()
     date_str = now.strftime(fmt or "%m-%d_%H-%M")
     return date_str
