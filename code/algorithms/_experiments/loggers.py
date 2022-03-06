@@ -1,5 +1,5 @@
 """
-loggers, including (planned) CSVLogger, TensorBoardXLogger, WandbLogger
+loggers, including (planned) CSVLogger
 
 with reference to `loggers` of `textattack` and `loggers` of `pytorch-lightning`
 """
@@ -541,11 +541,6 @@ class LoggerManager(ReprMixin):
             lm._add_txt_logger()
         if config.get("csv_logger", True):
             lm._add_csv_logger()
-        if config.get("tensorboardx_logger", True):
-            lm._add_tensorboardx_logger()
-        if config.get("wandb_logger", False):
-            kwargs = config.get("wandb_logger", {})
-            lm._add_wandb_logger(**kwargs)
         return lm
 
     def extra_repr_keys(self) -> List[str]:
