@@ -1,7 +1,7 @@
 """
 """
 
-from typing import Iterable, Union, NoReturn, Optional, Tuple
+from typing import Iterable, Union, NoReturn, Optional, Tuple, List
 
 import torch
 from torch import Tensor
@@ -57,7 +57,9 @@ class ProxSGD(Optimizer):
             group.setdefault("nesterov", False)
 
     @torch.no_grad()
-    def step(self, local_weight_updated:Iterable[Parameter], closure:Optional[callable]=None) -> Tuple[Iterable[Parameter], Optional[Tensor]]:
+    def step(self,
+             local_weight_updated:Iterable[Parameter],
+             closure:Optional[callable]=None,) -> Optional[Tensor]:
         """
 
         Parameters
@@ -109,7 +111,7 @@ class ProxSGD(Optimizer):
                 state = self.state[p]
                 state["momentum_buffer"] = momentum_buffer
 
-        return  loss
+        return loss
 
 
 def prox_sgd(params: List[Tensor],
