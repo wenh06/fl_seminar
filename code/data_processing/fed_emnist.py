@@ -125,3 +125,7 @@ class FedEMNIST(FedVisionDataset):
             "loss": self.criterion(probs, truths).item(),
             "num_examples": probs.shape[0],
         }
+
+    @property
+    def url(self) -> str:
+        return "https://fedml.s3-us-west-1.amazonaws.com/fed_emnist.tar.bz2"

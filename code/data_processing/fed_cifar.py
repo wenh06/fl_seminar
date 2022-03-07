@@ -144,6 +144,10 @@ class FedCIFAR100(FedCIFAR):
         """
         super().__init__(100, datadir)
 
+    @property
+    def url(self) -> str:
+        return "https://fedml.s3-us-west-1.amazonaws.com/fed_cifar100.tar.bz2"
+
 
 def _data_transforms_fed_cifar(mean:Optional[Sequence[float]]=None,
                                std:Optional[Sequence[float]]=None,

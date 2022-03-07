@@ -65,6 +65,11 @@ class FedDataset(ReprMixin, ABC):
         """
         return super().extra_repr_keys() + ["datadir",]
 
+    @property
+    @abstractmethod
+    def url(self) -> str:
+        raise NotImplementedError
+
 
 class FedVisionDataset(FedDataset, ABC):
     """

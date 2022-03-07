@@ -177,3 +177,7 @@ class FedShakespeare(FedNLPDataset):
             "loss": self.criterion(probs, truths).item(),
             "num_examples": probs.shape[0],
         }
+
+    @property
+    def url(self) -> str:
+        return "https://fedml.s3-us-west-1.amazonaws.com/shakespeare.tar.bz2"
