@@ -52,10 +52,10 @@ def generate_synthetic(alpha:float,
         shuffled_inds = [np.arange(n) for n in samples_per_client]
     clients = [
         {
-            "trainX": data_dict["X"][spl_i[0]:spl_i[1]][shf_i][:int(train_ratio * n)],
-            "trainy": data_dict["y"][0][spl_i[0]:spl_i[1]][shf_i][:int(train_ratio * n)],
-            "testX": data_dict["X"][spl_i[0]:spl_i[1]][shf_i][int(train_ratio * n):],
-            "testy": data_dict["y"][0][spl_i[0]:spl_i[1]][shf_i][int(train_ratio * n):],
+            "train_X": data_dict["X"][spl_i[0]:spl_i[1]][shf_i][:int(train_ratio * n)],
+            "train_y": data_dict["y"].flatten()[spl_i[0]:spl_i[1]][shf_i][:int(train_ratio * n)],
+            "test_X": data_dict["X"][spl_i[0]:spl_i[1]][shf_i][int(train_ratio * n):],
+            "test_y": data_dict["y"].flatten()[spl_i[0]:spl_i[1]][shf_i][int(train_ratio * n):],
         } for n, spl_i, shf_i in zip(samples_per_client, split_inds, shuffled_inds)
     ]
     return clients
@@ -104,17 +104,17 @@ def _generate_synthetic(alpha:float,
             W = rng.normal(mean_W[i], 1, (dimension, num_classes))
             b = rng.normal(mean_b[i], 1, num_classes)
 
-        xx = rng.multivariate_normal(mean_x[i], cov_x, n)
-        yy = np.zeros(n, dtype=int)
+        xx = rng.multivariate_normal(mean_x[i], cov_x, samples_per_client[i]).astype(np.float32)
+        yy = np.zeros(samples_per_client[i], dtype=int)
 
-        for j in range(n):
+        for j in range(samples_per_client[i]):
             tmp = np.dot(xx[j], W) + b
             yy[j] = np.argmax(torch.softmax(torch.from_numpy(tmp), dim=0).numpy())
 
-        print(f"{i}-th client has {len(y_split[i])} exampls")
-
         X_split[i] = xx
         y_split[i] = yy
+
+        # print(f"{i}-th client has {len(y_split[i])} exampls")
 
     split_inds = np.cumsum(samples_per_client)
     split_inds = np.array([np.append([0], split_inds[:-1]), split_inds]).T
