@@ -236,11 +236,13 @@ class Server(Node):
         """
         with tqdm(range(self.config.num_iters), total=self.config.num_iters) as pbar:
             for i in pbar:
-                for client_id in self._sample_clients():
+                chosen_clients = self._sample_clients()
+                for client_id in range(self.config.num_clients):
                     client = self._clients[client_id]
                     self.communicate(client)
                     client.update()
-                    client.communicate(self)
+                    if client_id in chosen_clients:
+                        client.communicate(self)
                 self.update()
 
     def add_parameters(self, params:Iterable[Parameter], ratio:float) -> NoReturn:
