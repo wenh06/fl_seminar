@@ -1,7 +1,7 @@
 """
 """
 
-from typing import Union, Iterable
+from typing import Union, Iterable, NoReturn
 
 from torch.nn.parameter import Parameter
 
