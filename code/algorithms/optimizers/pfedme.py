@@ -8,13 +8,37 @@ from torch import Tensor
 from torch.nn import Parameter
 from torch.optim.optimizer import Optimizer
 
+from .base import ProxSGD
+
 
 __all__ = ["pFedMeOptimizer",]
 
 
-class pFedMeOptimizer(Optimizer):
+class pFedMeOptimizer(ProxSGD):
     """
     """
+    __name__ = "pFedMeOptimizer"
+
+    def __init__(self,
+                 params:Iterable[Union[dict,Parameter]],
+                 lr:float=0.01, lamda:float=0.1, mu:float=1e-3) -> NoReturn:
+        """
+        """
+        self.lamda = lamda
+        self.mu = mu
+        super().__init__(params, lr=lr, prox=lamda, momentum=mu, nesterov=True)
+
+    def __setstate__(self, state:dict) -> NoReturn:
+        super().__setstate__(state)
+        for group in self.param_groups:
+            group.setdefault("nesterov", True)
+
+
+class _pFedMeOptimizer(Optimizer):
+    """ legacy pFedMeOptimizer
+    """
+    __name__ = "_pFedMeOptimizer"
+
     def __init__(self,
                  params:Iterable[Union[dict,Parameter]],
                  lr:float=0.01, lamda:float=0.1, mu:float=1e-3) -> NoReturn:
@@ -27,9 +51,9 @@ class pFedMeOptimizer(Optimizer):
         lr: float, default 0.01,
             the learning rate
         lamda: float, default 0.1,
-            hyperparameter for pFedMe
+            coeff. of the proximal term
         mu: float, default 1e-3,
-            hyperparameter for pFedMe
+            momentum coeff.
         """
         #self.local_weight_updated = local_weight # w_i,K
         if lr < 0.0:
@@ -94,6 +118,8 @@ class pFedMeOptimizer(Optimizer):
 class FEDLOptimizer(Optimizer):
     """
     """
+    __name__ = "FEDLOptimizer"
+
     def __init__(self,
                  params:Iterable[Union[dict,Parameter]],
                  lr:float=0.01,
@@ -142,6 +168,8 @@ class FEDLOptimizer(Optimizer):
 class APFLOptimizer(Optimizer):
     """
     """
+    __name__ = "APFLOptimizer"
+
     def __init__(self, params:Iterable[Union[dict,Parameter]], lr:float=0.01) -> NoReturn:
         """
         """

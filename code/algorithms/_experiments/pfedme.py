@@ -159,13 +159,16 @@ class pFedMeClient(Client):
                     output = self.model(X)
                     loss = self.criterion(output, y)
                     loss.backward()
-                    updated_parameters, _ = self.optimizer.step(self._client_parameters)
+                    self.optimizer.step(self._client_parameters)
 
                 # update local weight after finding aproximate theta
-                for up, cp in zip(updated_parameters, self._client_parameters):
+                # pFedMe paper Algorithm 1 line 8
+                for up, cp in zip(self.model.parameters(), self._client_parameters):
                     cp.data.add_(cp.data - up.data, alpha=-self.config.lamda * self.config.lr)
 
                 # update local model
+                # the init parameters (theta in pFedMe paper Algorithm 1 line  7)
+                # are set to be `self._client_parameters`
                 self.set_parameters(self._client_parameters)
 
     def evaluate(self) -> Dict[str, float]:
