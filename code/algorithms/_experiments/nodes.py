@@ -207,6 +207,7 @@ class Server(Node):
 
     def train_centralized(self) -> NoReturn:
         """
+        TODO: add evaluation
         """
         train_loader, val_loader = \
             self.dataset.get_dataloader(
@@ -233,16 +234,18 @@ class Server(Node):
 
     def train_federated(self) -> NoReturn:
         """
+        TODO: run clients in parallel
         """
         with tqdm(range(self.config.num_iters), total=self.config.num_iters) as pbar:
             for i in pbar:
-                chosen_clients = self._sample_clients()
-                for client_id in range(self.config.num_clients):
+                # chosen_clients = self._sample_clients()
+                for client_id in self._sample_clients():
                     client = self._clients[client_id]
                     self.communicate(client)
                     client.update()
-                    if client_id in chosen_clients:
-                        client.communicate(self)
+                    # if client_id in chosen_clients:
+                    #     client.communicate(self)
+                    client.communicate(self)
                 self.update()
 
     def add_parameters(self, params:Iterable[Parameter], ratio:float) -> NoReturn:
@@ -297,9 +300,13 @@ class Client(Node):
 
         self._post_init()
 
+    @abstractmethod
     def train(self) -> NoReturn:
         """
-        """
+        main part of inner loop solver, using the data from dataloaders
+
+        basic example:
+        ```python
         self.model.train()
         epoch_losses = []
         for epoch in range(self.config.num_epochs):
@@ -313,6 +320,15 @@ class Client(Node):
                 self.optimizer.step()
                 batch_losses.append(loss.item())
             epoch_losses.append(sum(batch_losses) / len(batch_losses))
+        ```
+        """
+        raise NotImplementedError
+
+    def solve_inner(self) -> NoReturn:
+        """
+        alias of `train`
+        """
+        self.train()
 
     def sample_data(self) -> Tuple[Tensor, Tensor]:
         """

@@ -45,8 +45,8 @@ class FedCIFAR(FedVisionDataset):
         self.DEFAULT_TRAIN_CLIENTS_NUM = 500
         self.DEFAULT_TEST_CLIENTS_NUM = 100
         self.DEFAULT_BATCH_SIZE = 20
-        self.DEFAULT_TRAIN_FILE = "fed_cifar100_train.h5"
-        self.DEFAULT_TEST_FILE = "fed_cifar100_test.h5"
+        self.DEFAULT_TRAIN_FILE = f"fed_cifar{self.n_class}_train.h5"
+        self.DEFAULT_TEST_FILE = f"fed_cifar{self.n_class}_test.h5"
 
         # group name defined by tff in h5 file
         self._EXAMPLE = "examples"
