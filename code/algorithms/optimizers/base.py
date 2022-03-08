@@ -34,10 +34,16 @@ class ProxSGD(Optimizer):
             the parameters to optimize
         lr: float, default 1e-3,
             the learning rate
+        momentum: float, default 1e-3,
+            momentum factor
+        dampening: float, default 0,
+            dampening for momentum
+        weight_decay: float, default 0
+            weight decay (L2 penalty)
+        nesterov: bool, default False,
+            if True, enables Nesterov momentum
         prox: float, default 0.1,
             coeff. of the proximal term
-        momentum: float, default 1e-3,
-            momentum coeff.
         """
         if lr < 0.0:
             raise ValueError(f"Invalid learning rate: {lr}")
@@ -65,7 +71,8 @@ class ProxSGD(Optimizer):
         Parameters
         ----------
         local_weight_updated: iterable of Parameter,
-            the local weights updated by the server
+            the local weights updated by the local optimizer,
+            or of the previous iteration
         closure: callable, optional,
             a closure that reevaluates the model and returns the loss.
 
