@@ -43,6 +43,13 @@ class pFedMeServerConfig(SeverConfig):
 
 class pFedMeClientConfig(ClientConfig):
     """
+    References
+    ----------
+    1. https://github.com/CharlieDinh/pFedMe/blob/master/FLAlgorithms/users/userpFedMe.py
+
+    Note:
+    1. `lr` is the `personal_learning_rate` in the original implementation
+    2. `eta` is the `learning_rate` in the original implementation
     """
     __name__ = "pFedMeClientConfig"
 
@@ -52,13 +59,13 @@ class pFedMeClientConfig(ClientConfig):
                  lr:float=0.09,
                  num_steps:int=30,
                  lamda:float=15.0,
-                 mu:float=0.001,) -> NoReturn:
+                 eta:float=0.001,) -> NoReturn:
         """
         """
         super().__init__(
             "pFedMe", "pFedMe",
             batch_size, num_epochs, lr,
-            num_steps=num_steps, lamda=lamda, mu=mu,
+            num_steps=num_steps, lamda=lamda, eta=eta,
         )
 
 
@@ -119,7 +126,7 @@ class pFedMeClient(Client):
     def required_config_fields(self) -> List[str]:
         """
         """
-        return ["num_steps", "lamda",]
+        return ["num_steps", "lamda", "eta",]
 
     def communicate(self, target:"pFedMeServer") -> NoReturn:
         """
@@ -135,13 +142,20 @@ class pFedMeClient(Client):
     def update(self) -> NoReturn:
         """
         """
+        # copy the parameters from the server
+        # pFedMe paper Algorithm 1 line 5
         try:
             self._client_parameters = deepcopy(self._received_messages["parameters"])
         except KeyError:
             warnings.warn("No parameters received from server")
             warnings.warn("Using current model parameters as initial parameters")
             self._client_parameters = deepcopy(list(self.model.parameters()))
+        except Exception as err:
+            print("Unknown error")
+            raise err
         self._client_parameters = [p.to(self.device) for p in self._client_parameters]
+        # update the model via prox_sgd
+        # pFedMe paper Algorithm 1 line 6 - 8
         self.train()
 
     def train(self) -> NoReturn:
@@ -163,11 +177,11 @@ class pFedMeClient(Client):
 
                 # update local weight after finding aproximate theta
                 # pFedMe paper Algorithm 1 line 8
-                for up, cp in zip(self.model.parameters(), self._client_parameters):
-                    cp.data.add_(cp.data - up.data, alpha=-self.config.lamda * self.config.lr)
+                for mp, cp in zip(self.model.parameters(), self._client_parameters):
+                    cp.data.add_(cp.data - mp.data, alpha=-self.config.lamda * self.config.eta)
 
                 # update local model
-                # the init parameters (theta in pFedMe paper Algorithm 1 line  7)
+                # the init parameters (theta in pFedMe paper Algorithm 1 line  7) for the next iteration
                 # are set to be `self._client_parameters`
                 self.set_parameters(self._client_parameters)
 

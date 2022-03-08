@@ -36,4 +36,5 @@ class FedProxOptimizer(ProxSGD):
         mu: float, default 0.1,
             coeff. of the proximal term
         """
+        self.mu = mu
         super().__init__(params, lr=lr, prox=mu, momentum=0)

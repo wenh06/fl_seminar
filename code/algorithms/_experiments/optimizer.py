@@ -25,12 +25,3 @@ def get_optimizer(optimizer_name:str, params:Iterable[Union[dict,Parameter]], co
         return get_optimizer_(optimizer_name, params, config)
     except:
         raise NotImplementedError
-
-
-class pFedOpt(Optimizer):
-    """
-    """
-    def __init__(self, params:Iterable[Union[dict,Parameter]], lr:float,) -> NoReturn:
-        """
-        """
-        raise NotImplementedError
