@@ -55,7 +55,7 @@ def get_regularizer(reg_type:str, reg_coeff:float=1.0) -> Regularizer:
     elif reg_type.lower() in ["l2", "l2_norm", "l2norm",]:
         return L2Norm(reg_coeff)
     else:
-        raise ValueError("Unknown regularizer type: {}".format(reg_type))
+        raise ValueError(f"Unknown regularizer type: {reg_type}")
 
 
 class L1Norm(Regularizer):

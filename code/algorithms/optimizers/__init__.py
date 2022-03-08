@@ -9,10 +9,12 @@ from torch.optim import Optimizer
 from .fedpd import FedPD_SGD, FedPD_VR, PSGD, PSVRG
 from .pfedme import pFedMeOptimizer as pFedMe
 from .fedprox import FedProxOptimizer as FedProx
+from .feddr import FedDROptimizer as FedDR
 
 
 __all__ = [
     "FedPD_SGD", "FedPD_VR", "PSGD", "PSVRG", "pFedMe",
+    "FedProx", "FedDR",
     "get_optimizer",
 ]
 
@@ -32,5 +34,7 @@ def get_optimizer(optimizer_name:str, params:Iterable[Union[dict,Parameter]], co
         return pFedMe(params, lr=config.lr, lamda=config.lamda, mu=config.mu)
     elif optimizer_name == "FedProx":
         return FedProx(params, lr=config.lr, mu=config.mu)
+    elif optimizer_name == "FedDR":
+        return FedDR(params, lr=config.lr, eta=config.eta)
     else:
         raise ValueError(f"Invalid optimizer name: {optimizer_name}")
