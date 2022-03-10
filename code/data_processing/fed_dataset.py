@@ -13,6 +13,7 @@ import torch.utils.data as data
 import torchvision.transforms as transforms
 
 from misc import CACHED_DATA_DIR, ReprMixin
+from _download_data import download_if_needed
 
 
 __all__ = [
@@ -69,6 +70,21 @@ class FedDataset(ReprMixin, ABC):
     @abstractmethod
     def url(self) -> str:
         raise NotImplementedError
+
+    def download_if_needed(self) -> NoReturn:
+        """
+        """
+        if self.url:
+            if self.data_dir is None:
+                dst_dir = CACHED_DATA_DIR
+            elif self.data_dir.exists():
+                print("data dir exists, skip downloading")
+                return
+            else:
+                dst_dir = self.datadir.parent
+            download_if_needed(self.url, dst_dir, extract=True)
+            return
+        print("No url for downloading data")
 
 
 class FedVisionDataset(FedDataset, ABC):

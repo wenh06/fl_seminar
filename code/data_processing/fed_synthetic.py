@@ -172,7 +172,7 @@ class FedSynthetic(FedDataset):
             "top3_acc": top_n_accuracy(probs, truths, 3),
             "top5_acc": top_n_accuracy(probs, truths, 5),
             "loss": self.criterion(probs, truths).item(),
-            "num_examples": probs.shape[0],
+            "num_samples": probs.shape[0],
         }
 
     @property

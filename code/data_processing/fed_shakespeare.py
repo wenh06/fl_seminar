@@ -62,6 +62,8 @@ class FedShakespeare(FedNLPDataset):
 
         self.criterion = torch.nn.CrossEntropyLoss(ignore_index=0)
 
+        self.download_if_needed()
+
         train_file_path = self.datadir / self.DEFAULT_TRAIN_FILE
         test_file_path = self.datadir / self.DEFAULT_TEST_FILE
         with h5py.File(str(train_file_path), "r") as train_h5, h5py.File(str(test_file_path), "r") as test_h5:
@@ -175,7 +177,7 @@ class FedShakespeare(FedNLPDataset):
             "top3_acc": top_n_accuracy(probs, truths, 3),
             "top5_acc": top_n_accuracy(probs, truths, 5),
             "loss": self.criterion(probs, truths).item(),
-            "num_examples": probs.shape[0],
+            "num_samples": probs.shape[0],
         }
 
     @property
