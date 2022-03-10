@@ -5,18 +5,20 @@ import random
 from abc import ABC, abstractmethod
 from itertools import repeat
 from copy import deepcopy
-from typing import Any, Optional, NoReturn, Iterable, List, Sequence, Tuple
+from typing import Any, Optional, NoReturn, Iterable, List, Sequence, Tuple, Dict
 
 import torch
 import torch.nn as nn
 from torch import Tensor
 from torch.utils.data import DataLoader
 from torch.nn.parameter import Parameter
-from torch.optim import Optimizer
+from torch.optim import Optimizer, SGD, Adam, AdamW
+from torch.optim.lr_scheduler import LambdaLR, StepLR, OneCycleLR
 try:
     from tqdm.auto import tqdm
 except ImportError:
     from tqdm import tqdm
+from easydict import EasyDict as ED
 
 from misc import ReprMixin
 from data_processing.fed_dataset import FedDataset
@@ -42,6 +44,7 @@ class SeverConfig(ReprMixin):
                  clients_sample_ratio:float,
                  txt_logger:bool=True,
                  csv_logger:bool=True,
+                 eval_every:int=1,
                  **kwargs:Any) -> NoReturn:
         """
         """
@@ -51,6 +54,7 @@ class SeverConfig(ReprMixin):
         self.clients_sample_ratio = clients_sample_ratio
         self.txt_logger = txt_logger
         self.csv_logger = csv_logger
+        self.eval_every = eval_every
         for k, v in kwargs.items():
             setattr(self, k, v)
 
@@ -163,6 +167,9 @@ class Server(Node):
         )
         self._logger_manager = LoggerManager.from_config(logger_config)
 
+        # set batch_size, in case of centralized training
+        setattr(self.config, "batch_size", client_config.batch_size)
+
         self._received_messages = []
         self._num_communications = 0
 
@@ -195,44 +202,75 @@ class Server(Node):
         k = int(self.config.num_clients * self.config.clients_sample_ratio)
         return random.sample(range(self.config.num_clients), k)
 
-    def train(self, mode:str="federated") -> NoReturn:
+    def train(self, mode:str="federated", extra_configs:Optional[dict]=None) -> NoReturn:
         """
         """
         if mode == "federated":
-            self.train_federated()
+            self.train_federated(extra_configs)
         elif mode == "centralized":
-            self.train_centralized()
+            self.train_centralized(extra_configs)
         else:
             raise ValueError(f"mode {mode} is not supported")
 
-    def train_centralized(self) -> NoReturn:
+    def train_centralized(self, extra_configs:Optional[dict]=None) -> NoReturn:
         """
         TODO: add evaluation
         """
+        extra_configs = ED(extra_configs or {})
+
+        batch_size = extra_configs.get("batch_size", self.config.batch_size)
         train_loader, val_loader = \
             self.dataset.get_dataloader(
-                self.config.batch_size, self.config.batch_size, None
+                batch_size, batch_size, None
             )
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-        criterion = deepcopy(self.dataset.criterion)
-
         self.model.train()
+        self.model.to(device)
+
+        criterion = deepcopy(self.dataset.criterion)
+        lr = extra_configs.get("lr", 1e-2)
+        optimizer = extra_configs.get("optimizer", SGD(self.model.parameters(), lr))
+        scheduler = extra_configs.get("scheduler", LambdaLR(optimizer, lambda epoch: 1 / (epoch + 1)))
+
         epoch_losses = []
-        with tqdm(range(self.config.num_iters), total=self.config.num_iters) as pbar:
-            epoch_loss = []
-            for i in pbar:
+        epoch, global_step = 0, 0
+        for _ in range(self.config.num_iters):
+            with tqdm(
+                total=len(train_loader.dataset),
+                desc=f"Epoch {epoch+1}/{self.config.num_iters}",
+                unit="sample",
+            ) as pbar:
+                epoch_loss = []
                 batch_losses = []
                 for data, target in train_loader:
                     data, target = data.to(device), target.to(device)
                     output = self.model(data)
                     loss = criterion(output, target)
-                    self.optimizer.zero_grad()
+                    optimizer.zero_grad()
                     loss.backward()
                     batch_losses.append(loss.item())
-                    self.optimizer.step()
+                    optimizer.step()
+                    global_step += 1
+                    pbar.set_postfix(**{
+                        "loss (batch)": loss.item(),
+                        "lr": scheduler.get_last_lr()[0],
+                    })
+                    pbar.update(data.shape[0])
                 epoch_loss.append(sum(batch_losses) / len(batch_losses))
+                if epoch > 0 and epoch % self.config.eval_every == 0:
+                    print("evaluating...")
+                    metrics = self.evaluate_centralized(val_loader, device)
+                    self._logger_manager.log_metrics(
+                        None, metrics, step=global_step, epoch=epoch, part="val",
+                    )
+                    metrics = self.evaluate_centralized(train_loader, device)
+                    self._logger_manager.log_metrics(
+                        None, metrics, step=global_step, epoch=epoch, part="train",
+                    )
+                scheduler.step()
+                epoch += 1
 
-    def train_federated(self) -> NoReturn:
+    def train_federated(self,  extra_configs:Optional[dict]=None) -> NoReturn:
         """
         TODO: run clients in parallel
         """
@@ -246,7 +284,27 @@ class Server(Node):
                     # if client_id in chosen_clients:
                     #     client.communicate(self)
                     client.communicate(self)
+                    if i > 0 and i % self.config.eval_every == 0:
+                        for part in ["train", "val"]:
+                            metrics = client.evaluate(part)
+                            self._logger_manager.log_metrics(
+                                client_id, metrics, step=i, epoch=i, part=part,
+                            )
                 self.update()
+
+    def evaluate_centralized(self, dataloader:DataLoader) -> Dict[str, float]:
+        """
+        """
+        metrics = []
+        for (X, y) in dataloader:
+            X, y = X.to(self.model.device), y.to(self.model.device)
+            probs = self.model(X)
+            metrics.append(self.dataset.evaluate(probs, y))
+        num_samples = sum([m["num_samples"] for m in metrics])
+        metrics_names = [k for k in metrics[0] if k != "num_samples"]
+        metrics = {k: sum([m[k] * m["num_samples"] for m in metrics]) / num_samples for k in metrics_names}
+        metrics["num_samples"] = num_samples
+        return metrics
 
     def add_parameters(self, params:Iterable[Parameter], ratio:float) -> NoReturn:
         """
@@ -337,7 +395,7 @@ class Client(Node):
         return next(iter(self.train_loader))
 
     @abstractmethod
-    def evaluate(self) -> NoReturn:
+    def evaluate(self, part:str) -> NoReturn:
         """
         """
         raise NotImplementedError

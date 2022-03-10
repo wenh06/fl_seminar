@@ -23,5 +23,8 @@ def get_optimizer(optimizer_name:str, params:Iterable[Union[dict,Parameter]], co
     """
     try:
         return get_optimizer_(optimizer_name, params, config)
-    except:
-        raise NotImplementedError
+    except ValueError as e:
+        raise e
+    except Exception as e:
+        print(f"Unknown error for getting optimizer {optimizer_name}")
+        raise e
