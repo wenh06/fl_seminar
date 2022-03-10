@@ -17,7 +17,10 @@ __all__ = [
 
 FEDML_DOMAIN = "https://fedml.s3-us-west-1.amazonaws.com/"
 DOWNLOAD_CMD = "wget --no-check-certificate --no-proxy {url} -O {dst}"
-DECOMPRESS_CMD = "tar -xvf {src} --directory {dst_dir}"
+DECOMPRESS_CMD = {
+    "tar": "tar -xvf {src} --directory {dst_dir}",
+    "zip": "unzip {src} -d {dst_dir}",
+}
 
 
 def download_if_needed(url:str, dst_dir:Union[str,Path]=CACHED_DATA_DIR, extract:bool=True) -> NoReturn:
@@ -61,7 +64,8 @@ def http_get(url:str, dst_dir:Union[str,Path], proxies:Optional[dict]=None, extr
         extract_dir = Path(dst_dir) / extract_dir
         extract_dir.mkdir(parents=True, exist_ok=True)
         print(f"Extracting {downloaded_file.name} to {extract_dir}.")
-        cmd = DECOMPRESS_CMD.format(
+        fmt = "zip" if _suffix(url) == ".zip" else "tar"
+        cmd = DECOMPRESS_CMD[fmt].format(
             src=str(downloaded_file.name),
             dst_dir=str(extract_dir)
         )
