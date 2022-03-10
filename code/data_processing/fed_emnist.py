@@ -88,7 +88,10 @@ class FedEMNIST(FedVisionDataset):
         test_y = np.concatenate([test_h5[self._EXAMPLE][client_id][self._LABEL][()] for client_id in test_ids])
 
         # dataloader
-        train_ds = data.TensorDataset(torch.from_numpy(train_x), torch.from_numpy(train_y.astype(np.long)))
+        train_ds = data.TensorDataset(
+            torch.from_numpy(train_x).unsqueeze(1),
+            torch.from_numpy(train_y.astype(np.long))
+        )
         train_dl = data.DataLoader(dataset=train_ds,
                                    batch_size=train_bs,
                                    shuffle=True,
