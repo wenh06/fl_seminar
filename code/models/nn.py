@@ -18,7 +18,7 @@ from .utils import SizeMixin
 __all__ = [
     "MLP",
     "CNNMnist",
-    "CNNFEMnist",
+    "CNNFEMnist", "CNNFEMnist_Tiny",
     "CNNCifar",
     "RNN_OriginalFedAvg",
     "RNN_StackOverFlow",
@@ -78,29 +78,57 @@ class CNNFEMnist(SizeMixin, nn.Sequential):
         """
         """
         super().__init__()
-        self.add_module(
-            "conv_block1",
-            nn.Sequential(
-                nn.Conv2d(1, 32, kernel_size=5, padding=2),
-                nn.ReLU(inplace=True),
-                nn.MaxPool2d(2),
+        in_channels = 1
+        for i, out_channels in enumerate([32, 64]):
+            self.add_module(
+                f"conv_block{i+1}",
+                nn.Sequential(
+                    nn.Conv2d(in_channels, out_channels, kernel_size=5, padding=2),
+                    nn.ReLU(inplace=True),
+                    nn.MaxPool2d(2),
+                )
             )
-        )
-        self.add_module(
-            "conv_block2",
-            nn.Sequential(
-                nn.Conv2d(32, 64, kernel_size=5, padding=2),
-                nn.ReLU(inplace=True),
-                nn.MaxPool2d(2),
-            )
-        )
+            in_channels = out_channels
         self.add_module("flatten", Rearrange("b c h w -> b (c h w)"))
         self.add_module(
             "mlp",
             nn.Sequential(
-                nn.Linear(7*7*64, 2048),
+                nn.Linear(7*7*in_channels, 2048),
                 nn.ReLU(inplace=True),
                 nn.Linear(2048, 62),
+            )
+        )
+
+
+class CNNFEMnist_Tiny(SizeMixin, nn.Sequential):
+    """
+    modified from FedPD/models.py
+
+    input shape: (batch_size, 1, 28, 28)
+    """
+
+    def __init__(self) -> NoReturn:
+        """
+        """
+        super().__init__()
+        in_channels = 1
+        for i, out_channels in enumerate([16, 32]):
+            self.add_module(
+                f"conv_block{i+1}",
+                nn.Sequential(
+                    nn.Conv2d(in_channels, out_channels, kernel_size=5, padding=2),
+                    nn.ReLU(inplace=True),
+                    nn.MaxPool2d(2),
+                )
+            )
+            in_channels = out_channels
+        self.add_module("flatten", Rearrange("b c h w -> b (c h w)"))
+        self.add_module(
+            "mlp",
+            nn.Sequential(
+                nn.Linear(7*7*in_channels, 256),
+                nn.ReLU(inplace=True),
+                nn.Linear(256, 62),
             )
         )
 
