@@ -97,7 +97,10 @@ class FedEMNIST(FedVisionDataset):
                                    shuffle=True,
                                    drop_last=False)
 
-        test_ds = data.TensorDataset(torch.from_numpy(test_x), torch.from_numpy(test_y.astype(np.long)))
+        test_ds = data.TensorDataset(
+            torch.from_numpy(test_x).unsqueeze(1),
+            torch.from_numpy(test_y.astype(np.long))
+        )
         test_dl = data.DataLoader(dataset=test_ds,
                                   batch_size=test_bs,
                                   shuffle=True,
