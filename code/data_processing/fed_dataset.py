@@ -11,6 +11,7 @@ import numpy as np
 import torch
 import torch.utils.data as data
 import torchvision.transforms as transforms
+from PIL import Image
 
 from misc import CACHED_DATA_DIR, ReprMixin
 from _download_data import download_if_needed
@@ -75,9 +76,9 @@ class FedDataset(ReprMixin, ABC):
         """
         """
         if self.url:
-            if self.data_dir is None:
+            if self.datadir is None:
                 dst_dir = CACHED_DATA_DIR
-            elif self.data_dir.exists():
+            elif self.datadir.exists():
                 print("data dir exists, skip downloading")
                 return
             else:
@@ -211,6 +212,12 @@ class FedVisionDataset(FedDataset, ABC):
     @property
     def n_class(self) -> int:
         return self._n_class
+
+    def show_image(self, tensor:torch.Tensor) -> Image.Image:
+        """
+        """
+        assert tensor.ndim == 3
+        return transforms.ToPILImage()(tensor)
 
 
 class FedNLPDataset(FedDataset, ABC):
