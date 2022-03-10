@@ -71,6 +71,14 @@ class SizeMixin(object):
             self, human=True, dtype=dtype,
         )
 
+    @property
+    def dtype(self) -> torch.dtype:
+        return next(self.parameters()).dtype
+
+    @property
+    def device(self) -> torch.device:
+        return next(self.parameters()).device
+
 
 def top_n_accuracy(preds:Tensor, labels:Tensor, n:int=1) -> float:
     """
