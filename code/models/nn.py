@@ -2,15 +2,28 @@
 simple neural network models
 """
 
+import re
 from typing import NoReturn, Optional
 
 import torch
 from torch import nn, Tensor
 import torch.nn.functional as F
+from torchvision.models.resnet import ResNet, BasicBlock, resnet18
 import einops
 from einops.layers.torch import Rearrange
 
 from .utils import SizeMixin
+
+
+__all__ = [
+    "MLP",
+    "CNNMnist",
+    "CNNFEMnist",
+    "CNNCifar",
+    "RNN_OriginalFedAvg",
+    "RNN_StackOverFlow",
+    "ResNet18", "ResNet10",
+]
 
 
 class MLP(SizeMixin, nn.Sequential):
@@ -205,3 +218,40 @@ class RNN_StackOverFlow(SizeMixin, nn.Module):
             "batch length vocab -> batch vocab length"
         )
         return output
+
+
+class ResNet18(SizeMixin, ResNet):
+    """
+    """
+    __name__ = "ResNet18"
+
+    def __init__(self, num_classs:int, pretrained:bool=False) -> NoReturn:
+        """
+        """
+        super().__init__(
+            BasicBlock, [2, 2, 2, 2],
+            num_classes=num_classs,
+        )
+        if pretrained:
+            _model = resnet18(pretrained=True)
+            self.load_state_dict(
+                {k:v for k,v in _model.state_dict().items() if not re.findall("^fc\.", k)},
+                strict=False,
+            )
+            del _model
+
+
+class ResNet10(SizeMixin, ResNet):
+    """
+    """
+    __name__ = "ResNet10"
+
+    def __init__(self, num_classs:int, pretrained:bool=False) -> NoReturn:
+        """
+        """
+        super().__init__(
+            BasicBlock, [1, 1, 1, 1],
+            num_classes=num_classs,
+        )
+        if pretrained:
+            raise NotImplementedError("ResNet10 has no pretrained model.")
