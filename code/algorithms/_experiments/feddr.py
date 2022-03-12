@@ -123,7 +123,7 @@ class FedDRServer(Server):
             mp.data = (self._regularizer.coeff / self.config.eta) * xtp.data \
                 + (1 / (self.config.num_clients + 1)) * yp.data
         for mp, p in zip(self.model.parameters(), self._regularizer.prox_eval(params=self.model.parameters())):
-            mp.data = p
+            mp.data = p.data
 
         # clear received messages
         self._received_messages = []
@@ -216,11 +216,14 @@ class FedDRClient(Client):
                     loss.backward()
                     self.optimizer.step(self._y_parameters)
 
-    def evaluate(self) -> Dict[str, float]:
+    @torch.no_grad()
+    def evaluate(self, part:str) -> Dict[str, float]:
         """
         """
+        assert part in ["train", "val",]
         self.model.eval()
         _metrics = []
+        data_loader = self.val_loader if part == "val" else self.train_loader
         for X, y in self.val_loader:
             logits = self.model(X)
             _metrics.append(self.dataset.evaluate(logits, y))

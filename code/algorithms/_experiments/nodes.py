@@ -214,7 +214,6 @@ class Server(Node):
 
     def train_centralized(self, extra_configs:Optional[dict]=None) -> NoReturn:
         """
-        TODO: add evaluation
         """
         extra_configs = ED(extra_configs or {})
 
@@ -234,7 +233,7 @@ class Server(Node):
 
         epoch_losses = []
         epoch, global_step = 0, 0
-        for _ in range(self.config.num_iters):
+        for epoch in range(self.config.num_iters):
             with tqdm(
                 total=len(train_loader.dataset),
                 desc=f"Epoch {epoch+1}/{self.config.num_iters}",
@@ -257,39 +256,46 @@ class Server(Node):
                     })
                     pbar.update(data.shape[0])
                 epoch_loss.append(sum(batch_losses) / len(batch_losses))
-                if epoch > 0 and epoch % self.config.eval_every == 0:
+                if (epoch + 1) % self.config.eval_every == 0:
                     print("evaluating...")
                     metrics = self.evaluate_centralized(val_loader, device)
                     self._logger_manager.log_metrics(
                         None, metrics, step=global_step, epoch=epoch, part="val",
                     )
-                    metrics = self.evaluate_centralized(train_loader, device)
+                    metrics = self.evaluate_centralized(train_loader)
                     self._logger_manager.log_metrics(
                         None, metrics, step=global_step, epoch=epoch, part="train",
                     )
                 scheduler.step()
-                epoch += 1
 
-    def train_federated(self,  extra_configs:Optional[dict]=None) -> NoReturn:
+        self.model.to(self.device)  # move to the original device
+
+    def train_federated(self, extra_configs:Optional[dict]=None) -> NoReturn:
         """
         TODO: run clients in parallel
         """
-        with tqdm(range(self.config.num_iters), total=self.config.num_iters) as pbar:
-            for i in pbar:
-                # chosen_clients = self._sample_clients()
-                for client_id in self._sample_clients():
+        for n_iter in range(self.config.num_iters):
+            selected_clients = self._sample_clients()
+            with tqdm(
+                total=len(selected_clients),
+                desc=f"Iter {n_iter+1}/{self.config.num_iters}",
+                unit="client",
+            ) as pbar:
+                for client_id in selected_clients:
                     client = self._clients[client_id]
                     self.communicate(client)
                     client.update()
                     # if client_id in chosen_clients:
                     #     client.communicate(self)
                     client.communicate(self)
-                    if i > 0 and i % self.config.eval_every == 0:
+                    if (n_iter + 1) % self.config.eval_every == 0:
                         for part in ["train", "val"]:
                             metrics = client.evaluate(part)
+                            # print(f"metrics: {metrics}")
                             self._logger_manager.log_metrics(
-                                client_id, metrics, step=i, epoch=i, part=part,
+                                client_id, metrics, step=n_iter, epoch=n_iter, part=part,
                             )
+                    pbar.update(1)
                 self.update()
 
     def evaluate_centralized(self, dataloader:DataLoader) -> Dict[str, float]:

@@ -4,7 +4,7 @@ pFedMe re-implemented in the experiment framework
 
 from copy import deepcopy
 import warnings
-from typing import List, NoReturn, Dict
+from typing import List, NoReturn, Dict, Any
 
 import torch
 try:
@@ -31,13 +31,15 @@ class pFedMeServerConfig(SeverConfig):
                  num_iters:int,
                  num_clients:int,
                  clients_sample_ratio:float,
-                 beta:float=1.0,) -> NoReturn:
+                 beta:float=1.0,
+                 **kwargs:Any) -> NoReturn:
         """
         """
         super().__init__(
             "pFedMe",
             num_iters, num_clients, clients_sample_ratio,
             beta=beta,
+            **kwargs
         )
 
 
@@ -50,6 +52,7 @@ class pFedMeClientConfig(ClientConfig):
     Note:
     1. `lr` is the `personal_learning_rate` in the original implementation
     2. `eta` is the `learning_rate` in the original implementation
+    3. `mu` is the momentum factor in the original implemented optimzer
     """
     __name__ = "pFedMeClientConfig"
 
@@ -59,13 +62,16 @@ class pFedMeClientConfig(ClientConfig):
                  lr:float=0.09,
                  num_steps:int=30,
                  lamda:float=15.0,
-                 eta:float=0.001,) -> NoReturn:
+                 eta:float=1e-3,
+                 mu:float=1e-3,
+                 **kwargs:Any,) -> NoReturn:
         """
         """
         super().__init__(
             "pFedMe", "pFedMe",
             batch_size, num_epochs, lr,
-            num_steps=num_steps, lamda=lamda, eta=eta,
+            num_steps=num_steps, lamda=lamda, eta=eta, mu=mu,
+            **kwargs
         )
 
 
@@ -93,6 +99,7 @@ class pFedMeServer(Server):
     def update(self) -> NoReturn:
         """
         """
+        print("Server update...")
         if len(self._received_messages) == 0:
             warnings.warn("No message received from the clients, unable to update server model")
             return
@@ -126,7 +133,7 @@ class pFedMeClient(Client):
     def required_config_fields(self) -> List[str]:
         """
         """
-        return ["num_steps", "lamda", "eta",]
+        return ["num_steps", "lamda", "eta", "mu",]
 
     def communicate(self, target:"pFedMeServer") -> NoReturn:
         """
@@ -185,16 +192,20 @@ class pFedMeClient(Client):
                 # are set to be `self._client_parameters`
                 self.set_parameters(self._client_parameters)
 
-    def evaluate(self) -> Dict[str, float]:
+    @torch.no_grad()
+    def evaluate(self, part:str) -> Dict[str, float]:
         """
         """
+        assert part in ["train", "val",]
         self.model.eval()
         _metrics = []
-        for X, y in self.val_loader:
+        data_loader = self.val_loader if part == "val" else self.train_loader
+        for X, y in data_loader:
+            X, y = X.to(self.device), y.to(self.device)
             logits = self.model(X)
             _metrics.append(self.dataset.evaluate(logits, y))
-        metrics = {"num_examples": sum([m["num_examples"] for m in _metrics]),}
+        metrics = {"num_samples": sum([m["num_samples"] for m in _metrics]),}
         for k in _metrics[0]:
-            if k != "num_examples":  # average over all metrics
-                metrics[k] = sum([m[k] * m["num_examples"] for m in _metrics]) / metrics["num_examples"]
+            if k != "num_samples":  # average over all metrics
+                metrics[k] = sum([m[k] * m["num_samples"] for m in _metrics]) / metrics["num_samples"]
         return metrics

@@ -454,7 +454,7 @@ class LoggerManager(ReprMixin):
             can be "train" or "val" or "test", etc.
         """
         for l in self.loggers:
-            l.log_metrics(metrics, step, epoch, part)
+            l.log_metrics(client_id, metrics, step, epoch, part)
 
     def log_message(self, msg:str, level:int=logging.INFO) -> NoReturn:
         """

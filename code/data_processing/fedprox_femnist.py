@@ -12,7 +12,6 @@ import json
 from pathlib import Path
 from typing import NoReturn, Optional, Union, List, Callable, Tuple, Dict, Sequence
 
-import h5py
 import numpy as np
 import torch
 import torch.utils.data as data
