@@ -3,7 +3,7 @@ simple neural network models
 """
 
 import re
-from typing import NoReturn, Optional
+from typing import NoReturn, Optional, Union, Sequence
 
 import torch
 from torch import nn, Tensor
@@ -16,7 +16,7 @@ from .utils import SizeMixin
 
 
 __all__ = [
-    "MLP",
+    "MLP", "FedPDMLP",
     "CNNMnist",
     "CNNFEMnist", "CNNFEMnist_Tiny",
     "CNNCifar",
@@ -28,8 +28,48 @@ __all__ = [
 
 class MLP(SizeMixin, nn.Sequential):
     """
+    multi-layer perceptron
+
+    can be used for
+    1. logistic regression (for classification) using cross entropy loss (CrossEntropyLoss, BCEWithLogitsLoss, etc)
+    2. regression (for regression) using MSE loss
+    3. SVM (for classification) using hinge loss (MultiMarginLoss, MultiLabelMarginLoss, etc)
+    4. etc.
+    """
+    __name__ = "MLP"
+
+    def __init__(self, dim_in:int, dim_out:int, dim_hidden:Optional[Union[int,Sequence[int]]]=None) -> NoReturn:
+        """
+        """
+        super().__init__()
+        self.add_module("flatten", Rearrange("b c h w -> b (c h w)"))
+        dims = []
+        if dim_hidden is not None:
+            if isinstance(dim_hidden, int):
+                dims = [dim_hidden,]
+            else:
+                dims = list(dim_hidden)
+        for i, dim in enumerate(dims):
+            self.add_module(f"linear_{i+1}", nn.Linear(dim_in, dim))
+            self.add_module(f"relu_{i+1}", nn.ReLU(inplace=True))
+            self.add_module(f"dropout_{i+1}", nn.Dropout(p=0.2, inplace=True))
+            dim_in = dim
+        self.add_module(f"linear_{len(dims)+1}", nn.Linear(dim_in, dim_out))
+
+    def forward(self, input:Tensor) -> Tensor:
+        """
+        """
+        for _ in range(4-input.ndim):
+            # allow for input of ndim 2 and 3
+            input = input.unsqueeze(1)
+        return super().forward(input)
+
+
+class FedPDMLP(SizeMixin, nn.Sequential):
+    """
     modified from FedPD/models.py
     """
+    __name__ = "FedPDMLP"
 
     def __init__(self, dim_in:int, dim_hidden:int, dim_out:int) -> NoReturn:
         """
@@ -41,6 +81,14 @@ class MLP(SizeMixin, nn.Sequential):
         self.add_module("dropout", nn.Dropout(p=0.2, inplace=True))
         self.add_module("layer_hidden", nn.Linear(dim_hidden, dim_out))
 
+    def forward(self, input:Tensor) -> Tensor:
+        """
+        """
+        for _ in range(4-input.ndim):
+            # allow for input of ndim 2 and 3
+            input = input.unsqueeze(1)
+        return super().forward(input)
+
 
 class CNNMnist(SizeMixin, nn.Sequential):
     """
@@ -48,6 +96,7 @@ class CNNMnist(SizeMixin, nn.Sequential):
 
     input: (batch_size, 1, 28, 28)
     """
+    __name__ = "CNNMnist"
 
     def __init__(self, num_classes:int) -> NoReturn:
         """
@@ -73,6 +122,7 @@ class CNNFEMnist(SizeMixin, nn.Sequential):
 
     input shape: (batch_size, 1, 28, 28)
     """
+    __name__ = "CNNFEMnist"
 
     def __init__(self) -> NoReturn:
         """
@@ -106,6 +156,7 @@ class CNNFEMnist_Tiny(SizeMixin, nn.Sequential):
 
     input shape: (batch_size, 1, 28, 28)
     """
+    __name__ = "CNNFEMnist_Tiny"
 
     def __init__(self) -> NoReturn:
         """
@@ -139,6 +190,8 @@ class CNNCifar(SizeMixin, nn.Sequential):
     
     input shape： (batch_size, 3, 32, 32)
     """
+    __name__ = "CNNCifar"
+
     def __init__(self, num_classes:int) -> NoReturn:
         """
         """
@@ -182,6 +235,7 @@ class RNN_OriginalFedAvg(SizeMixin, nn.Module):
 
     Modified from `FedML`
     """
+    __name__ = "RNN_OriginalFedAvg"
 
     def __init__(self, embedding_dim:int=8, vocab_size:int=90, hidden_size:int=256) -> NoReturn:
         """
@@ -218,6 +272,7 @@ class RNN_StackOverFlow(SizeMixin, nn.Module):
     
     Modified from `FedML`
     """
+    __name__ = "RNN_StackOverFlow"
 
     def __init__(self,
                  vocab_size:int=10000,
