@@ -11,9 +11,9 @@ try:
 except ImportError:
     from tqdm import tqdm
 
-from .nodes import Server, Client, ServerConfig, ClientConfig
-from .optimizer import get_optimizer
-from .regularizers import get_regularizer
+from nodes import Server, Client, ServerConfig, ClientConfig
+from ..optimizers import get_optimizer
+from ..regularizers import get_regularizer
 
 
 __all__ = [
