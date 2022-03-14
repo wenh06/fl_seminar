@@ -12,7 +12,7 @@ try:
 except ImportError:
     from tqdm import tqdm
 
-from .nodes import Server, Client, SeverConfig, ClientConfig
+from .nodes import Server, Client, ServerConfig, ClientConfig
 from .optimizer import get_optimizer
 
 
@@ -22,7 +22,7 @@ __all__ = [
 ]
 
 
-class FedProxServerConfig(SeverConfig):
+class FedProxServerConfig(ServerConfig):
     """
     """
     __name__ = "FedProxServerConfig"

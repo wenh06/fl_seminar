@@ -11,7 +11,7 @@ try:
 except ImportError:
     from tqdm import tqdm
 
-from .nodes import Server, Client, SeverConfig, ClientConfig
+from .nodes import Server, Client, ServerConfig, ClientConfig
 from .optimizer import get_optimizer
 from .regularizers import get_regularizer
 
@@ -22,7 +22,7 @@ __all__ = [
 ]
 
 
-class FedDRServerConfig(SeverConfig):
+class FedDRServerConfig(ServerConfig):
     """
     """
     __name__ = "FedDRServerConfig"
@@ -70,7 +70,7 @@ class FedDRServer(Server):
     def __init__(self,
                  model:nn.Module,
                  dataset:FedDataset,
-                 config:SeverConfig,
+                 config:ServerConfig,
                  client_config:ClientConfig,) -> NoReturn:
         """
         """

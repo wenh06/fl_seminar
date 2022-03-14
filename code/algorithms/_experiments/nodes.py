@@ -28,14 +28,14 @@ from .loggers import LoggerManager
 
 __all__ = [
     "Server", "Client",
-    "SeverConfig", "ClientConfig",
+    "ServerConfig", "ClientConfig",
 ]
 
 
-class SeverConfig(ReprMixin):
+class ServerConfig(ReprMixin):
     """
     """
-    __name__ = "SeverConfig"
+    __name__ = "ServerConfig"
 
     def __init__(self,
                  algorithm:str,
@@ -147,7 +147,7 @@ class Server(Node):
     def __init__(self,
                  model:nn.Module,
                  dataset:FedDataset,
-                 config:SeverConfig,
+                 config:ServerConfig,
                  client_config:ClientConfig,) -> NoReturn:
         """
         """
