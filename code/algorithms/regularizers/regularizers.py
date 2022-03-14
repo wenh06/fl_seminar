@@ -15,8 +15,10 @@ from misc import ReprMixin
 
 
 __all__ = [
-    "Regularizer", "get_regularizer",
-    "L1Norm", "L2Norm", "L2NormSquared", "NullRegularizer",
+    "get_regularizer",
+    "Regularizer",
+    "L1Norm", "L2Norm", "L2NormSquared",
+    "NullRegularizer",
 ]
 
 
