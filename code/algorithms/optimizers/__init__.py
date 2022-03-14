@@ -5,7 +5,10 @@ from typing import Iterable, Union, Any
 
 from torch.nn.parameter import Parameter
 from torch.optim import Optimizer
+import torch.optim as opt
+import torch_optimizer as topt
 
+from .base import ProxSGD
 from .fedpd import FedPD_SGD, FedPD_VR, PSGD, PSVRG
 from .pfedme import pFedMeOptimizer as pFedMe
 from .fedprox import FedProxOptimizer as FedProx
@@ -20,8 +23,30 @@ __all__ = [
 
 
 def get_optimizer(optimizer_name:str, params:Iterable[Union[dict,Parameter]], config:Any) -> Optimizer:
+    """ get optimizer by name
+
+    Usage examples
+    --------------
+    ```python
+    import torch
+
+    model = torch.nn.Linear(10, 1)
+    optimizer = get_optimizer("SGD", model.parameters(), {"lr": 1e-2})  # PyTorch built-in
+    optimizer = get_optimizer("yogi", model.parameters(), {"lr": 1e-2})  # from pytorch_optimizer
+    optimizer = get_optimizer("FedPD_SGD", model.parameters(), {"lr": 1e-2})  # federated
     """
-    """
+    try:
+        optimizer = eval(f"opt.{optimizer_name}(params, **config)")
+        print(f"PyTorch built-in optimizer {optimizer_name} is used.")
+        return optimizer
+    except:
+        try:
+            optimizer = topt.get(optimizer_name)(params, **config)
+            print(f"Optimizer {optimizer_name} from torch_optimizer is used.")
+            return optimizer
+        except:
+            pass
+
     if optimizer_name == "FedPD_SGD":
         return FedPD_SGD(params, mu=config.mu, lamda=config.lamda, lr=config.lr)
     elif optimizer_name == "FedPD_VR":
