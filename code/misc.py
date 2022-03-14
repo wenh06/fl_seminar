@@ -2,12 +2,13 @@
 """
 
 import pathlib
-from typing import List
+from typing import List, Any
 
 
 __all__ = [
     "PROJECT_DIR", "BUILTIN_DATA_DIR", "CACHED_DATA_DIR", "LOG_DIR",
     "default_class_repr", "ReprMixin",
+    "isclass",
 ]
 
 
@@ -70,3 +71,22 @@ class ReprMixin(object):
         """
         """
         return []
+
+
+def isclass(obj:Any) -> bool:
+    """ finished, checked,
+
+    Parameters
+    ----------
+    obj: any object,
+        any object, including class, instance of class, etc
+
+    Returns
+    -------
+    bool:
+        True if `obj` is a class, False otherwise
+    """
+    try:
+        return issubclass(obj, object)
+    except TypeError:
+        return False
