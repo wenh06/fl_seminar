@@ -172,3 +172,5 @@ dmypy.json
 
 .data_cache/
 .logs/
+.tmp/
+.temp/
