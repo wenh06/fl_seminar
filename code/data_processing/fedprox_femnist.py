@@ -58,17 +58,15 @@ class FedProxFEMNIST(FedVisionDataset):
         #client id list
         train_file_path = self.datadir / self.DEFAULT_TRAIN_FILE
         test_file_path = self.datadir / self.DEFAULT_TEST_FILE
-        train_data_dict = json.loads(train_file_path.read_text())
-        test_data_dict = json.loads(test_file_path.read_text())
-        self._client_ids_train = train_data_dict["users"]
-        self._client_ids_test = test_data_dict["users"]
+        self._train_data_dict = json.loads(train_file_path.read_text())
+        self._test_data_dict = json.loads(test_file_path.read_text())
+        self._client_ids_train = self._train_data_dict["users"]
+        self._client_ids_test = self._test_data_dict["users"]
             
         self._n_class = len(np.unique(np.concatenate([
-            train_data_dict[self._EXAMPLE][self._client_ids_train[idx]][self._LABEL] \
+            self._train_data_dict[self._EXAMPLE][self._client_ids_train[idx]][self._LABEL] \
                 for idx in range(self.DEFAULT_TRAIN_CLIENTS_NUM)
         ])))
-        del train_data_dict
-        del test_data_dict
 
     def get_dataloader(self,
                        train_bs:int,
@@ -76,11 +74,6 @@ class FedProxFEMNIST(FedVisionDataset):
                        client_idx:Optional[int]=None,) -> Tuple[data.DataLoader, data.DataLoader]:
         """
         """
-        train_file_path = self.datadir / self.DEFAULT_TRAIN_FILE
-        test_file_path = self.datadir / self.DEFAULT_TEST_FILE
-        train_data_dict = json.loads(train_file_path.read_text())
-        test_data_dict = json.loads(test_file_path.read_text())
-
         # load data
         if client_idx is None:
             # get ids of all clients
@@ -92,14 +85,14 @@ class FedProxFEMNIST(FedVisionDataset):
             test_ids = [self._client_ids_test[client_idx]]
 
         # load data
-        train_x = np.vstack([train_data_dict[self._EXAMPLE][client_id][self._IMGAE] for client_id in train_ids])
-        train_y = np.concatenate([train_data_dict[self._EXAMPLE][client_id][self._LABEL] for client_id in train_ids])
-        test_x = np.vstack([test_data_dict[self._EXAMPLE][client_id][self._IMGAE] for client_id in test_ids])
-        test_y = np.concatenate([test_data_dict[self._EXAMPLE][client_id][self._LABEL] for client_id in test_ids])
+        train_x = np.vstack([self._train_data_dict[self._EXAMPLE][client_id][self._IMGAE] for client_id in train_ids])
+        train_y = np.concatenate([self._train_data_dict[self._EXAMPLE][client_id][self._LABEL] for client_id in train_ids])
+        test_x = np.vstack([self._test_data_dict[self._EXAMPLE][client_id][self._IMGAE] for client_id in test_ids])
+        test_y = np.concatenate([self._test_data_dict[self._EXAMPLE][client_id][self._LABEL] for client_id in test_ids])
 
         # dataloader
         train_ds = data.TensorDataset(
-            torch.from_numpy(train_x.reshape((-1,28,28))).unsqueeze(1),
+            torch.from_numpy(train_x.reshape((-1,28,28)).astype(np.float32)).unsqueeze(1),
             torch.from_numpy(train_y.astype(np.long))
         )
         train_dl = data.DataLoader(dataset=train_ds,
@@ -108,7 +101,7 @@ class FedProxFEMNIST(FedVisionDataset):
                                    drop_last=False)
 
         test_ds = data.TensorDataset(
-            torch.from_numpy(test_x.reshape((-1,28,28))).unsqueeze(1),
+            torch.from_numpy(test_x.reshape((-1,28,28)).astype(np.float32)).unsqueeze(1),
             torch.from_numpy(test_y.astype(np.long))
         )
         test_dl = data.DataLoader(dataset=test_ds,
@@ -155,5 +148,5 @@ class FedProxFEMNIST(FedVisionDataset):
         return {
             "cnn_femmist_tiny": mnn.CNNFEMnist_Tiny(),
             "cnn_femmist": mnn.CNNFEMnist(),
-            "resnet10": mnn.ResNet10(num_classses=self.n_class),
+            "resnet10": mnn.ResNet10(num_classes=self.n_class),
         }

@@ -147,5 +147,5 @@ class FedEMNIST(FedVisionDataset):
         return {
             "cnn_femmist_tiny": mnn.CNNFEMnist_Tiny(),
             "cnn_femmist": mnn.CNNFEMnist(),
-            "resnet10": mnn.ResNet10(num_classses=self.n_class),
+            "resnet10": mnn.ResNet10(num_classes=self.n_class),
         }

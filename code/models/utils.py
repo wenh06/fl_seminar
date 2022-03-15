@@ -12,7 +12,7 @@ from torch import nn
 
 __all__ = [
     "compute_module_size",
-    "SizeMixin",
+    "SizeMixin", "CLFMixin",
     "top_n_accuracy",
 ]
 
@@ -56,6 +56,7 @@ class SizeMixin(object):
 
     mixin class for size related methods
     """
+    __name__ = "SizeMixin"
     
     @property
     def module_size(self) -> int:

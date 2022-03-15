@@ -51,7 +51,7 @@ class MLP(CLFMixin, SizeMixin, nn.Sequential):
                 dims = list(dim_hidden)
         for i, dim in enumerate(dims):
             self.add_module(f"linear_{i+1}", nn.Linear(dim_in, dim))
-            self.add_module(f"relu_{i+1}", nn.ReLU(inplace=True))
+            self.add_module(f"relu_{i+1}", nn.ReLU())
             self.add_module(f"dropout_{i+1}", nn.Dropout(p=0.2, inplace=True))
             dim_in = dim
         self.add_module(f"linear_{len(dims)+1}", nn.Linear(dim_in, dim_out))
@@ -308,12 +308,12 @@ class ResNet18(CLFMixin, SizeMixin, ResNet):
     """
     __name__ = "ResNet18"
 
-    def __init__(self, num_classs:int, pretrained:bool=False) -> NoReturn:
+    def __init__(self, num_classes:int, pretrained:bool=False) -> NoReturn:
         """
         """
         super().__init__(
             BasicBlock, [2, 2, 2, 2],
-            num_classes=num_classs,
+            num_classes=num_classes,
         )
         if pretrained:
             _model = resnet18(pretrained=True)
@@ -329,12 +329,12 @@ class ResNet10(CLFMixin, SizeMixin, ResNet):
     """
     __name__ = "ResNet10"
 
-    def __init__(self, num_classs:int, pretrained:bool=False) -> NoReturn:
+    def __init__(self, num_classes:int, pretrained:bool=False) -> NoReturn:
         """
         """
         super().__init__(
             BasicBlock, [1, 1, 1, 1],
-            num_classes=num_classs,
+            num_classes=num_classes,
         )
         if pretrained:
             raise NotImplementedError("ResNet10 has no pretrained model.")

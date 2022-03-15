@@ -54,7 +54,9 @@ class FedSynthetic(FedDataset):
             num_classes=self.num_classes,
             dimension=self.dimension,
         )
-        self.DEFAULT_BATCH_SIZE = 16
+        self.DEFAULT_BATCH_SIZE = 8
+        self.DEFAULT_TRAIN_CLIENTS_NUM = self.num_clients
+        self.DEFAULT_TEST_CLIENTS_NUM = self.num_clients
 
     def get_dataloader(self,
                        train_bs:int,

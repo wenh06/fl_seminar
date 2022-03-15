@@ -215,6 +215,7 @@ class Server(Node):
     def train_centralized(self, extra_configs:Optional[dict]=None) -> NoReturn:
         """
         """
+        self._logger_manager.log_message("Training centralized...")
         extra_configs = ED(extra_configs or {})
 
         batch_size = extra_configs.get("batch_size", self.config.batch_size)
@@ -258,7 +259,7 @@ class Server(Node):
                 epoch_loss.append(sum(batch_losses) / len(batch_losses))
                 if (epoch + 1) % self.config.eval_every == 0:
                     print("evaluating...")
-                    metrics = self.evaluate_centralized(val_loader, device)
+                    metrics = self.evaluate_centralized(val_loader)
                     self._logger_manager.log_metrics(
                         None, metrics, step=global_step, epoch=epoch, part="val",
                     )
@@ -274,6 +275,7 @@ class Server(Node):
         """
         TODO: run clients in parallel
         """
+        self._logger_manager.log_message("Training federated...")
         for n_iter in range(self.config.num_iters):
             selected_clients = self._sample_clients()
             with tqdm(

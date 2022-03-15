@@ -82,7 +82,7 @@ class FedProxMNIST(FedVisionDataset):
 
         # dataloader
         train_ds = data.TensorDataset(
-            torch.from_numpy(train_x).unsqueeze(1),
+            torch.from_numpy(train_x.astype(np.float32)).unsqueeze(1),
             torch.from_numpy(train_y.astype(np.long))
         )
         train_dl = data.DataLoader(dataset=train_ds,
@@ -91,7 +91,7 @@ class FedProxMNIST(FedVisionDataset):
                                    drop_last=False)
 
         test_ds = data.TensorDataset(
-            torch.from_numpy(test_x).unsqueeze(1),
+            torch.from_numpy(test_x.astype(np.float32)).unsqueeze(1),
             torch.from_numpy(test_y.astype(np.long))
         )
         test_dl = data.DataLoader(dataset=test_ds,
@@ -138,7 +138,7 @@ class FedProxMNIST(FedVisionDataset):
         return {
             "cnn_femmist_tiny": mnn.CNNFEMnist_Tiny(),
             "cnn_femmist": mnn.CNNFEMnist(),
-            "resnet10": mnn.ResNet10(num_classses=self.n_class),
+            "resnet10": mnn.ResNet10(num_classes=self.n_class),
         }
 
 
@@ -186,8 +186,8 @@ def generate_niid(mnist_data:Dict[str, np.ndarray],
             clients_data[c]["train_y"] = \
                 np.append(clients_data[c]["train_y"], np.full_like(inds, label, dtype=np.int64))
             idx[label] += n
-    print(f"idx = {idx}")
-    print(f"class_inds = {[(l, len(class_inds[l])) for l in range(NUM_CLASSES)]}")
+    # print(f"idx = {idx}")
+    # print(f"class_inds = {[(l, len(class_inds[l])) for l in range(NUM_CLASSES)]}")
 
     rng = np.random.default_rng(seed)
     probs = rng.lognormal(0, 2.0, (NUM_CLASSES, num_clients//NUM_CLASSES, class_per_client))
@@ -211,6 +211,6 @@ def generate_niid(mnist_data:Dict[str, np.ndarray],
         clients_data[c]["test_y"] = clients_data[c]["train_y"][inds[train_len:]]
         clients_data[c]["train_x"] = clients_data[c]["train_x"][inds[:train_len], ...]
         clients_data[c]["train_y"] = clients_data[c]["train_y"][inds[:train_len]]
-    print(f"idx = {idx}")
+    # print(f"idx = {idx}")
 
     return clients_data
