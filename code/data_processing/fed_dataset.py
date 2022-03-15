@@ -82,8 +82,9 @@ class FedDataset(ReprMixin, ABC):
                 print("data dir exists, skip downloading")
                 return
             else:
-                dst_dir = self.datadir.parent
-            download_if_needed(self.url, dst_dir, extract=True)
+                # dst_dir = self.datadir.parent
+                pass
+            download_if_needed(self.url, self.datadir, extract=True)
             return
         print("No url for downloading data")
 

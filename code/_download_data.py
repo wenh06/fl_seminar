@@ -1,7 +1,7 @@
 """
 """
 
-import os, shlex, shutil, collections, subprocess, platform, re, tempfile
+import os, shlex, shutil, collections, subprocess, platform, re, tempfile, zipfile, tarfile
 from pathlib import Path
 from typing import NoReturn, Union, List, Tuple, Optional
 
@@ -28,8 +28,7 @@ def download_if_needed(url:str, dst_dir:Union[str,Path]=CACHED_DATA_DIR, extract
     """
     dst_dir = Path(dst_dir)
     dst_dir.mkdir(parents=True, exist_ok=True)
-    dst = dst_dir / Path(url).name
-    if (dst_dir / _stem(dst)).exists():
+    if dst_dir.exists() and len(list(dst_dir.iterdir())) > 0:
         return
     http_get(url, dst_dir, extract=extract)
     
@@ -40,8 +39,9 @@ def http_get(url:str, dst_dir:Union[str,Path], proxies:Optional[dict]=None, extr
     https://github.com/huggingface/transformers/blob/master/src/transformers/file_utils.py
     """
     print(f"Downloading {url}.")
+    parent_dir = Path(dst_dir).parent
     downloaded_file = tempfile.NamedTemporaryFile(
-        dir=Path(dst_dir),
+        dir=parent_dir,
         suffix=_suffix(url),
         delete=False
     )
@@ -58,19 +58,10 @@ def http_get(url:str, dst_dir:Union[str,Path], proxies:Optional[dict]=None, extr
     progress.close()
     downloaded_file.close()
     if extract:
-        extract_dir = _stem(url)
-        if not extract_dir.startswith("fed"):
-            extract_dir = f"fed_{extract_dir}"
-        extract_dir = Path(dst_dir) / extract_dir
-        extract_dir.mkdir(parents=True, exist_ok=True)
-        print(f"Extracting {downloaded_file.name} to {extract_dir}.")
-        fmt = "zip" if _suffix(url) == ".zip" else "tar"
-        cmd = DECOMPRESS_CMD[fmt].format(
-            src=str(downloaded_file.name),
-            dst_dir=str(extract_dir)
-        )
-        exitcode, output_msg = execute_cmd(shlex.split(cmd))
-        # print(f"exitcode = {exitcode}, output_msg = {output_msg}")
+        if _suffix(url) == ".zip":
+            _unzip_file(str(downloaded_file.name), str(dst_dir))
+        else:  # tar files
+            _untar_file(str(downloaded_file.name), str(dst_dir))
     else:
         shutil.copyfile(downloaded_file.name, Path(dst_dir) / Path(url).name)
     os.remove(downloaded_file.name)
@@ -136,3 +127,19 @@ def _suffix(path:Union[str,Path]) -> str:
     """
     """
     return "".join(Path(path).suffixes)
+
+
+def _unzip_file(path_to_zip_file:Union[str, Path], dst_dir:Union[str, Path]) -> NoReturn:
+    """Unzips a .zip file to folder path."""
+    print(f"Extracting file {path_to_zip_file} to {dst_dir}.")
+    with zipfile.ZipFile(str(path_to_zip_file)) as zip_ref:
+        zip_ref.extractall(str(dst_dir))
+
+
+def _untar_file(path_to_tar_file:Union[str, Path], dst_dir:Union[str, Path]) -> NoReturn:
+    """decompress a .tar.xx file to folder path."""
+    print(f"Extracting file {path_to_tar_file} to {dst_dir}.")
+    mode = Path(path_to_tar_file).suffix.replace(".", "r:").replace("tar", "")
+    # print(f"mode: {mode}")
+    with tarfile.open(str(path_to_tar_file), mode) as tar_ref:
+        tar_ref.extractall(str(dst_dir))
