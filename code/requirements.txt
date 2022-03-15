@@ -2,9 +2,13 @@ einops
 h5py
 numpy
 pandas
+Pillow
+h5py
 scikit_learn
 scipy
 torch==1.8.1+cu111
 torchvision==0.9.1+cu111
+pytorch-optimizer
 tqdm
+easydict
 requests

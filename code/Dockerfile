@@ -32,4 +32,4 @@ RUN pip install -r code/requirements.txt
 RUN python -m pip cache purge
 
 
-# RUN python code/docker_test.py  # TODO: implement the test code
+RUN python code/docker_test.py
