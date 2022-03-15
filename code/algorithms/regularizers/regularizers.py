@@ -18,6 +18,7 @@ __all__ = [
     "get_regularizer",
     "Regularizer",
     "L1Norm", "L2Norm", "L2NormSquared",
+    "LInfNorm",
     "NullRegularizer",
 ]
 
@@ -62,6 +63,8 @@ def get_regularizer(reg_type:str, reg_coeff:float=1.0) -> Regularizer:
         return L2NormSquared(reg_coeff)
     elif reg_type in ["no", "empty", "zero", "none", "null",]:
         return NullRegularizer(reg_coeff)
+    elif reg_type in ["linf", "inf", "linfinity", "infinity", "linfty", "infty",]:
+        return LInfNorm(reg_coeff)
     else:
         raise ValueError(f"Unknown regularizer type: {reg_type}")
 
@@ -157,3 +160,24 @@ class L2NormSquared(Regularizer):
         ]
         del _params
         return ret_params
+
+
+class LInfNorm(Regularizer):
+    """
+    """
+    __name__ = "LInfNorm"
+
+    def eval(self, params:Iterable[Parameter], coeff:Optional[float]=None) -> float:
+        """
+        """
+        if coeff is None:
+            coeff = self.coeff
+        return coeff * max([p.data.abs().max().item() for p in params])
+
+    def prox_eval(self, params:Iterable[Parameter], coeff:Optional[float]=None) -> Iterable[Parameter]:
+        """
+        """
+        if coeff is None:
+            coeff = self.coeff
+        _params = list(params)  # to avoid the case that params is a generator
+        raise NotImplementedError("L-infinity norm is not implemented yet")

@@ -6,11 +6,13 @@ import warnings
 from typing import List, NoReturn, Dict
 
 import torch
+import torch.nn as nn
 try:
     from tqdm.auto import tqdm
 except ImportError:
     from tqdm import tqdm
 
+from data_processing.fed_dataset import FedDataset
 from nodes import Server, Client, ServerConfig, ClientConfig
 from ..optimizers import get_optimizer
 from ..regularizers import get_regularizer
