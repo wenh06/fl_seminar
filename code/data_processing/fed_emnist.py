@@ -140,7 +140,7 @@ class FedEMNIST(FedVisionDataset):
         return "https://fedml.s3-us-west-1.amazonaws.com/fed_emnist.tar.bz2"
 
     @property
-    def _candidate_models(self) -> Dict[str, torch.nn.Module]:
+    def candidate_models(self) -> Dict[str, torch.nn.Module]:
         """
         a set of candidate models
         """

@@ -12,7 +12,7 @@ from torchvision.models.resnet import ResNet, BasicBlock, resnet18
 import einops
 from einops.layers.torch import Rearrange
 
-from .utils import SizeMixin
+from .utils import SizeMixin, CLFMixin
 
 
 __all__ = [
@@ -26,7 +26,7 @@ __all__ = [
 ]
 
 
-class MLP(SizeMixin, nn.Sequential):
+class MLP(CLFMixin, SizeMixin, nn.Sequential):
     """
     multi-layer perceptron
 
@@ -65,7 +65,7 @@ class MLP(SizeMixin, nn.Sequential):
         return super().forward(input)
 
 
-class FedPDMLP(SizeMixin, nn.Sequential):
+class FedPDMLP(CLFMixin, SizeMixin, nn.Sequential):
     """
     modified from FedPD/models.py
     """
@@ -90,7 +90,7 @@ class FedPDMLP(SizeMixin, nn.Sequential):
         return super().forward(input)
 
 
-class CNNMnist(SizeMixin, nn.Sequential):
+class CNNMnist(CLFMixin, SizeMixin, nn.Sequential):
     """
     modified from FedPD/models.py
 
@@ -116,7 +116,7 @@ class CNNMnist(SizeMixin, nn.Sequential):
         self.add_module("fc2", nn.Linear(50, num_classes))
 
 
-class CNNFEMnist(SizeMixin, nn.Sequential):
+class CNNFEMnist(CLFMixin, SizeMixin, nn.Sequential):
     """
     modified from FedPD/models.py
 
@@ -150,7 +150,7 @@ class CNNFEMnist(SizeMixin, nn.Sequential):
         )
 
 
-class CNNFEMnist_Tiny(SizeMixin, nn.Sequential):
+class CNNFEMnist_Tiny(CLFMixin, SizeMixin, nn.Sequential):
     """
     modified from FedPD/models.py
 
@@ -184,7 +184,7 @@ class CNNFEMnist_Tiny(SizeMixin, nn.Sequential):
         )
 
 
-class CNNCifar(SizeMixin, nn.Sequential):
+class CNNCifar(CLFMixin, SizeMixin, nn.Sequential):
     """
     modified from FedPD/models.py
     
@@ -225,7 +225,7 @@ class CNNCifar(SizeMixin, nn.Sequential):
         )
 
 
-class RNN_OriginalFedAvg(SizeMixin, nn.Module):
+class RNN_OriginalFedAvg(CLFMixin, SizeMixin, nn.Module):
     """Creates a RNN model using LSTM layers for Shakespeare language models (next character prediction task).
       This replicates the model structure in the paper:
       Communication-Efficient Learning of Deep Networks from Decentralized Data
@@ -264,7 +264,7 @@ class RNN_OriginalFedAvg(SizeMixin, nn.Module):
         return output
 
 
-class RNN_StackOverFlow(SizeMixin, nn.Module):
+class RNN_StackOverFlow(CLFMixin, SizeMixin, nn.Module):
     """Creates a RNN model using LSTM layers for StackOverFlow (next word prediction task).
       This replicates the model structure in the paper:
       "Adaptive Federated Optimization. ICML 2020" (https://arxiv.org/pdf/2003.00295.pdf)
@@ -303,7 +303,7 @@ class RNN_StackOverFlow(SizeMixin, nn.Module):
         return output
 
 
-class ResNet18(SizeMixin, ResNet):
+class ResNet18(CLFMixin, SizeMixin, ResNet):
     """
     """
     __name__ = "ResNet18"
@@ -324,7 +324,7 @@ class ResNet18(SizeMixin, ResNet):
             del _model
 
 
-class ResNet10(SizeMixin, ResNet):
+class ResNet10(CLFMixin, SizeMixin, ResNet):
     """
     """
     __name__ = "ResNet10"

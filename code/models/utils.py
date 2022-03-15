@@ -1,7 +1,7 @@
 """
 """
 
-from typing import Union
+from typing import Union, Optional, Dict
 
 import numpy as np
 import einops
@@ -78,6 +78,43 @@ class SizeMixin(object):
     @property
     def device(self) -> torch.device:
         return next(self.parameters()).device
+
+
+class CLFMixin(object):
+    """
+    mixin for classifiers
+    """
+    __name__ = "CLFMixin"
+
+    def predict_proba(self, input:Tensor, multi_label:bool=False) -> np.ndarray:
+        """
+        """
+        output = self.forward(input)
+        if multi_label:
+            return torch.sigmoid(output).cpu().detach().numpy()
+        return torch.softmax(output, dim=-1).cpu().detach().numpy()
+
+    def predict(self, input:Tensor, thr:Optional[float]=None, class_map:Optional[Dict[int, str]]=None) -> list:
+        """
+        """
+        proba = self.predict_proba(input, multi_label=thr is not None)
+        if thr is None:
+            output = proba.argmax(axis=-1).tolist()
+            if class_map is not None:
+                output = [class_map[i] for i in output]
+            return output
+        output = [[] for _ in range(input.shape[0])]
+        indices = np.where(proba > thr)
+        if len(indices) > 2:
+            raise ValueError(f"multi-label classification is not supported for output of 3 dimensions or more")
+        for i, j in zip(*indices):
+            output[i].append(j)
+        for idx in range(len(output)):
+            if len(output[idx]) == 0:
+                output[idx] = [proba[idx].argmax()]
+        if class_map is not None:
+            output = [[class_map[i] for i in l] for l in output]
+        return output
 
 
 def top_n_accuracy(preds:Tensor, labels:Tensor, n:int=1) -> float:
