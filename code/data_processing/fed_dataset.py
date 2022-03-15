@@ -87,6 +87,14 @@ class FedDataset(ReprMixin, ABC):
             return
         print("No url for downloading data")
 
+    @property
+    @abstractmethod
+    def _candidate_models(self) -> Dict[str, torch.nn.Module]:
+        """
+        a set of candidate models
+        """
+        raise NotImplementedError
+
 
 class FedVisionDataset(FedDataset, ABC):
     """

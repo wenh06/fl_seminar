@@ -18,6 +18,7 @@ import torch.utils.data as data
 import torchvision.transforms as transforms
 
 from misc import CACHED_DATA_DIR
+from models import nn as mnn
 from models.utils import top_n_accuracy
 from .fed_dataset import FedVisionDataset
 
@@ -145,3 +146,14 @@ class FedProxFEMNIST(FedVisionDataset):
     def url(self) -> str:
         # https://drive.google.com/file/d/1tCEcJgRJ8NdRo11UJZR6WSKMNdmox4GC/view?usp=sharing
         return "http://218.245.5.12/NLP/federated/fedprox-femnist.zip"
+
+    @property
+    def _candidate_models(self) -> Dict[str, torch.nn.Module]:
+        """
+        a set of candidate models
+        """
+        return {
+            "cnn_femmist_tiny": mnn.CNNFEMnist_Tiny(),
+            "cnn_femmist": mnn.CNNFEMnist(),
+            "resnet10": mnn.ResNet10(num_classses=self.n_class),
+        }

@@ -9,6 +9,7 @@ import torch
 import torch.utils.data as data
 
 from misc import CACHED_DATA_DIR
+from models import nn as mnn
 from models.utils import top_n_accuracy
 from .fed_dataset import FedDataset
 from .generate_synthetic import generate_synthetic
@@ -178,3 +179,23 @@ class FedSynthetic(FedDataset):
     @property
     def url(self) -> str:
         return ""
+
+    @property
+    def _candidate_models(self) -> Dict[str, torch.nn.Module]:
+        """
+        a set of candidate models
+        """
+        return {
+            "mlp_d1": mnn.MLP(
+                self.dimension, self.num_classes
+            ),
+            "mlp_d2": mnn.MLP(
+                self.dimension, self.num_classes, [2*self.dimension,],
+            ),
+            "mlp_d3": mnn.MLP(
+                self.dimension, self.num_classes, [int(1.5*self.dimension), 2*self.dimension,],
+            ),
+            "mlp_d4": mnn.MLP(
+                self.dimension, self.num_classes, [int(1.5*self.dimension), 2*self.dimension, int(1.5*self.dimension),],
+            ),
+        }

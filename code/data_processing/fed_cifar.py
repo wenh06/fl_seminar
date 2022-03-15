@@ -12,6 +12,7 @@ import torch.utils.data as data
 import torchvision.transforms as transforms
 
 from misc import CACHED_DATA_DIR
+from models import nn as mnn
 from models.utils import top_n_accuracy
 from .fed_dataset import FedVisionDataset
 
@@ -133,6 +134,16 @@ class FedCIFAR(FedVisionDataset):
             "top5_acc": top_n_accuracy(probs, truths, 5),
             "loss": self.criterion(probs, truths).item(),
             "num_samples": probs.shape[0],
+        }
+
+    @property
+    def _candidate_models(self) -> Dict[str, torch.nn.Module]:
+        """
+        a set of candidate models
+        """
+        return {
+            "cnn_cifar": mnn.CNNCifar(num_classes=self.n_class),
+            "resnet10": mnn.ResNet10(num_classses=self.n_class),
         }
 
 

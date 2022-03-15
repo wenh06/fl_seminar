@@ -13,6 +13,7 @@ import torch.utils.data as data
 import torchvision.transforms as transforms
 
 from misc import CACHED_DATA_DIR
+from models import nn as mnn
 from models.utils import top_n_accuracy
 from .fed_dataset import FedNLPDataset
 
@@ -183,3 +184,12 @@ class FedShakespeare(FedNLPDataset):
     @property
     def url(self) -> str:
         return "https://fedml.s3-us-west-1.amazonaws.com/shakespeare.tar.bz2"
+
+    @property
+    def _candidate_models(self) -> Dict[str, torch.nn.Module]:
+        """
+        a set of candidate models
+        """
+        return {
+            "rnn": mnn.RNN_OriginalFedAvg(),
+        }
