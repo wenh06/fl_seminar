@@ -1,8 +1,0 @@
-absl
-attrs
-jax
-jaxlib
-numpy
-numpyro
-matplotlib
-sklearn
