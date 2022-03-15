@@ -1,6 +1,7 @@
 """
 """
 
+import warnings
 from typing import Iterable, Union, NoReturn, Optional, Tuple, List
 
 import torch
@@ -53,6 +54,12 @@ class ProxSGD(Optimizer):
             raise ValueError(f"Invalid weight_decay value: {weight_decay}")
         if nesterov and (momentum <= 0 or dampening != 0):
             raise ValueError("Nesterov momentum requires a momentum and zero dampening")
+        if prox < 0.0:
+            raise ValueError(f"Invalid prox value: {prox}")
+        if prox * lr >= 1:
+            warnings.warn(
+                f"prox * lr = {prox * lr:.3f} >= 1 with prox = {prox}, lr = {lr}, you may encounter gradient exploding",
+            )
         defaults = dict(lr=lr, momentum=momentum, dampening=dampening,
                         weight_decay=weight_decay, nesterov=nesterov, prox=prox)
         super().__init__(params, defaults)
@@ -140,7 +147,7 @@ def prox_sgd(params: List[Tensor],
             d_p = d_p.add(param, alpha=weight_decay)  # L2 regularization
 
         if prox != 0:
-            d_p = d_p.add(param-localweight, alpha=prox)  # proximal regularization
+            d_p = d_p.add(param-localweight.detach().clone(), alpha=prox)  # proximal regularization
 
         if momentum != 0:
             buf = momentum_buffer_list[i]

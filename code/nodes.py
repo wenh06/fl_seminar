@@ -416,7 +416,7 @@ class Client(Node):
     def set_parameters(self, params:Iterable[Parameter]) -> NoReturn:
         """
         """
-        for client_param , param in zip(self.model.parameters(), params):
+        for client_param, param in zip(self.model.parameters(), params):
             client_param.data = param.data.detach().clone()
 
     def get_gradients(self) -> List[Tensor]:
@@ -425,7 +425,7 @@ class Client(Node):
         grads = []
         for param in self.model.parameters():
             if param.grad is None:
-                grads.append(None)
+                grads.append(torch.zeros_like(param.data))
             else:
                 grads.append(param.grad.data)
         return grads

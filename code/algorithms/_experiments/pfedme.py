@@ -59,7 +59,7 @@ class pFedMeClientConfig(ClientConfig):
     def __init__(self,
                  batch_size:int,
                  num_epochs:int,
-                 lr:float=0.09,
+                 lr:float=5e-3,
                  num_steps:int=30,
                  lamda:float=15.0,
                  eta:float=1e-3,
@@ -185,7 +185,11 @@ class pFedMeClient(Client):
                 # update local weight after finding aproximate theta
                 # pFedMe paper Algorithm 1 line 8
                 for mp, cp in zip(self.model.parameters(), self._client_parameters):
-                    cp.data.add_(cp.data - mp.data, alpha=-self.config.lamda * self.config.eta)
+                    # print(mp.data.isnan().any(), cp.data.isnan().any())
+                    cp.data.add_(
+                        cp.data.clone() - mp.data.clone(),
+                        alpha=-self.config.lamda * self.config.eta
+                    )
 
                 # update local model
                 # the init parameters (theta in pFedMe paper Algorithm 1 line  7) for the next iteration
