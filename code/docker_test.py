@@ -7,7 +7,7 @@ from typing import Callable, Any
 from data_processing.fed_synthetic import FedSynthetic
 from data_processing.fedprox_femnist import FedProxFEMNIST
 
-from algorithms._experiments.pfedme import pFedMeClient, pFedMeServer, pFedMeClientConfig, pFedMeServerConfig
+from algorithms.pfedme import pFedMeClient, pFedMeServer, pFedMeClientConfig, pFedMeServerConfig
 from algorithms._experiments.fedprox import FedProxClient, FedProxServer, FedProxClientConfig, FedProxServerConfig
 from algorithms._experiments.feddr import FedDRClient, FedDRServer, FedDRClientConfig, FedDRServerConfig
 

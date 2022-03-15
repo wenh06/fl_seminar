@@ -13,7 +13,7 @@ except ImportError:
     from tqdm import tqdm
 
 from nodes import Server, Client, ServerConfig, ClientConfig
-from ..optimizers import get_optimizer
+from .optimizers import get_optimizer
 
 
 __all__ = [
