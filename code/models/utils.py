@@ -57,28 +57,38 @@ class SizeMixin(object):
     mixin class for size related methods
     """
     __name__ = "SizeMixin"
-    
+
     @property
     def module_size(self) -> int:
-        return compute_module_size(self)
+        return compute_module_size(self, dtype=self.dtype_,)
 
     @property
     def module_size_(self) -> str:
-        try:
-            dtype = str(next(self.parameters()).dtype).replace("torch.", "")
-        except StopIteration:
-            dtype = "float32"  # can be set arbitrarily among all the supported types
         return compute_module_size(
-            self, human=True, dtype=dtype,
+            self, human=True, dtype=self.dtype_,
         )
 
     @property
     def dtype(self) -> torch.dtype:
-        return next(self.parameters()).dtype
+        try:
+            return next(self.parameters()).dtype
+        except StopIteration:
+            return torch.float32
 
     @property
     def device(self) -> torch.device:
-        return next(self.parameters()).device
+        try:
+            return next(self.parameters()).device
+        except StopIteration:
+            return torch.device("cpu")
+
+    @property
+    def dtype_(self) -> str:
+        return str(self.dtype).replace("torch.", "")
+
+    @property
+    def device_(self) -> str:
+        return str(self.device)
 
 
 class CLFMixin(object):
