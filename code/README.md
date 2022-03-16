@@ -1,13 +1,17 @@
-this folder includes code for studying problems of federated learning, under construction....
+This folder includes code for studying problems of federated learning, under construction....
 
+The main part of this code repository is a standalone simulation framework of federated training.
 
-## Benchmarks
-to write
+<!-- toc -->
 
-## boyd-admm
+- [Optimizers](#optimizers)
+- [Regularizers](#regularizers)
+- [Compression](#compression)
+- [Data Processing](#data-processing)
+- [Models](#models)
+- [Algorithms Implemented](#algorithms-implemented)
 
-the folder [boyd-admm](algorithms/boyd-admm/) contains matlab code from the website of S. Boyd for his ADMM long paper.
-
+<!-- tocstop -->
 
 ## Optimizers
 to write
@@ -19,13 +23,25 @@ to write
 
 ## Compression
 
-the folder [compression](algorithms/compression/) contains code for constructing compressors.
+The module (folder) [compression](algorithms/compression/) contains code for constructing compressors.
 
 
 ## Data Processing
 
-the folder [data_processing](data_processing/) contains code for data preprocessing, io, etc.
+The module (folder) [data_processing](data_processing/) contains code for data preprocessing, io, etc.
 
 
 ## Models
 to write
+
+
+## Algorithms Implemented
+to write
+
+
+## Benchmarks
+to write
+
+## boyd-admm
+
+the folder [boyd-admm](algorithms/boyd-admm/) contains matlab code from the website of S. Boyd for his ADMM long paper.
