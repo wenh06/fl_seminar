@@ -12,7 +12,7 @@ try:
 except ImportError:
     from tqdm import tqdm
 
-from nodes import Server, Client, ServerConfig, ClientConfig
+from nodes import Server, Client, ServerConfig, ClientConfig, ClientMessage
 from ..optimizers import get_optimizer
 
 
@@ -81,10 +81,6 @@ class FedProxServer(Server):
     def update(self) -> NoReturn:
         """
         """
-        if len(self._received_messages) == 0:
-            warnings.warn("No message received from the clients, unable to update server model")
-            return
-
         # sum of received parameters, with self.model.parameters() as its container
         for param in self.model.parameters():
             param.data = torch.zeros_like(param.data)
@@ -107,14 +103,14 @@ class FedProxClient(Client):
     def communicate(self, target:"FedProxServer") -> NoReturn:
         """
         """
-        target._received_messages.append(
-            {
+        target._received_messages.append(ClientMessage(
+            **{
                 "client_id": self.client_id,
                 "parameters": deepcopy(list(self.model.parameters())),
-                "train_samples": self.config.num_epochs * self.config.batch_size,
+                "train_samples": len(self.train_loader.dataset),
                 "metrics": self._metrics,
             }
-        )
+        ))
 
     def update(self) -> NoReturn:
         """
@@ -125,6 +121,8 @@ class FedProxClient(Client):
             warnings.warn("No parameters received from server")
             warnings.warn("Using current model parameters as initial parameters")
             self._client_parameters = deepcopy(list(self.model.parameters()))
+        except Exception as err:
+            raise err
         self._client_parameters = [p.to(self.device) for p in self._client_parameters]
         self.train()
 
@@ -142,21 +140,3 @@ class FedProxClient(Client):
                     loss = self.criterion(output, y)
                     loss.backward()
                     self.optimizer.step(self._client_parameters)
-
-    @torch.no_grad()
-    def evaluate(self, part:str) -> Dict[str, float]:
-        """
-        """
-        assert part in ["train", "val",]
-        self.model.eval()
-        _metrics = []
-        data_loader = self.val_loader if part == "val" else self.train_loader
-        for X, y in data_loader:
-            X, y = X.to(self.device), y.to(self.device)
-            logits = self.model(X)
-            _metrics.append(self.dataset.evaluate(logits, y))
-        self._metrics = {"num_samples": sum([m["num_samples"] for m in _metrics]),}
-        for k in _metrics[0]:
-            if k != "num_samples":  # average over all metrics
-                self._metrics[k] = sum([m[k] * m["num_samples"] for m in _metrics]) / self._metrics["num_samples"]
-        return self._metrics

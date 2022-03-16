@@ -1,5 +1,5 @@
 """
-pFedMe re-implemented in the experiment framework
+pFedMe re-implemented in the new framework
 """
 
 from copy import deepcopy
@@ -12,7 +12,7 @@ try:
 except ImportError:
     from tqdm import tqdm
 
-from nodes import Server, Client, ServerConfig, ClientConfig
+from nodes import Server, Client, ServerConfig, ClientConfig, ClientMessage
 from .optimizers import get_optimizer
 
 
@@ -98,10 +98,6 @@ class pFedMeServer(Server):
     def update(self) -> NoReturn:
         """
         """
-        print("Server update...")
-        if len(self._received_messages) == 0:
-            warnings.warn("No message received from the clients, unable to update server model")
-            return
         # store previous parameters
         previous_param = deepcopy(list(self.model.parameters()))
         for p in previous_param:
@@ -136,14 +132,14 @@ class pFedMeClient(Client):
     def communicate(self, target:"pFedMeServer") -> NoReturn:
         """
         """
-        target._received_messages.append(
-            {
+        target._received_messages.append(ClientMessage(
+            **{
                 "client_id": self.client_id,
                 "parameters": deepcopy(list(self.model.parameters())),
                 "train_samples": self.config.num_epochs * self.config.batch_size,
                 "metrics": self._metrics,
             }
-        )
+        ))
 
     def update(self) -> NoReturn:
         """
@@ -157,7 +153,6 @@ class pFedMeClient(Client):
             warnings.warn("Using current model parameters as initial parameters")
             self._client_parameters = deepcopy(list(self.model.parameters()))
         except Exception as err:
-            print("Unknown error")
             raise err
         self._client_parameters = [p.to(self.device) for p in self._client_parameters]
         # update the model via prox_sgd
@@ -194,21 +189,3 @@ class pFedMeClient(Client):
                 # the init parameters (theta in pFedMe paper Algorithm 1 line  7) for the next iteration
                 # are set to be `self._client_parameters`
                 self.set_parameters(self._client_parameters)
-
-    @torch.no_grad()
-    def evaluate(self, part:str) -> Dict[str, float]:
-        """
-        """
-        assert part in ["train", "val",]
-        self.model.eval()
-        _metrics = []
-        data_loader = self.val_loader if part == "val" else self.train_loader
-        for X, y in data_loader:
-            X, y = X.to(self.device), y.to(self.device)
-            logits = self.model(X)
-            _metrics.append(self.dataset.evaluate(logits, y))
-        self._metrics[part] = {"num_samples": sum([m["num_samples"] for m in _metrics]),}
-        for k in _metrics[0]:
-            if k != "num_samples":  # average over all metrics
-                self._metrics[part][k] = sum([m[k] * m["num_samples"] for m in _metrics]) / self._metrics[part]["num_samples"]
-        return self._metrics[part]

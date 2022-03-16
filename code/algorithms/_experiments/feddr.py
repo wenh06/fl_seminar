@@ -13,7 +13,7 @@ except ImportError:
     from tqdm import tqdm
 
 from data_processing.fed_dataset import FedDataset
-from nodes import Server, Client, ServerConfig, ClientConfig
+from nodes import Server, Client, ServerConfig, ClientConfig, ClientMessage
 from ..optimizers import get_optimizer
 from ..regularizers import get_regularizer
 
@@ -98,15 +98,10 @@ class FedDRServer(Server):
         """
         """
         target._received_messages = {"parameters": deepcopy(list(self.model.parameters()))}
-        self._num_communications += 1
 
     def update(self) -> NoReturn:
         """
         """
-        if len(self._received_messages) == 0:
-            warnings.warn("No message received from the clients, unable to update server model")
-            return
-
         # update y
         # FedDR paper Algorithm 1 line 7, first equation
         for yp, mp in zip(self._y_parameters, self.model.parameters()):
@@ -126,9 +121,6 @@ class FedDRServer(Server):
                 + (1 / (self.config.num_clients + 1)) * yp.data
         for mp, p in zip(self.model.parameters(), self._regularizer.prox_eval(params=self.model.parameters())):
             mp.data = p.data
-
-        # clear received messages
-        self._received_messages = []
 
 
 class FedDRClient(Client):
@@ -166,14 +158,14 @@ class FedDRClient(Client):
             p.data - hp.data for p, hp in zip(self._x_hat_parameters, self._x_hat_buffer)
         ]
         self._x_hat_buffer = deepcopy(self._x_hat_parameters)
-        target._received_messages.append(
-            {
+        target._received_messages.append(ClientMessage(
+            **{
                 "client_id": self.client_id,
                 "x_hat_delta": x_hat_delta,
                 "train_samples": len(self.train_loader.dataset),
                 "metrics": self._metrics,
             }
-        )
+        ))
 
     def update(self) -> NoReturn:
         """
@@ -187,7 +179,6 @@ class FedDRClient(Client):
             warnings.warn("Using current model parameters as initial parameters")
             self._client_parameters = deepcopy(list(self.model.parameters()))
         except Exception as err:
-            print("Unknown error")
             raise err
         self._client_parameters = [p.to(self.device) for p in self._client_parameters]
         # update y
@@ -218,20 +209,3 @@ class FedDRClient(Client):
                     loss = self.criterion(output, y)
                     loss.backward()
                     self.optimizer.step(self._y_parameters)
-
-    @torch.no_grad()
-    def evaluate(self, part:str) -> Dict[str, float]:
-        """
-        """
-        assert part in ["train", "val",]
-        self.model.eval()
-        _metrics = []
-        data_loader = self.val_loader if part == "val" else self.train_loader
-        for X, y in self.val_loader:
-            logits = self.model(X)
-            _metrics.append(self.dataset.evaluate(logits, y))
-        self._metrics = {"num_samples": sum([m["num_samples"] for m in _metrics]),}
-        for k in _metrics[0]:
-            if k != "num_samples":  # average over all metrics
-                self._metrics[k] = sum([m[k] * m["num_samples"] for m in _metrics]) / self._metrics["num_samples"]
-        return self._metrics
