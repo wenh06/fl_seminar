@@ -284,11 +284,11 @@ class Server(Node):
                     print("evaluating...")
                     metrics = self.evaluate_centralized(val_loader)
                     self._logger_manager.log_metrics(
-                        None, metrics, step=global_step, epoch=self.n_iter, part="val",
+                        None, metrics, step=global_step, epoch=self.n_iter+1, part="val",
                     )
                     metrics = self.evaluate_centralized(train_loader)
                     self._logger_manager.log_metrics(
-                        None, metrics, step=global_step, epoch=self.n_iter, part="train",
+                        None, metrics, step=global_step, epoch=self.n_iter+1, part="train",
                     )
                 scheduler.step()
 
@@ -319,7 +319,9 @@ class Server(Node):
                             metrics = client.evaluate(part)
                             # print(f"metrics: {metrics}")
                             self._logger_manager.log_metrics(
-                                client_id, metrics, step=self.n_iter, epoch=self.n_iter, part=part,
+                                client_id, metrics,
+                                step=self.n_iter+1, epoch=self.n_iter+1,
+                                part=part,
                             )
                     client._communicate(self)
                     pbar.update(1)
@@ -361,7 +363,7 @@ class Server(Node):
                 if k != "num_samples":
                     metrics[k] /= metrics["num_samples"]
             self._logger_manager.log_metrics(
-                None, dict(metrics), step=self.n_iter, epoch=self.n_iter, part=part,
+                None, dict(metrics), step=self.n_iter+1, epoch=self.n_iter+1, part=part,
             )
 
     def add_parameters(self, params:Iterable[Parameter], ratio:float) -> NoReturn:
@@ -410,8 +412,7 @@ class Client(Node):
         self.train_loader, self.val_loader = \
             self.dataset.get_dataloader(self.config.batch_size, self.config.batch_size, self.client_id)
 
-        self._server_parameters = None
-        self._client_parameters = None
+        self._cached_parameters = None
         self._received_messages = {}
         self._metrics = {}
 
@@ -478,11 +479,11 @@ class Client(Node):
             X, y = X.to(self.device), y.to(self.device)
             logits = self.model(X)
             _metrics.append(self.dataset.evaluate(logits, y))
-        self._metrics = {"num_samples": sum([m["num_samples"] for m in _metrics]),}
+        self._metrics[part] = {"num_samples": sum([m["num_samples"] for m in _metrics]),}
         for k in _metrics[0]:
             if k != "num_samples":  # average over all metrics
-                self._metrics[k] = sum([m[k] * m["num_samples"] for m in _metrics]) / self._metrics["num_samples"]
-        return self._metrics
+                self._metrics[part][k] = sum([m[k] * m["num_samples"] for m in _metrics]) / self._metrics[part]["num_samples"]
+        return self._metrics[part]
 
     def get_parameters(self) -> Iterable[Parameter]:
         """
@@ -493,7 +494,7 @@ class Client(Node):
         """
         """
         for client_param, param in zip(self.model.parameters(), params):
-            client_param.data = param.data.detach().clone()
+            client_param.data = param.data.detach().clone().to(self.device)
 
     def get_gradients(self) -> List[Tensor]:
         """

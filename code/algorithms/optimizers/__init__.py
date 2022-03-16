@@ -39,17 +39,17 @@ def get_optimizer(optimizer_name:Union[str,type], params:Iterable[Union[dict,Par
     optimizer = get_optimizer("FedPD_SGD", model.parameters(), {"lr": 1e-2})  # federated
     """
     if isclass(optimizer_name) and issubclass(optimizer_name, Optimizer):
-        print(f"{optimizer_name.__name__} is an Optimizer class, used directly")
+        # print(f"{optimizer_name.__name__} is an Optimizer class, used directly")
         return optimizer_name(params, **_get_args(optimizer_name, config))
     try:
         _config = _get_args(eval(f"opt.{optimizer_name}"), config)
         optimizer = eval(f"opt.{optimizer_name}(params, **_config)")
-        print(f"PyTorch built-in optimizer {optimizer_name} is used.")
+        # print(f"PyTorch built-in optimizer {optimizer_name} is used.")
         return optimizer
     except:
         try:
             optimizer = topt.get(optimizer_name)(params, **_get_args(topt.get(optimizer_name), config))
-            print(f"Optimizer {optimizer_name} from torch_optimizer is used.")
+            # print(f"Optimizer {optimizer_name} from torch_optimizer is used.")
             return optimizer
         except:
             pass

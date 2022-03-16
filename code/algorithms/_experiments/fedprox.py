@@ -116,14 +116,14 @@ class FedProxClient(Client):
         """
         """
         try:
-            self._client_parameters = deepcopy(self._received_messages["parameters"])
+            self._cached_parameters = deepcopy(self._received_messages["parameters"])
         except KeyError:
             warnings.warn("No parameters received from server")
             warnings.warn("Using current model parameters as initial parameters")
-            self._client_parameters = deepcopy(list(self.model.parameters()))
+            self._cached_parameters = deepcopy(list(self.model.parameters()))
         except Exception as err:
             raise err
-        self._client_parameters = [p.to(self.device) for p in self._client_parameters]
+        self._cached_parameters = [p.to(self.device) for p in self._cached_parameters]
         self.train()
 
     def train(self) -> NoReturn:
@@ -139,4 +139,4 @@ class FedProxClient(Client):
                     output = self.model(X)
                     loss = self.criterion(output, y)
                     loss.backward()
-                    self.optimizer.step(self._client_parameters)
+                    self.optimizer.step(self._cached_parameters)

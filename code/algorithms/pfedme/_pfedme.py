@@ -147,14 +147,14 @@ class pFedMeClient(Client):
         # copy the parameters from the server
         # pFedMe paper Algorithm 1 line 5
         try:
-            self._client_parameters = deepcopy(self._received_messages["parameters"])
+            self._cached_parameters = deepcopy(self._received_messages["parameters"])
         except KeyError:
             warnings.warn("No parameters received from server")
             warnings.warn("Using current model parameters as initial parameters")
-            self._client_parameters = deepcopy(list(self.model.parameters()))
+            self._cached_parameters = deepcopy(list(self.model.parameters()))
         except Exception as err:
             raise err
-        self._client_parameters = [p.to(self.device) for p in self._client_parameters]
+        self._cached_parameters = [p.to(self.device) for p in self._cached_parameters]
         # update the model via prox_sgd
         # pFedMe paper Algorithm 1 line 6 - 8
         self.train()
@@ -174,11 +174,11 @@ class pFedMeClient(Client):
                     output = self.model(X)
                     loss = self.criterion(output, y)
                     loss.backward()
-                    self.optimizer.step(self._client_parameters)
+                    self.optimizer.step(self._cached_parameters)
 
                 # update local weight after finding aproximate theta
                 # pFedMe paper Algorithm 1 line 8
-                for mp, cp in zip(self.model.parameters(), self._client_parameters):
+                for mp, cp in zip(self.model.parameters(), self._cached_parameters):
                     # print(mp.data.isnan().any(), cp.data.isnan().any())
                     cp.data.add_(
                         cp.data.clone() - mp.data.clone(),
@@ -187,5 +187,5 @@ class pFedMeClient(Client):
 
                 # update local model
                 # the init parameters (theta in pFedMe paper Algorithm 1 line  7) for the next iteration
-                # are set to be `self._client_parameters`
-                self.set_parameters(self._client_parameters)
+                # are set to be `self._cached_parameters`
+                self.set_parameters(self._cached_parameters)

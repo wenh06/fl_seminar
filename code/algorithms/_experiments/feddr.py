@@ -173,26 +173,26 @@ class FedDRClient(Client):
         # copy the parameters from the server
         # x_bar
         try:
-            self._client_parameters = deepcopy(self._received_messages["parameters"])
+            self._cached_parameters = deepcopy(self._received_messages["parameters"])
         except KeyError:
             warnings.warn("No parameters received from server")
             warnings.warn("Using current model parameters as initial parameters")
-            self._client_parameters = deepcopy(list(self.model.parameters()))
+            self._cached_parameters = deepcopy(list(self.model.parameters()))
         except Exception as err:
             raise err
-        self._client_parameters = [p.to(self.device) for p in self._client_parameters]
+        self._cached_parameters = [p.to(self.device) for p in self._cached_parameters]
         # update y
         if self._y_parameters is None:
-            self._y_parameters = deepcopy(self._client_parameters)
+            self._y_parameters = deepcopy(self._cached_parameters)
         else:
-            for yp, cp, mp in zip(self._y_parameters, self._client_parameters, self.model.parameters()):
+            for yp, cp, mp in zip(self._y_parameters, self._cached_parameters, self.model.parameters()):
                 yp.data.add_(cp.data-mp.data, alpha=self.config.alpha)
         # update x, via prox_sgd of y
         self.train()
         # update x_hat
         if self._x_hat_parameters is None:
-            self._x_hat_parameters = deepcopy(self._client_parameters)
-        for hp, cp, mp in zip(self._x_hat_parameters, self._client_parameters, self.model.parameters()):
+            self._x_hat_parameters = deepcopy(self._cached_parameters)
+        for hp, cp, mp in zip(self._x_hat_parameters, self._cached_parameters, self.model.parameters()):
             hp.data = 2 * mp.data - yp.data
 
     def train(self) -> NoReturn:
