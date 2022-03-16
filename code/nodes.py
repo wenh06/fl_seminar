@@ -1,7 +1,7 @@
 """
 """
 
-import random
+import random, warnings
 from abc import ABC, abstractmethod
 from itertools import repeat
 from copy import deepcopy
@@ -30,6 +30,7 @@ from algorithms.optimizers import get_optimizer
 __all__ = [
     "Server", "Client",
     "ServerConfig", "ClientConfig",
+    "ClientMessage",
 ]
 
 
@@ -206,7 +207,7 @@ class Server(Node):
         return random.sample(range(self.config.num_clients), k)
 
     def _communicate(self, target:"Client") -> NoReturn:
-        """ broadcast to target client, and maintain status variables
+        """ broadcast to target client, and maintain state variables
         """
         self.communicate(target)
         self._num_communications += 1
@@ -214,8 +215,15 @@ class Server(Node):
     def _update(self) -> NoReturn:
         """ server update, and clear cached messages from clients of the previous iteration
         """
+        self._logger_manager.log_message("Server update...")
+        if len(self._received_messages) == 0:
+            warnings.warn("No message received from the clients, unable to update server model")
+            return
+        assert all([isinstance(m, ClientMessage) for m in self._received_messages]), \
+            "received messages must be of type `ClientMessage`"
         self.update()
         self._received_messages = []
+        self._logger_manager.log_message("Server update finished...")
 
     def train(self, mode:str="federated", extra_configs:Optional[dict]=None) -> NoReturn:
         """
@@ -285,6 +293,7 @@ class Server(Node):
                 scheduler.step()
 
         self.model.to(self.device)  # move to the original device
+        self._logger_manager.log_message("Centralized training finished...")
 
     def train_federated(self, extra_configs:Optional[dict]=None) -> NoReturn:
         """
@@ -317,6 +326,7 @@ class Server(Node):
                 if (self.n_iter + 1) % self.config.eval_every == 0:
                     self.aggregate_client_metrics()
                 self._update()
+        self._logger_manager.log_message("Federated training finished...")
 
     def evaluate_centralized(self, dataloader:DataLoader) -> Dict[str, float]:
         """
@@ -408,7 +418,7 @@ class Client(Node):
         self._post_init()
 
     def _communicate(self, target:"Server") -> NoReturn:
-        """ send messages to the server, and maintain status variables
+        """ send messages to the server, and maintain state variables
         """
         self.communicate(target)
         target._num_communications += 1
@@ -456,11 +466,23 @@ class Client(Node):
         """
         return next(iter(self.train_loader))
 
-    @abstractmethod
-    def evaluate(self, part:str) -> NoReturn:
+    @torch.no_grad()
+    def evaluate(self, part:str) -> Dict[str, float]:
         """
         """
-        raise NotImplementedError
+        assert part in self.dataset.data_parts, "Invalid part name"
+        self.model.eval()
+        _metrics = []
+        data_loader = self.val_loader if part == "val" else self.train_loader
+        for X, y in data_loader:
+            X, y = X.to(self.device), y.to(self.device)
+            logits = self.model(X)
+            _metrics.append(self.dataset.evaluate(logits, y))
+        self._metrics = {"num_samples": sum([m["num_samples"] for m in _metrics]),}
+        for k in _metrics[0]:
+            if k != "num_samples":  # average over all metrics
+                self._metrics[k] = sum([m[k] * m["num_samples"] for m in _metrics]) / self._metrics["num_samples"]
+        return self._metrics
 
     def get_parameters(self) -> Iterable[Parameter]:
         """
@@ -488,3 +510,20 @@ class Client(Node):
         """
         """
         return super().extra_repr_keys() + ["client_id", "config",]
+
+
+class ClientMessage(dict):
+    """
+    a class used to specify required fields for a message from client to server
+    """
+    __name__ = "ClientMessage"
+
+    def __init__(self, client_id:int, train_samples:int, metrics:dict, **kwargs) -> NoReturn:
+        """
+        """
+        super().__init__(
+            client_id=client_id,
+            train_samples=train_samples,
+            metrics=metrics,
+            **kwargs
+        )
