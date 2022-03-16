@@ -94,7 +94,6 @@ class pFedMeServer(Server):
         """
         """
         target._received_messages = {"parameters": deepcopy(list(self.model.parameters()))}
-        self._num_communications += 1
 
     def update(self) -> NoReturn:
         """
@@ -121,7 +120,6 @@ class pFedMeServer(Server):
 
         # clear received messages
         del pre_param
-        self._received_messages = []
 
 
 class pFedMeClient(Client):
@@ -140,11 +138,12 @@ class pFedMeClient(Client):
         """
         target._received_messages.append(
             {
+                "client_id": self.client_id,
                 "parameters": deepcopy(list(self.model.parameters())),
                 "train_samples": self.config.num_epochs * self.config.batch_size,
+                "metrics": self._metrics,
             }
         )
-        self._received_messages = {}
 
     def update(self) -> NoReturn:
         """
@@ -208,8 +207,8 @@ class pFedMeClient(Client):
             X, y = X.to(self.device), y.to(self.device)
             logits = self.model(X)
             _metrics.append(self.dataset.evaluate(logits, y))
-        metrics = {"num_samples": sum([m["num_samples"] for m in _metrics]),}
+        self._metrics[part] = {"num_samples": sum([m["num_samples"] for m in _metrics]),}
         for k in _metrics[0]:
             if k != "num_samples":  # average over all metrics
-                metrics[k] = sum([m[k] * m["num_samples"] for m in _metrics]) / metrics["num_samples"]
-        return metrics
+                self._metrics[part][k] = sum([m[k] * m["num_samples"] for m in _metrics]) / self._metrics[part]["num_samples"]
+        return self._metrics[part]

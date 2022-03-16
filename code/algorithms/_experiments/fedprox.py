@@ -77,7 +77,6 @@ class FedProxServer(Server):
         """
         """
         target._received_messages = {"parameters": deepcopy(list(self.model.parameters()))}
-        self._num_communications += 1
 
     def update(self) -> NoReturn:
         """
@@ -92,9 +91,6 @@ class FedProxServer(Server):
         total_samples = sum([m["train_samples"] for m in self._received_messages])
         for m in self._received_messages:
             self.add_parameters(m["parameters"], m["train_samples"] / total_samples)
-
-        # clear received messages
-        self._received_messages = []
 
 
 class FedProxClient(Client):
@@ -113,11 +109,12 @@ class FedProxClient(Client):
         """
         target._received_messages.append(
             {
+                "client_id": self.client_id,
                 "parameters": deepcopy(list(self.model.parameters())),
                 "train_samples": self.config.num_epochs * self.config.batch_size,
+                "metrics": self._metrics,
             }
         )
-        self._received_messages = {}
 
     def update(self) -> NoReturn:
         """
@@ -146,16 +143,20 @@ class FedProxClient(Client):
                     loss.backward()
                     self.optimizer.step(self._client_parameters)
 
-    def evaluate(self) -> Dict[str, float]:
+    @torch.no_grad()
+    def evaluate(self, part:str) -> Dict[str, float]:
         """
         """
+        assert part in ["train", "val",]
         self.model.eval()
         _metrics = []
-        for X, y in self.val_loader:
+        data_loader = self.val_loader if part == "val" else self.train_loader
+        for X, y in data_loader:
+            X, y = X.to(self.device), y.to(self.device)
             logits = self.model(X)
             _metrics.append(self.dataset.evaluate(logits, y))
-        metrics = {"num_examples": sum([m["num_examples"] for m in _metrics]),}
+        self._metrics = {"num_samples": sum([m["num_samples"] for m in _metrics]),}
         for k in _metrics[0]:
-            if k != "num_examples":  # average over all metrics
-                metrics[k] = sum([m[k] * m["num_examples"] for m in _metrics]) / metrics["num_examples"]
-        return metrics
+            if k != "num_samples":  # average over all metrics
+                self._metrics[k] = sum([m[k] * m["num_samples"] for m in _metrics]) / self._metrics["num_samples"]
+        return self._metrics

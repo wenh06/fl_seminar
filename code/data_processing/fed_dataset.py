@@ -96,6 +96,10 @@ class FedDataset(ReprMixin, ABC):
         """
         raise NotImplementedError
 
+    @property
+    def data_parts(self) -> List[str]:
+        return ["train", "val",]
+
 
 class FedVisionDataset(FedDataset, ABC):
     """

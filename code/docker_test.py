@@ -2,7 +2,7 @@
 """
 
 from functools import wraps
-from typing import Callable, Any
+from typing import Callable, Any, NoReturn
 
 from data_processing.fed_synthetic import FedSynthetic
 from data_processing.fedprox_femnist import FedProxFEMNIST
@@ -30,14 +30,14 @@ def experiment_indicator(name:str) -> Callable:
 
 
 @experiment_indicator("pFedMe")
-def test_pfedme():
+def test_pfedme() -> NoReturn:
     """
     """
     print("Using dataset FedSynthetic")
     dataset = FedSynthetic(1,1,False,30)
     model = dataset.candidate_models["mlp_d1"]
     server_config = pFedMeServerConfig(10, dataset.DEFAULT_TRAIN_CLIENTS_NUM, 0.7)
-    client_config = pFedMeClientConfig(dataset.DEFAULT_BATCH_SIZE, 30)
+    client_config = pFedMeClientConfig(dataset.DEFAULT_BATCH_SIZE, 20)
     s = pFedMeServer(model, dataset, server_config, client_config)
     s.train_centralized()
     s.train_federated()
@@ -46,8 +46,8 @@ def test_pfedme():
     print("Using dataset FedProxFemnist")
     dataset = FedProxFEMNIST()
     model = dataset.candidate_models["cnn_femmist_tiny"]
-    server_config = pFedMeServerConfig(10, dataset.DEFAULT_TRAIN_CLIENTS_NUM, 0.7)
-    client_config = pFedMeClientConfig(dataset.DEFAULT_BATCH_SIZE, 30)
+    server_config = pFedMeServerConfig(10, dataset.DEFAULT_TRAIN_CLIENTS_NUM, 0.2)
+    client_config = pFedMeClientConfig(dataset.DEFAULT_BATCH_SIZE, 20)
     s = pFedMeServer(model, dataset, server_config, client_config)
     s.train_centralized()
     s.train_federated()
@@ -55,7 +55,7 @@ def test_pfedme():
 
 
 @experiment_indicator("FedProx")
-def test_fedprox():
+def test_fedprox() -> NoReturn:
     """
     """
     print("Using dataset FedSynthetic")
@@ -71,7 +71,7 @@ def test_fedprox():
     print("Using dataset FedProxFemnist")
     dataset = FedProxFEMNIST()
     model = dataset.candidate_models["cnn_femmist_tiny"]
-    server_config = FedProxServerConfig(10, dataset.DEFAULT_TRAIN_CLIENTS_NUM, 0.7)
+    server_config = FedProxServerConfig(10, dataset.DEFAULT_TRAIN_CLIENTS_NUM, 0.2)
     client_config = FedProxClientConfig(dataset.DEFAULT_BATCH_SIZE, 30)
     s = FedProxServer(model, dataset, server_config, client_config)
     s.train_centralized()
@@ -80,7 +80,7 @@ def test_fedprox():
 
 
 @experiment_indicator("FedDR")
-def test_feddr():
+def test_feddr() -> NoReturn:
     """
     """
     print("Using dataset FedSynthetic")
@@ -96,7 +96,7 @@ def test_feddr():
     print("Using dataset FedProxFemnist")
     dataset = FedProxFEMNIST()
     model = dataset.candidate_models["cnn_femmist_tiny"]
-    server_config = FedDRServerConfig(10, dataset.DEFAULT_TRAIN_CLIENTS_NUM, 0.7)
+    server_config = FedDRServerConfig(10, dataset.DEFAULT_TRAIN_CLIENTS_NUM, 0.2)
     client_config = FedDRClientConfig(dataset.DEFAULT_BATCH_SIZE, 30)
     s = FedDRServer(model, dataset, server_config, client_config)
     s.train_centralized()

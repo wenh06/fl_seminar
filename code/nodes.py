@@ -5,6 +5,7 @@ import random
 from abc import ABC, abstractmethod
 from itertools import repeat
 from copy import deepcopy
+from collections import defaultdict
 from typing import Any, Optional, NoReturn, Iterable, List, Sequence, Tuple, Dict
 
 import torch
@@ -173,6 +174,8 @@ class Server(Node):
         self._received_messages = []
         self._num_communications = 0
 
+        self.n_iter = 0
+
         self._post_init()
 
     def _setup_clients(self, dataset:FedDataset, client_config:ClientConfig) -> List[Node]:
@@ -201,6 +204,18 @@ class Server(Node):
         """
         k = int(self.config.num_clients * self.config.clients_sample_ratio)
         return random.sample(range(self.config.num_clients), k)
+
+    def _communicate(self, target:"Client") -> NoReturn:
+        """ broadcast to target client, and maintain status variables
+        """
+        self.communicate(target)
+        self._num_communications += 1
+
+    def _update(self) -> NoReturn:
+        """ server update, and clear cached messages from clients of the previous iteration
+        """
+        self.update()
+        self._received_messages = []
 
     def train(self, mode:str="federated", extra_configs:Optional[dict]=None) -> NoReturn:
         """
@@ -233,11 +248,11 @@ class Server(Node):
         scheduler = extra_configs.get("scheduler", LambdaLR(optimizer, lambda epoch: 1 / (epoch + 1)))
 
         epoch_losses = []
-        epoch, global_step = 0, 0
-        for epoch in range(self.config.num_iters):
+        self.n_iter, global_step = 0, 0
+        for self.n_iter in range(self.config.num_iters):
             with tqdm(
                 total=len(train_loader.dataset),
-                desc=f"Epoch {epoch+1}/{self.config.num_iters}",
+                desc=f"Epoch {self.n_iter+1}/{self.config.num_iters}",
                 unit="sample",
             ) as pbar:
                 epoch_loss = []
@@ -257,15 +272,15 @@ class Server(Node):
                     })
                     pbar.update(data.shape[0])
                 epoch_loss.append(sum(batch_losses) / len(batch_losses))
-                if (epoch + 1) % self.config.eval_every == 0:
+                if (self.n_iter + 1) % self.config.eval_every == 0:
                     print("evaluating...")
                     metrics = self.evaluate_centralized(val_loader)
                     self._logger_manager.log_metrics(
-                        None, metrics, step=global_step, epoch=epoch, part="val",
+                        None, metrics, step=global_step, epoch=self.n_iter, part="val",
                     )
                     metrics = self.evaluate_centralized(train_loader)
                     self._logger_manager.log_metrics(
-                        None, metrics, step=global_step, epoch=epoch, part="train",
+                        None, metrics, step=global_step, epoch=self.n_iter, part="train",
                     )
                 scheduler.step()
 
@@ -276,29 +291,32 @@ class Server(Node):
         TODO: run clients in parallel
         """
         self._logger_manager.log_message("Training federated...")
-        for n_iter in range(self.config.num_iters):
+        self.n_iter = 0
+        for self.n_iter in range(self.config.num_iters):
             selected_clients = self._sample_clients()
             with tqdm(
                 total=len(selected_clients),
-                desc=f"Iter {n_iter+1}/{self.config.num_iters}",
+                desc=f"Iter {self.n_iter+1}/{self.config.num_iters}",
                 unit="client",
             ) as pbar:
                 for client_id in selected_clients:
                     client = self._clients[client_id]
-                    self.communicate(client)
-                    client.update()
+                    self._communicate(client)
+                    client._update()
                     # if client_id in chosen_clients:
-                    #     client.communicate(self)
-                    client.communicate(self)
-                    if (n_iter + 1) % self.config.eval_every == 0:
-                        for part in ["train", "val"]:
+                    #     client._communicate(self)
+                    if (self.n_iter + 1) % self.config.eval_every == 0:
+                        for part in self.dataset.data_parts:
                             metrics = client.evaluate(part)
                             # print(f"metrics: {metrics}")
                             self._logger_manager.log_metrics(
-                                client_id, metrics, step=n_iter, epoch=n_iter, part=part,
+                                client_id, metrics, step=self.n_iter, epoch=self.n_iter, part=part,
                             )
+                    client._communicate(self)
                     pbar.update(1)
-                self.update()
+                if (self.n_iter + 1) % self.config.eval_every == 0:
+                    self.aggregate_client_metrics()
+                self._update()
 
     def evaluate_centralized(self, dataloader:DataLoader) -> Dict[str, float]:
         """
@@ -313,6 +331,28 @@ class Server(Node):
         metrics = {k: sum([m[k] * m["num_samples"] for m in metrics]) / num_samples for k in metrics_names}
         metrics["num_samples"] = num_samples
         return metrics
+
+    def aggregate_client_metrics(self) -> NoReturn:
+        """
+        """
+        if not any(["metrics" in m for m in self._received_messages]):
+            raise ValueError("no metrics received from clients")
+        for part in self.dataset.data_parts:
+            metrics = defaultdict(float)
+            for m in self._received_messages:
+                if "metrics" not in m:
+                    continue
+                for k, v in m["metrics"][part].items():
+                    if k != "num_samples":
+                        metrics[k] += m["metrics"][part][k] * m["metrics"][part]["num_samples"]
+                    else:
+                        metrics[k] += m["metrics"][part][k]
+            for k in metrics:
+                if k != "num_samples":
+                    metrics[k] /= metrics["num_samples"]
+            self._logger_manager.log_metrics(
+                None, dict(metrics), step=self.n_iter, epoch=self.n_iter, part=part,
+            )
 
     def add_parameters(self, params:Iterable[Parameter], ratio:float) -> NoReturn:
         """
@@ -363,8 +403,22 @@ class Client(Node):
         self._server_parameters = None
         self._client_parameters = None
         self._received_messages = {}
+        self._metrics = {}
 
         self._post_init()
+
+    def _communicate(self, target:"Server") -> NoReturn:
+        """ send messages to the server, and maintain status variables
+        """
+        self.communicate(target)
+        target._num_communications += 1
+        self._metrics = {}
+
+    def _update(self) -> NoReturn:
+        """ client update, and clear cached messages from the server of the previous iteration
+        """
+        self.update()
+        self._received_messages = {}
 
     @abstractmethod
     def train(self) -> NoReturn:

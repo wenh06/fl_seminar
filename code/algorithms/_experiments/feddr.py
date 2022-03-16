@@ -168,11 +168,12 @@ class FedDRClient(Client):
         self._x_hat_buffer = deepcopy(self._x_hat_parameters)
         target._received_messages.append(
             {
+                "client_id": self.client_id,
                 "x_hat_delta": x_hat_delta,
                 "train_samples": len(self.train_loader.dataset),
+                "metrics": self._metrics,
             }
         )
-        self._received_messages = {}
 
     def update(self) -> NoReturn:
         """
@@ -229,8 +230,8 @@ class FedDRClient(Client):
         for X, y in self.val_loader:
             logits = self.model(X)
             _metrics.append(self.dataset.evaluate(logits, y))
-        metrics = {"num_examples": sum([m["num_examples"] for m in _metrics]),}
+        self._metrics = {"num_samples": sum([m["num_samples"] for m in _metrics]),}
         for k in _metrics[0]:
-            if k != "num_examples":  # average over all metrics
-                metrics[k] = sum([m[k] * m["num_examples"] for m in _metrics]) / metrics["num_examples"]
-        return metrics
+            if k != "num_samples":  # average over all metrics
+                self._metrics[k] = sum([m[k] * m["num_samples"] for m in _metrics]) / self._metrics["num_samples"]
+        return self._metrics
