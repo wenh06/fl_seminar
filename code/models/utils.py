@@ -74,6 +74,8 @@ class SizeMixin(object):
             return next(self.parameters()).dtype
         except StopIteration:
             return torch.float32
+        except Exception as err:
+            raise err  # unknown error
 
     @property
     def device(self) -> torch.device:
@@ -81,6 +83,8 @@ class SizeMixin(object):
             return next(self.parameters()).device
         except StopIteration:
             return torch.device("cpu")
+        except Exception as err:
+            raise err  # unknown error
 
     @property
     def dtype_(self) -> str:
