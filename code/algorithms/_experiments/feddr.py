@@ -79,7 +79,7 @@ class FedDRServer(Server):
         super().__init__(model, dataset, config, client_config)
         self._regularizer = get_regularizer(
             self.config.reg_type,
-            self.config.num_clients * self.config.eta / (self.config.num_clients + 1),
+            self.config.eta * self.config.num_clients / (self.config.num_clients + 1),
         )
         self._y_parameters = deepcopy(list(self.model.parameters()))  # y
         self._x_til_parameters = deepcopy(list(self.model.parameters()))  # x_tilde
