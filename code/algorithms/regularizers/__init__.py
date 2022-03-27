@@ -4,7 +4,9 @@
 from .regularizers import (
     get_regularizer,
     Regularizer,
-    L1Norm, L2Norm, L2NormSquared,
+    L1Norm,
+    L2Norm,
+    L2NormSquared,
     NullRegularizer,
 )
 
@@ -12,6 +14,8 @@ from .regularizers import (
 __all__ = [
     "get_regularizer",
     "Regularizer",
-    "L1Norm", "L2Norm", "L2NormSquared",
+    "L1Norm",
+    "L2Norm",
+    "L2NormSquared",
     "NullRegularizer",
 ]

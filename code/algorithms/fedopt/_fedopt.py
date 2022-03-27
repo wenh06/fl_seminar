@@ -6,6 +6,7 @@ import warnings
 from typing import List, NoReturn, Dict, Sequence
 
 import torch
+
 try:
     from tqdm.auto import tqdm
 except ImportError:
@@ -16,73 +17,96 @@ from ..optimizers import get_optimizer
 
 
 __all__ = [
-    "FedOptServer", "FedOptClient",
-    "FedOptServerConfig", "FedOptClientConfig",
-    "FedAvgServer", "FedAvgClient",
-    "FedAvgServerConfig", "FedAvgClientConfig",
-    "FedAdagradServer", "FedAdagradClient",
-    "FedAdagradServerConfig", "FedAdagradClientConfig",
-    "FedYogiServer", "FedYogiClient",
-    "FedYogiServerConfig", "FedYogiClientConfig",
-    "FedAdamServer", "FedAdamClient",
-    "FedAdamServerConfig", "FedAdamClientConfig",
+    "FedOptServer",
+    "FedOptClient",
+    "FedOptServerConfig",
+    "FedOptClientConfig",
+    "FedAvgServer",
+    "FedAvgClient",
+    "FedAvgServerConfig",
+    "FedAvgClientConfig",
+    "FedAdagradServer",
+    "FedAdagradClient",
+    "FedAdagradServerConfig",
+    "FedAdagradClientConfig",
+    "FedYogiServer",
+    "FedYogiClient",
+    "FedYogiServerConfig",
+    "FedYogiClientConfig",
+    "FedAdamServer",
+    "FedAdamClient",
+    "FedAdamServerConfig",
+    "FedAdamClientConfig",
 ]
 
 
 class FedOptServerConfig(ServerConfig):
-    """
-    """
+    """ """
+
     __name__ = "FedOptServerConfig"
 
-    def __init__(self,
-                 num_iters:int,
-                 num_clients:int,
-                 clients_sample_ratio:float,
-                 optimizer:str="Adam",
-                 lr:float=1e-3,
-                 betas:Sequence[float]=(0.9, 0.999),
-                 tau:float=1e-5,) -> NoReturn:
+    def __init__(
+        self,
+        num_iters: int,
+        num_clients: int,
+        clients_sample_ratio: float,
+        optimizer: str = "Adam",
+        lr: float = 1e-3,
+        betas: Sequence[float] = (0.9, 0.999),
+        tau: float = 1e-5,
+    ) -> NoReturn:
         """
         tau: controls the degree of adaptivity of the algorithm
         """
         assert optimizer.lower() in [
-            "avg", "adagrad", "yogi", "adam",
+            "avg",
+            "adagrad",
+            "yogi",
+            "adam",
         ]
         super().__init__(
             "FedOpt",
-            num_iters, num_clients, clients_sample_ratio,
-            optimizer=optimizer, lr=lr, betas=betas, tau=tau,
+            num_iters,
+            num_clients,
+            clients_sample_ratio,
+            optimizer=optimizer,
+            lr=lr,
+            betas=betas,
+            tau=tau,
         )
 
 
 class FedOptClientConfig(ClientConfig):
-    """
-    """
+    """ """
+
     __name__ = "FedOptClientConfig"
 
-    def __init__(self,
-                 batch_size:int,
-                 num_epochs:int,
-                 lr:float=1e-3,
-                 optimizer:str="SGD",
-                 **kwargs,) -> NoReturn:
-        """
-        """
+    def __init__(
+        self,
+        batch_size: int,
+        num_epochs: int,
+        lr: float = 1e-3,
+        optimizer: str = "SGD",
+        **kwargs,
+    ) -> NoReturn:
+        """ """
         super().__init__(
-            "FedOpt", optimizer,
-            batch_size, num_epochs, lr,
+            "FedOpt",
+            optimizer,
+            batch_size,
+            num_epochs,
+            lr,
             **kwargs,
         )
 
 
 class FedOptServer(Server):
-    """
-    """
+    """ """
+
     __name__ = "FedOptServer"
 
     def _post_init(self) -> NoReturn:
-        """
-        """
+        """ """
         super()._post_init()
         self.delta_parameters = deepcopy(list(self.model.parameters()))
         for p in self.delta_parameters:
@@ -90,15 +114,18 @@ class FedOptServer(Server):
         if self.config.optimizer.lower() != "avg":
             self.v_parameters = deepcopy(self.delta_parameters)
             for p in self.v_parameters:
-                p.data.random_(1, 100).mul_(self.config.tau**2)
+                p.data.random_(1, 100).mul_(self.config.tau ** 2)
         else:
             self.config.lr = 1
             self.config.betas = (1, 0)
             self.v_parameters = [
                 # this makes the denominator of the update of the model parameters always 1
                 # ref. the last part of self.update
-                torch.Tensor([1-self.config.tau]).pow(2).to(self.model.dtype).to(self.device) \
-                    for _ in self.delta_parameters
+                torch.Tensor([1 - self.config.tau])
+                .pow(2)
+                .to(self.model.dtype)
+                .to(self.device)
+                for _ in self.delta_parameters
             ]
 
     @property
@@ -107,18 +134,22 @@ class FedOptServer(Server):
 
     @property
     def required_config_fields(self) -> List[str]:
-        """
-        """
-        return ["optimizer", "lr", "betas", "tau",]
+        """ """
+        return [
+            "optimizer",
+            "lr",
+            "betas",
+            "tau",
+        ]
 
-    def communicate(self, target:"FedOptClient") -> NoReturn:
-        """
-        """
-        target._received_messages = {"parameters": deepcopy(list(self.model.parameters()))}
+    def communicate(self, target: "FedOptClient") -> NoReturn:
+        """ """
+        target._received_messages = {
+            "parameters": deepcopy(list(self.model.parameters()))
+        }
 
     def update(self) -> NoReturn:
-        """
-        """
+        """ """
         # update delta_parameters, FedOpt paper Algorithm 2, line 10
         total_samples = sum([m["train_samples"] for m in self._received_messages])
         for idx, param in enumerate(self.delta_parameters):
@@ -126,7 +157,9 @@ class FedOptServer(Server):
             for m in self._received_messages:
                 param.data.add_(
                     m["delta_parameters"][idx].data.detach().clone().to(self.device),
-                    alpha=(1 - self.config.betas[0]) * m["train_samples"] / total_samples
+                    alpha=(1 - self.config.betas[0])
+                    * m["train_samples"]
+                    / total_samples,
                 )
         # update v_parameters, FedOpt paper Algorithm 2, line 11-13
         optimizer = self.config.optimizer.lower()
@@ -141,68 +174,71 @@ class FedOptServer(Server):
         else:
             raise ValueError(f"Unknown optimizer: {self.config.optimizer}")
         # update model parameters, FedOpt paper Algorithm 2, line 14
-        for sp, dp, vp in zip(self.model.parameters(), self.delta_parameters, self.v_parameters):
+        for sp, dp, vp in zip(
+            self.model.parameters(), self.delta_parameters, self.v_parameters
+        ):
             sp.data.addcdiv_(
-                dp.data, vp.sqrt()+self.config.tau,
+                dp.data,
+                vp.sqrt() + self.config.tau,
                 value=-self.config.lr,
             )
 
     def update_avg(self) -> NoReturn:
-        """
-        """
+        """ """
         pass
 
     def update_adagrad(self) -> NoReturn:
-        """
-        """
+        """ """
         for vp, dp in zip(self.v_parameters, self.delta_parameters):
             vp.data.add_(dp.data.pow(2))
 
     def update_yogi(self) -> NoReturn:
-        """
-        """
+        """ """
         for vp, dp in zip(self.v_parameters, self.delta_parameters):
             vp.data.addcmul_(
-                dp.data.pow(2), (vp.data-dp.data.pow(2)).sign(),
-                value=-(1-self.config.betas[1])
+                dp.data.pow(2),
+                (vp.data - dp.data.pow(2)).sign(),
+                value=-(1 - self.config.betas[1]),
             )
 
     def update_adam(self) -> NoReturn:
-        """
-        """
+        """ """
         for vp, dp in zip(self.v_parameters, self.delta_parameters):
-            vp.data.mul_(self.config.betas[1]).add_(dp.data.pow(2), alpha=1-self.config.betas[1])
+            vp.data.mul_(self.config.betas[1]).add_(
+                dp.data.pow(2), alpha=1 - self.config.betas[1]
+            )
 
 
 class FedOptClient(Client):
-    """
-    """
+    """ """
+
     __name__ = "FedOptClient"
 
     @property
     def required_config_fields(self) -> List[str]:
-        """
-        """
-        return ["optimizer",]
+        """ """
+        return [
+            "optimizer",
+        ]
 
-    def communicate(self, target:"FedOptServer") -> NoReturn:
-        """
-        """
+    def communicate(self, target: "FedOptServer") -> NoReturn:
+        """ """
         delta_parameters = deepcopy(list(self.model.parameters()))
         for dp, rp in zip(delta_parameters, self._cached_parameters):
             dp.data.add_(rp.data, alpha=-1)
-        target._received_messages.append(ClientMessage(
-            **{
-                "client_id": self.client_id,
-                "delta_parameters": delta_parameters,
-                "train_samples": len(self.train_loader.dataset),
-                "metrics": self._metrics,
-            }
-        ))
+        target._received_messages.append(
+            ClientMessage(
+                **{
+                    "client_id": self.client_id,
+                    "delta_parameters": delta_parameters,
+                    "train_samples": len(self.train_loader.dataset),
+                    "metrics": self._metrics,
+                }
+            )
+        )
 
     def update(self) -> NoReturn:
-        """
-        """
+        """ """
         try:
             self.set_parameters(self._received_messages["parameters"])
             self._cached_parameters = deepcopy(self._received_messages["parameters"])
@@ -216,8 +252,7 @@ class FedOptClient(Client):
         self.train()
 
     def train(self) -> NoReturn:
-        """
-        """
+        """ """
         self.model.train()
         with tqdm(range(self.config.num_epochs), total=self.config.num_epochs) as pbar:
             for epoch in pbar:  # local update
@@ -232,31 +267,36 @@ class FedOptClient(Client):
 
 
 class FedAvgServerConfig(FedOptServerConfig):
-    """
-    """
+    """ """
+
     __name__ = "FedAvgServerConfig"
 
-    def __init__(self,
-                 num_iters:int,
-                 num_clients:int,
-                 clients_sample_ratio:float,) -> NoReturn:
-        """
-        """
+    def __init__(
+        self,
+        num_iters: int,
+        num_clients: int,
+        clients_sample_ratio: float,
+    ) -> NoReturn:
+        """ """
         super().__init__(
-            num_iters, num_clients, clients_sample_ratio,
-            optimizer="Avg", lr=1, betas=(1, 0),
+            num_iters,
+            num_clients,
+            clients_sample_ratio,
+            optimizer="Avg",
+            lr=1,
+            betas=(1, 0),
         )
 
 
 class FedAvgClientConfig(FedOptClientConfig):
-    """
-    """
+    """ """
+
     __name__ = "FedAvgClientConfig"
 
 
 class FedAvgServer(FedOptServer):
-    """
-    """
+    """ """
+
     __name__ = "FedAvgServer"
 
     @property
@@ -265,162 +305,176 @@ class FedAvgServer(FedOptServer):
 
     @property
     def required_config_fields(self) -> List[str]:
-        """
-        """
+        """ """
         return []
 
 
 class FedAvgClient(FedOptClient):
-    """
-    """
+    """ """
+
     __name__ = "FedAvgClient"
 
 
 class FedAdagradServerConfig(FedOptServerConfig):
-    """
-    """
+    """ """
+
     __name__ = "FedAdagradServerConfig"
 
-    def __init__(self,
-                 num_iters:int,
-                 num_clients:int,
-                 clients_sample_ratio:float,
-                 lr:float=1e-3,
-                 betas:Sequence[float]=(0.9, 0.999),
-                 tau:float=1e-5,) -> NoReturn:
+    def __init__(
+        self,
+        num_iters: int,
+        num_clients: int,
+        clients_sample_ratio: float,
+        lr: float = 1e-3,
+        betas: Sequence[float] = (0.9, 0.999),
+        tau: float = 1e-5,
+    ) -> NoReturn:
         """
         tau: controls the degree of adaptivity of the algorithm
         """
         super().__init__(
-            num_iters, num_clients, clients_sample_ratio,
-            optimizer="Adagrad", lr=lr, betas=betas, tau=tau,
+            num_iters,
+            num_clients,
+            clients_sample_ratio,
+            optimizer="Adagrad",
+            lr=lr,
+            betas=betas,
+            tau=tau,
         )
 
 
 class FedAdagradClientConfig(FedOptClientConfig):
-    """
-    """
+    """ """
+
     __name__ = "FedAdagradClientConfig"
 
 
 class FedAdagradServer(FedOptServer):
-    """
-    """
+    """ """
+
     __name__ = "FedAdagradServer"
 
-    
     @property
     def client_cls(self) -> "Client":
         return FedAdagradClient
 
     @property
     def required_config_fields(self) -> List[str]:
-        """
-        """
+        """ """
         return [k for k in super().required_config_fields if k != "optimizer"]
 
 
 class FedAdagradClient(FedOptClient):
-    """
-    """
+    """ """
+
     __name__ = "FedAdagradClient"
 
 
 class FedYogiServerConfig(FedOptServerConfig):
-    """
-    """
+    """ """
+
     __name__ = "FedYogiServerConfig"
 
-    def __init__(self,
-                 num_iters:int,
-                 num_clients:int,
-                 clients_sample_ratio:float,
-                 lr:float=1e-3,
-                 betas:Sequence[float]=(0.9, 0.999),
-                 tau:float=1e-5,) -> NoReturn:
+    def __init__(
+        self,
+        num_iters: int,
+        num_clients: int,
+        clients_sample_ratio: float,
+        lr: float = 1e-3,
+        betas: Sequence[float] = (0.9, 0.999),
+        tau: float = 1e-5,
+    ) -> NoReturn:
         """
         tau: controls the degree of adaptivity of the algorithm
         """
         super().__init__(
-            num_iters, num_clients, clients_sample_ratio,
-            optimizer="Yogi", lr=lr, betas=betas, tau=tau,
+            num_iters,
+            num_clients,
+            clients_sample_ratio,
+            optimizer="Yogi",
+            lr=lr,
+            betas=betas,
+            tau=tau,
         )
 
 
 class FedYogiClientConfig(FedOptClientConfig):
-    """
-    """
+    """ """
+
     __name__ = "FedYogiClientConfig"
 
 
 class FedYogiServer(FedOptServer):
-    """
-    """
+    """ """
+
     __name__ = "FedYogiServer"
 
-    
     @property
     def client_cls(self) -> "Client":
         return FedYogiClient
 
     @property
     def required_config_fields(self) -> List[str]:
-        """
-        """
+        """ """
         return [k for k in super().required_config_fields if k != "optimizer"]
 
 
 class FedYogiClient(FedOptClient):
-    """
-    """
+    """ """
+
     __name__ = "FedYogiClient"
 
 
 class FedAdamServerConfig(FedOptServerConfig):
-    """
-    """
+    """ """
+
     __name__ = "FedAdamServerConfig"
 
-    def __init__(self,
-                 num_iters:int,
-                 num_clients:int,
-                 clients_sample_ratio:float,
-                 lr:float=1e-3,
-                 betas:Sequence[float]=(0.9, 0.999),
-                 tau:float=1e-5,) -> NoReturn:
+    def __init__(
+        self,
+        num_iters: int,
+        num_clients: int,
+        clients_sample_ratio: float,
+        lr: float = 1e-3,
+        betas: Sequence[float] = (0.9, 0.999),
+        tau: float = 1e-5,
+    ) -> NoReturn:
         """
         tau: controls the degree of adaptivity of the algorithm
         """
         super().__init__(
-            num_iters, num_clients, clients_sample_ratio,
-            optimizer="Adam", lr=lr, betas=betas, tau=tau,
+            num_iters,
+            num_clients,
+            clients_sample_ratio,
+            optimizer="Adam",
+            lr=lr,
+            betas=betas,
+            tau=tau,
         )
 
 
 class FedAdamClientConfig(FedOptClientConfig):
-    """
-    """
+    """ """
+
     __name__ = "FedAdamClientConfig"
 
 
 class FedAdamServer(FedOptServer):
-    """
-    """
+    """ """
+
     __name__ = "FedAdamServer"
 
-    
     @property
     def client_cls(self) -> "Client":
         return FedAdamClient
 
     @property
     def required_config_fields(self) -> List[str]:
-        """
-        """
+        """ """
         return [k for k in super().required_config_fields if k != "optimizer"]
 
 
 class FedAdamClient(FedOptClient):
-    """
-    """
+    """ """
+
     __name__ = "FedAdamClient"

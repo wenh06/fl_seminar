@@ -19,14 +19,23 @@ from .feddr import FedDROptimizer as FedDR
 
 
 __all__ = [
-    "FedPD_SGD", "FedPD_VR", "PSGD", "PSVRG", "pFedMe",
-    "FedProx", "FedDR",
+    "FedPD_SGD",
+    "FedPD_VR",
+    "PSGD",
+    "PSVRG",
+    "pFedMe",
+    "FedProx",
+    "FedDR",
     "get_optimizer",
 ]
 
 
-def get_optimizer(optimizer_name:Union[str,type], params:Iterable[Union[dict,Parameter]], config:Any) -> Optimizer:
-    """ get optimizer by name
+def get_optimizer(
+    optimizer_name: Union[str, type],
+    params: Iterable[Union[dict, Parameter]],
+    config: Any,
+) -> Optimizer:
+    """get optimizer by name
 
     Usage examples
     --------------
@@ -48,7 +57,9 @@ def get_optimizer(optimizer_name:Union[str,type], params:Iterable[Union[dict,Par
         return optimizer
     except:
         try:
-            optimizer = topt.get(optimizer_name)(params, **_get_args(topt.get(optimizer_name), config))
+            optimizer = topt.get(optimizer_name)(
+                params, **_get_args(topt.get(optimizer_name), config)
+            )
             # print(f"Optimizer {optimizer_name} from torch_optimizer is used.")
             return optimizer
         except:
@@ -59,7 +70,13 @@ def get_optimizer(optimizer_name:Union[str,type], params:Iterable[Union[dict,Par
     if optimizer_name == "FedPD_SGD":
         return FedPD_SGD(params, mu=config.mu, lamda=config.lamda, lr=config.lr)
     elif optimizer_name == "FedPD_VR":
-        return FedPD_VR(params, mu=config.mu, freq_1=config.freq_1, freq_2=config.freq_2, lr=config.lr)
+        return FedPD_VR(
+            params,
+            mu=config.mu,
+            freq_1=config.freq_1,
+            freq_2=config.freq_2,
+            lr=config.lr,
+        )
     elif optimizer_name == "PSGD":
         pass
     elif optimizer_name == "PSVRG":
@@ -74,13 +91,21 @@ def get_optimizer(optimizer_name:Union[str,type], params:Iterable[Union[dict,Par
         raise ValueError(f"Invalid optimizer name: {optimizer_name}")
 
 
-def _get_args(cls:type, config:Any) -> ED:
+def _get_args(cls: type, config: Any) -> ED:
     """
     used to filter out the items in config that are not arguments of the class
     """
     if isinstance(config, dict):
         config = ED(config)
-    args = [k for k in inspect.getfullargspec(cls.__init__).args if k not in ["self", "params",]]
+    args = [
+        k
+        for k in inspect.getfullargspec(cls.__init__).args
+        if k
+        not in [
+            "self",
+            "params",
+        ]
+    ]
     kwargs = ED()
     for k in args:
         try:

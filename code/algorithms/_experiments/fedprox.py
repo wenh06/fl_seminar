@@ -7,6 +7,7 @@ import warnings
 from typing import List, NoReturn, Dict
 
 import torch
+
 try:
     from tqdm.auto import tqdm
 except ImportError:
@@ -17,50 +18,59 @@ from ..optimizers import get_optimizer
 
 
 __all__ = [
-    "FedProxServer", "FedProxClient",
-    "FedProxServerConfig", "FedProxClientConfig",
+    "FedProxServer",
+    "FedProxClient",
+    "FedProxServerConfig",
+    "FedProxClientConfig",
 ]
 
 
 class FedProxServerConfig(ServerConfig):
-    """
-    """
+    """ """
+
     __name__ = "FedProxServerConfig"
 
-    def __init__(self,
-                 num_iters:int,
-                 num_clients:int,
-                 clients_sample_ratio:float,) -> NoReturn:
-        """
-        """
+    def __init__(
+        self,
+        num_iters: int,
+        num_clients: int,
+        clients_sample_ratio: float,
+    ) -> NoReturn:
+        """ """
         super().__init__(
             "FedProx",
-            num_iters, num_clients, clients_sample_ratio,
+            num_iters,
+            num_clients,
+            clients_sample_ratio,
         )
 
 
 class FedProxClientConfig(ClientConfig):
-    """
-    """
+    """ """
+
     __name__ = "FedProxClientConfig"
 
-    def __init__(self,
-                 batch_size:int,
-                 num_epochs:int,
-                 lr:float=1e-3,
-                 mu:float=0.01,) -> NoReturn:
-        """
-        """
+    def __init__(
+        self,
+        batch_size: int,
+        num_epochs: int,
+        lr: float = 1e-3,
+        mu: float = 0.01,
+    ) -> NoReturn:
+        """ """
         super().__init__(
-            "FedProx", "FedProx",
-            batch_size, num_epochs,
-            lr, mu=mu,
+            "FedProx",
+            "FedProx",
+            batch_size,
+            num_epochs,
+            lr,
+            mu=mu,
         )
 
 
 class FedProxServer(Server):
-    """
-    """
+    """ """
+
     __name__ = "FedProxServer"
 
     @property
@@ -69,18 +79,17 @@ class FedProxServer(Server):
 
     @property
     def required_config_fields(self) -> List[str]:
-        """
-        """
+        """ """
         return []
-    
-    def communicate(self, target:"FedProxClient") -> NoReturn:
-        """
-        """
-        target._received_messages = {"parameters": deepcopy(list(self.model.parameters()))}
+
+    def communicate(self, target: "FedProxClient") -> NoReturn:
+        """ """
+        target._received_messages = {
+            "parameters": deepcopy(list(self.model.parameters()))
+        }
 
     def update(self) -> NoReturn:
-        """
-        """
+        """ """
         # sum of received parameters, with self.model.parameters() as its container
         for param in self.model.parameters():
             param.data = torch.zeros_like(param.data)
@@ -90,31 +99,32 @@ class FedProxServer(Server):
 
 
 class FedProxClient(Client):
-    """
-    """
+    """ """
+
     __name__ = "FedProxClient"
 
     @property
     def required_config_fields(self) -> List[str]:
-        """
-        """
-        return ["mu",]
+        """ """
+        return [
+            "mu",
+        ]
 
-    def communicate(self, target:"FedProxServer") -> NoReturn:
-        """
-        """
-        target._received_messages.append(ClientMessage(
-            **{
-                "client_id": self.client_id,
-                "parameters": deepcopy(list(self.model.parameters())),
-                "train_samples": len(self.train_loader.dataset),
-                "metrics": self._metrics,
-            }
-        ))
+    def communicate(self, target: "FedProxServer") -> NoReturn:
+        """ """
+        target._received_messages.append(
+            ClientMessage(
+                **{
+                    "client_id": self.client_id,
+                    "parameters": deepcopy(list(self.model.parameters())),
+                    "train_samples": len(self.train_loader.dataset),
+                    "metrics": self._metrics,
+                }
+            )
+        )
 
     def update(self) -> NoReturn:
-        """
-        """
+        """ """
         try:
             self._cached_parameters = deepcopy(self._received_messages["parameters"])
         except KeyError:
@@ -127,8 +137,7 @@ class FedProxClient(Client):
         self.train()
 
     def train(self) -> NoReturn:
-        """
-        """
+        """ """
         self.model.train()
         with tqdm(range(self.config.num_epochs), total=self.config.num_epochs) as pbar:
             for epoch in pbar:  # local update

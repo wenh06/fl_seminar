@@ -8,7 +8,9 @@ from torch.nn.parameter import Parameter
 from .base import ProxSGD
 
 
-__all__ = ["FedProxOptimizer",]
+__all__ = [
+    "FedProxOptimizer",
+]
 
 
 class FedProxOptimizer(ProxSGD):
@@ -20,11 +22,15 @@ class FedProxOptimizer(ProxSGD):
 
     The `gold` (reference 2) is not re-implemented yet.
     """
+
     __name__ = "FedProxOptimizer"
 
-    def __init__(self,
-                 params:Iterable[Union[dict,Parameter]],
-                 lr:float=1e-3, mu:float=1e-2,) -> NoReturn:
+    def __init__(
+        self,
+        params: Iterable[Union[dict, Parameter]],
+        lr: float = 1e-3,
+        mu: float = 1e-2,
+    ) -> NoReturn:
         """
 
         Parameters

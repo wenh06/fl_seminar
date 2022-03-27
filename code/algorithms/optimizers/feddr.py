@@ -8,17 +8,22 @@ from torch.nn.parameter import Parameter
 from .base import ProxSGD
 
 
-__all__ = ["FedDROptimizer",]
+__all__ = [
+    "FedDROptimizer",
+]
 
 
 class FedDROptimizer(ProxSGD):
-    """
-    """
+    """ """
+
     __name__ = "FedDROptimizer"
 
-    def __init__(self,
-                 params:Iterable[Union[dict,Parameter]],
-                 lr:float=1e-3, eta:float=1.0,) -> NoReturn:
+    def __init__(
+        self,
+        params: Iterable[Union[dict, Parameter]],
+        lr: float = 1e-3,
+        eta: float = 1.0,
+    ) -> NoReturn:
         """
 
         Parameters
@@ -31,4 +36,4 @@ class FedDROptimizer(ProxSGD):
             reciprocal coeff. of the proximal term
         """
         self.eta = eta
-        super().__init__(params, lr=lr, prox=1/eta, momentum=0)
+        super().__init__(params, lr=lr, prox=1 / eta, momentum=0)

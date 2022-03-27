@@ -10,17 +10,24 @@ from torch.optim.optimizer import Optimizer
 
 
 __all__ = [
-    "FedPD_VR", "FedPD_SGD",
-    "PSVRG", "PSGD",
+    "FedPD_VR",
+    "FedPD_SGD",
+    "PSVRG",
+    "PSGD",
 ]
 
 
 class FedPD_VR(Optimizer):
-    """
-    """
-    def __init__(self,
-                 params:Iterable[Union[dict,Parameter]],
-                 lr:float=1e-3, mu:float=1.0, freq_1:int=10, freq_2:int=10,) -> NoReturn:
+    """ """
+
+    def __init__(
+        self,
+        params: Iterable[Union[dict, Parameter]],
+        lr: float = 1e-3,
+        mu: float = 1.0,
+        freq_1: int = 10,
+        freq_2: int = 10,
+    ) -> NoReturn:
         """
 
         Parameters
@@ -38,13 +45,13 @@ class FedPD_VR(Optimizer):
         """
         if lr < 0.0:
             raise ValueError(f"Invalid learning rate: {lr}")
-        defaults = dict(lr=lr, freq_1=freq_1+1, mu=mu, freq_2=freq_2)
+        defaults = dict(lr=lr, freq_1=freq_1 + 1, mu=mu, freq_2=freq_2)
         self.counter_in = 0
         self.counter_out = 0
         self.flag = False
         super().__init__(params, defaults)
 
-    def step(self, closure:Optional[callable]=None) -> Optional[Tensor]:
+    def step(self, closure: Optional[callable] = None) -> Optional[Tensor]:
         """Performs a single optimization step.
 
         Parameters
@@ -75,35 +82,37 @@ class FedPD_VR(Optimizer):
                     param_state["x_0"] = torch.zeros_like(p.data)
                     param_state["g_ex"] = torch.zeros_like(p.data)
                     param_state["lambda"] = torch.zeros_like(p.data)
-                
+
                 x_0 = param_state["x_0"]
                 g_ex = param_state["g_ex"]
                 lamb = param_state["lambda"]
 
-                if (self.counter_in == 0):
-                    if not (self.flag): # first iteration, initialize
-                        x_0.copy_(p.data) # x_0 = x_i
-                    else: # after the first iteration
+                if self.counter_in == 0:
+                    if not (self.flag):  # first iteration, initialize
+                        x_0.copy_(p.data)  # x_0 = x_i
+                    else:  # after the first iteration
                         temp = p.data.clone().detach()
                         p.data.copy_(x_0)
                         x_0.copy_(temp)
 
-                    if (self.counter_out == 0):
-                        g_ex.fill_(0) # g_ex = 0
-                    
-                g_ex.add_(d_p) # g_ex = g_ex + (h-h')
+                    if self.counter_out == 0:
+                        g_ex.fill_(0)  # g_ex = 0
 
-                if (self.counter_in > 0): # first inner loop, only switch x_0 and x_i
-                    p.data.add_(p.data - x_0, alpha=-group["lr"]*mu)
+                g_ex.add_(d_p)  # g_ex = g_ex + (h-h')
+
+                if self.counter_in > 0:  # first inner loop, only switch x_0 and x_i
+                    p.data.add_(p.data - x_0, alpha=-group["lr"] * mu)
                     p.data.add_(g_ex + lamb, alpha=-group["lr"])
 
-                if (self.counter_in+1 == freq_1): # last inner loop, perform update on lambda and x_0
+                if (
+                    self.counter_in + 1 == freq_1
+                ):  # last inner loop, perform update on lambda and x_0
                     lamb.add_(p.data - x_0, alpha=mu)
                     x_0.copy_(p.data)
-                    p.data.add_(lamb, alpha=1./mu)
-                
+                    p.data.add_(lamb, alpha=1.0 / mu)
+
         self.flag = True
-        self.counter_in += 1    
+        self.counter_in += 1
         if self.counter_in == freq_1:
             self.counter_in = 0
             self.counter_out += 1
@@ -112,13 +121,17 @@ class FedPD_VR(Optimizer):
 
         return loss
 
-class FedPD_SGD(Optimizer):
-    """
-    """
 
-    def __init__(self,
-                 params:Iterable[Union[dict,Parameter]],
-                 lr:float=1e-3, mu:float=1.0, freq:int=10,) -> NoReturn:
+class FedPD_SGD(Optimizer):
+    """ """
+
+    def __init__(
+        self,
+        params: Iterable[Union[dict, Parameter]],
+        lr: float = 1e-3,
+        mu: float = 1.0,
+        freq: int = 10,
+    ) -> NoReturn:
         """
 
         Parameters
@@ -134,12 +147,12 @@ class FedPD_SGD(Optimizer):
         """
         if lr < 0.0:
             raise ValueError(f"Invalid learning rate: {lr}")
-        defaults = dict(lr=lr, freq=freq+1, mu=mu)
+        defaults = dict(lr=lr, freq=freq + 1, mu=mu)
         self.counter_in = 0
         self.flag = False
         super().__init__(params, defaults)
 
-    def step(self, closure:Optional[callable]=None) -> Optional[Tensor]:
+    def step(self, closure: Optional[callable] = None) -> Optional[Tensor]:
         """Performs a single optimization step.
 
         Parameters
@@ -169,34 +182,35 @@ class FedPD_SGD(Optimizer):
                     # print("inner_init")
                     param_state["x_0"] = torch.zeros_like(p.data)
                     param_state["lambda"] = torch.zeros_like(p.data)
-                
+
                 x_0 = param_state["x_0"]
                 lamb = param_state["lambda"]
 
-                if (self.counter_in == 0):
-                    if not (self.flag): # first iteration, initialize
-                        x_0.copy_(p.data) # x_0 = x_i
-                    else: # after the first iteration
+                if self.counter_in == 0:
+                    if not (self.flag):  # first iteration, initialize
+                        x_0.copy_(p.data)  # x_0 = x_i
+                    else:  # after the first iteration
                         temp = p.data.clone().detach()
                         p.data.copy_(x_0)
                         x_0.copy_(temp)
 
-                if (self.counter_in > 0): # first inner loop, only switch x_0 and x_i
-                    p.data.add_(p.data - x_0, alpha=-group["lr"]*mu)
+                if self.counter_in > 0:  # first inner loop, only switch x_0 and x_i
+                    p.data.add_(p.data - x_0, alpha=-group["lr"] * mu)
                     p.data.add_(d_p + lamb, alpha=-group["lr"])
 
-                if (self.counter_in+1 == freq): # last inner loop, perform update on lambda and x_0
+                if (
+                    self.counter_in + 1 == freq
+                ):  # last inner loop, perform update on lambda and x_0
                     lamb.add_(p.data - x_0, alpha=mu)
                     x_0.copy_(p.data)
-                    p.data.add_(lamb, alpha=1./mu)
-                
+                    p.data.add_(lamb, alpha=1.0 / mu)
+
         self.flag = True
-        self.counter_in += 1    
+        self.counter_in += 1
         if self.counter_in == freq:
             self.counter_in = 0
 
         return loss
-
 
 
 # -----------------------------
@@ -208,9 +222,13 @@ class PSVRG(Optimizer):
     FedProx with variance reduction
     """
 
-    def __init__(self,
-                 params:Iterable[Union[dict,Parameter]],
-                 lr:float=1e-3, mu:float=1.0, freq:int=10,) -> NoReturn:
+    def __init__(
+        self,
+        params: Iterable[Union[dict, Parameter]],
+        lr: float = 1e-3,
+        mu: float = 1.0,
+        freq: int = 10,
+    ) -> NoReturn:
         """
 
         Parameters
@@ -231,7 +249,7 @@ class PSVRG(Optimizer):
         self.flag = False
         super().__init__(params, defaults)
 
-    def step(self, closure:Optional[callable]=None) -> Optional[Tensor]:
+    def step(self, closure: Optional[callable] = None) -> Optional[Tensor]:
         """Performs a single optimization step.
 
         Parameters
@@ -260,21 +278,21 @@ class PSVRG(Optimizer):
                 if not (self.flag):
                     param_state["x_0"] = torch.zeros_like(p.data)
                     param_state["g_ex"] = torch.zeros_like(p.data)
-                
+
                 x_0 = param_state["x_0"]
                 g_ex = param_state["g_ex"]
 
-                if (self.counter ==0):
+                if self.counter == 0:
                     x_0.copy_(p.data)
                     g_ex.fill_(0)
-                
+
                 g_ex.add_(d_p)
 
-                p.data.add_(p.data - x_0, alpha=-group["lr"]*mu)
+                p.data.add_(p.data - x_0, alpha=-group["lr"] * mu)
                 p.data.add_(g_ex, alpha=-group["lr"])
 
         self.flag = True
-        self.counter += 1    
+        self.counter += 1
         if self.counter == freq:
             self.counter = 0
         return loss
@@ -284,10 +302,14 @@ class PSGD(Optimizer):
     """
     FedProx
     """
-    
-    def __init__(self,
-                 params:Iterable[Union[dict,Parameter]],
-                 lr:float=1e-3, mu:float=1.0, freq:int=2,) -> NoReturn:
+
+    def __init__(
+        self,
+        params: Iterable[Union[dict, Parameter]],
+        lr: float = 1e-3,
+        mu: float = 1.0,
+        freq: int = 2,
+    ) -> NoReturn:
         """
 
         Parameters
@@ -303,12 +325,12 @@ class PSGD(Optimizer):
         """
         if lr < 0.0:
             raise ValueError(f"Invalid learning rate: {lr}")
-        defaults = dict(lr=lr, mu= mu, freq= freq)
+        defaults = dict(lr=lr, mu=mu, freq=freq)
         self.counter = 0
         self.flag = False
         super().__init__(params, defaults)
 
-    def step(self, closure:Optional[callable]=None) -> Optional[Tensor]:
+    def step(self, closure: Optional[callable] = None) -> Optional[Tensor]:
         """Performs a single optimization step.
 
         Parameters
@@ -336,17 +358,17 @@ class PSGD(Optimizer):
 
                 if not (self.flag):
                     param_state["x_0"] = torch.zeros_like(p.data)
-                
+
                 x_0 = param_state["x_0"]
 
                 if self.counter == 0:
                     x_0.copy_(p.data)
 
-                p.data.add_(p.data-x_0, alpha=-group["lr"]*mu)
+                p.data.add_(p.data - x_0, alpha=-group["lr"] * mu)
                 p.data.add_(d_p, alpha=-group["lr"])
 
         self.flag = True
-        self.counter += 1    
+        self.counter += 1
         if self.counter == freq:
             self.counter = 0
         return loss

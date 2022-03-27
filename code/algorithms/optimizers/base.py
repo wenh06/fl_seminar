@@ -11,7 +11,8 @@ from torch.optim.optimizer import Optimizer
 
 
 __all__ = [
-    "ProxSGD", "prox_sgd",
+    "ProxSGD",
+    "prox_sgd",
 ]
 
 
@@ -19,14 +20,19 @@ class ProxSGD(Optimizer):
     """
     Proximal Stochastic Gradient Descent
     """
+
     __name__ = "ProxSGD"
 
-    def __init__(self,
-                 params:Iterable[Union[dict,Parameter]],
-                 lr:float=1e-3,
-                 momentum=1e-3, dampening=0,
-                 weight_decay=0, nesterov=False,
-                 prox:float=0.1,) -> NoReturn:
+    def __init__(
+        self,
+        params: Iterable[Union[dict, Parameter]],
+        lr: float = 1e-3,
+        momentum=1e-3,
+        dampening=0,
+        weight_decay=0,
+        nesterov=False,
+        prox: float = 0.1,
+    ) -> NoReturn:
         """
 
         Parameters
@@ -60,19 +66,27 @@ class ProxSGD(Optimizer):
             warnings.warn(
                 f"prox * lr = {prox * lr:.3f} >= 1 with prox = {prox}, lr = {lr}, you may encounter gradient exploding",
             )
-        defaults = dict(lr=lr, momentum=momentum, dampening=dampening,
-                        weight_decay=weight_decay, nesterov=nesterov, prox=prox)
+        defaults = dict(
+            lr=lr,
+            momentum=momentum,
+            dampening=dampening,
+            weight_decay=weight_decay,
+            nesterov=nesterov,
+            prox=prox,
+        )
         super().__init__(params, defaults)
 
-    def __setstate__(self, state:dict) -> NoReturn:
+    def __setstate__(self, state: dict) -> NoReturn:
         super().__setstate__(state)
         for group in self.param_groups:
             group.setdefault("nesterov", False)
 
     @torch.no_grad()
-    def step(self,
-             local_weight_updated:Iterable[Parameter],
-             closure:Optional[callable]=None,) -> Optional[Tensor]:
+    def step(
+        self,
+        local_weight_updated: Iterable[Parameter],
+        closure: Optional[callable] = None,
+    ) -> Optional[Tensor]:
         """
 
         Parameters
@@ -115,9 +129,16 @@ class ProxSGD(Optimizer):
                         momentum_buffer_list.append(state["momentum_buffer"])
 
             prox_sgd(
-                params_with_grad, local_weight_updated,
-                d_p_list, momentum_buffer_list,
-                weight_decay, momentum, lr, dampening, nesterov, prox,
+                params_with_grad,
+                local_weight_updated,
+                d_p_list,
+                momentum_buffer_list,
+                weight_decay,
+                momentum,
+                lr,
+                dampening,
+                nesterov,
+                prox,
             )
 
             # update momentum_buffers in state
@@ -128,18 +149,19 @@ class ProxSGD(Optimizer):
         return loss
 
 
-def prox_sgd(params: List[Tensor],
-             local_weight_updated:Iterable[Parameter],
-             d_p_list: List[Tensor],
-             momentum_buffer_list: List[Optional[Tensor]],
-             weight_decay: float,
-             momentum: float,
-             lr: float,
-             dampening: float,
-             nesterov: bool,
-             prox:float) -> NoReturn:
-    """
-    """
+def prox_sgd(
+    params: List[Tensor],
+    local_weight_updated: Iterable[Parameter],
+    d_p_list: List[Tensor],
+    momentum_buffer_list: List[Optional[Tensor]],
+    weight_decay: float,
+    momentum: float,
+    lr: float,
+    dampening: float,
+    nesterov: bool,
+    prox: float,
+) -> NoReturn:
+    """ """
     for i, (param, localweight) in enumerate(zip(params, local_weight_updated)):
 
         d_p = d_p_list[i]
@@ -147,7 +169,9 @@ def prox_sgd(params: List[Tensor],
             d_p = d_p.add(param, alpha=weight_decay)  # L2 regularization
 
         if prox != 0:
-            d_p = d_p.add(param-localweight.detach().clone(), alpha=prox)  # proximal regularization
+            d_p = d_p.add(
+                param - localweight.detach().clone(), alpha=prox
+            )  # proximal regularization
 
         if momentum != 0:
             buf = momentum_buffer_list[i]

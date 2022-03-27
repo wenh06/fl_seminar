@@ -7,6 +7,7 @@ import warnings
 from typing import List, NoReturn, Dict, Any
 
 import torch
+
 try:
     from tqdm.auto import tqdm
 except ImportError:
@@ -17,29 +18,29 @@ from ..optimizers import get_optimizer
 
 
 __all__ = [
-    "pFedMeServer", "pFedMeClient",
-    "pFedMeServerConfig", "pFedMeClientConfig",
+    "pFedMeServer",
+    "pFedMeClient",
+    "pFedMeServerConfig",
+    "pFedMeClientConfig",
 ]
 
 
 class pFedMeServerConfig(ServerConfig):
-    """
-    """
+    """ """
+
     __name__ = "pFedMeServerConfig"
 
-    def __init__(self,
-                 num_iters:int,
-                 num_clients:int,
-                 clients_sample_ratio:float,
-                 beta:float=1.0,
-                 **kwargs:Any) -> NoReturn:
-        """
-        """
+    def __init__(
+        self,
+        num_iters: int,
+        num_clients: int,
+        clients_sample_ratio: float,
+        beta: float = 1.0,
+        **kwargs: Any,
+    ) -> NoReturn:
+        """ """
         super().__init__(
-            "pFedMe",
-            num_iters, num_clients, clients_sample_ratio,
-            beta=beta,
-            **kwargs
+            "pFedMe", num_iters, num_clients, clients_sample_ratio, beta=beta, **kwargs
         )
 
 
@@ -54,30 +55,38 @@ class pFedMeClientConfig(ClientConfig):
     2. `eta` is the `learning_rate` in the original implementation
     3. `mu` is the momentum factor in the original implemented optimzer
     """
+
     __name__ = "pFedMeClientConfig"
 
-    def __init__(self,
-                 batch_size:int,
-                 num_epochs:int,
-                 lr:float=5e-3,
-                 num_steps:int=30,
-                 lamda:float=15.0,
-                 eta:float=1e-3,
-                 mu:float=1e-3,
-                 **kwargs:Any,) -> NoReturn:
-        """
-        """
+    def __init__(
+        self,
+        batch_size: int,
+        num_epochs: int,
+        lr: float = 5e-3,
+        num_steps: int = 30,
+        lamda: float = 15.0,
+        eta: float = 1e-3,
+        mu: float = 1e-3,
+        **kwargs: Any,
+    ) -> NoReturn:
+        """ """
         super().__init__(
-            "pFedMe", "pFedMe",
-            batch_size, num_epochs, lr,
-            num_steps=num_steps, lamda=lamda, eta=eta, mu=mu,
-            **kwargs
+            "pFedMe",
+            "pFedMe",
+            batch_size,
+            num_epochs,
+            lr,
+            num_steps=num_steps,
+            lamda=lamda,
+            eta=eta,
+            mu=mu,
+            **kwargs,
         )
 
 
 class pFedMeServer(Server):
-    """
-    """
+    """ """
+
     __name__ = "pFedMeServer"
 
     @property
@@ -86,18 +95,19 @@ class pFedMeServer(Server):
 
     @property
     def required_config_fields(self) -> List[str]:
-        """
-        """
-        return ["beta",]
-    
-    def communicate(self, target:"pFedMeClient") -> NoReturn:
-        """
-        """
-        target._received_messages = {"parameters": deepcopy(list(self.model.parameters()))}
+        """ """
+        return [
+            "beta",
+        ]
+
+    def communicate(self, target: "pFedMeClient") -> NoReturn:
+        """ """
+        target._received_messages = {
+            "parameters": deepcopy(list(self.model.parameters()))
+        }
 
     def update(self) -> NoReturn:
-        """
-        """
+        """ """
         # store previous parameters
         previous_param = deepcopy(list(self.model.parameters()))
         for p in previous_param:
@@ -110,40 +120,46 @@ class pFedMeServer(Server):
         for m in self._received_messages:
             self.add_parameters(m["parameters"], m["train_samples"] / total_samples)
 
-        # aaggregate avergage model with previous model using parameter beta 
+        # aaggregate avergage model with previous model using parameter beta
         for pre_param, param in zip(previous_param, self.model.parameters()):
-            param.data = (1 - self.config.beta) * pre_param.data.detach().clone() + self.config.beta * param.data
+            param.data = (
+                1 - self.config.beta
+            ) * pre_param.data.detach().clone() + self.config.beta * param.data
 
         # clear received messages
         del pre_param
 
 
 class pFedMeClient(Client):
-    """
-    """
+    """ """
+
     __name__ = "pFedMeClient"
 
     @property
     def required_config_fields(self) -> List[str]:
-        """
-        """
-        return ["num_steps", "lamda", "eta", "mu",]
+        """ """
+        return [
+            "num_steps",
+            "lamda",
+            "eta",
+            "mu",
+        ]
 
-    def communicate(self, target:"pFedMeServer") -> NoReturn:
-        """
-        """
-        target._received_messages.append(ClientMessage(
-            **{
-                "client_id": self.client_id,
-                "parameters": deepcopy(list(self.model.parameters())),
-                "train_samples": self.config.num_epochs * self.config.batch_size,
-                "metrics": self._metrics,
-            }
-        ))
+    def communicate(self, target: "pFedMeServer") -> NoReturn:
+        """ """
+        target._received_messages.append(
+            ClientMessage(
+                **{
+                    "client_id": self.client_id,
+                    "parameters": deepcopy(list(self.model.parameters())),
+                    "train_samples": self.config.num_epochs * self.config.batch_size,
+                    "metrics": self._metrics,
+                }
+            )
+        )
 
     def update(self) -> NoReturn:
-        """
-        """
+        """ """
         # copy the parameters from the server
         # pFedMe paper Algorithm 1 line 5
         try:
@@ -160,8 +176,7 @@ class pFedMeClient(Client):
         self.train()
 
     def train(self) -> NoReturn:
-        """
-        """
+        """ """
         self.model.train()
         with tqdm(range(self.config.num_epochs), total=self.config.num_epochs) as pbar:
             for epoch in pbar:  # local update
@@ -182,7 +197,7 @@ class pFedMeClient(Client):
                     # print(mp.data.isnan().any(), cp.data.isnan().any())
                     cp.data.add_(
                         cp.data.clone() - mp.data.clone(),
-                        alpha=-self.config.lamda * self.config.eta
+                        alpha=-self.config.lamda * self.config.eta,
                     )
 
                 # update local model

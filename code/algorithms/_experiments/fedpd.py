@@ -6,6 +6,7 @@ import warnings
 from typing import List, NoReturn, Dict
 
 import torch
+
 try:
     from tqdm.auto import tqdm
 except ImportError:

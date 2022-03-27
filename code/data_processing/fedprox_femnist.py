@@ -23,22 +23,23 @@ from models.utils import top_n_accuracy
 from .fed_dataset import FedVisionDataset
 
 
-__all__ = ["FedProxFEMNIST",]
+__all__ = [
+    "FedProxFEMNIST",
+]
 
 
 FEDPROX_FEMNIST_DATA_DIR = CACHED_DATA_DIR / "fedprox_femnist"
 FEDPROX_FEMNIST_DATA_DIR.mkdir(exist_ok=True)
-_label_mapping = {i:c for i,c in enumerate("abcdefghijklmnopqrstuvwxyz"[:10])}
+_label_mapping = {i: c for i, c in enumerate("abcdefghijklmnopqrstuvwxyz"[:10])}
 
 
 class FedProxFEMNIST(FedVisionDataset):
-    """
-    """
+    """ """
+
     __name__ = "FedProxFEMNIST"
 
-    def _preload(self, datadir:Optional[Union[str,Path]]=None) -> NoReturn:
-        """
-        """
+    def _preload(self, datadir: Optional[Union[str, Path]] = None) -> NoReturn:
+        """ """
         self.datadir = Path(datadir or FEDPROX_FEMNIST_DATA_DIR)
 
         self.DEFAULT_TRAIN_CLIENTS_NUM = 200
@@ -55,25 +56,34 @@ class FedProxFEMNIST(FedVisionDataset):
 
         self.download_if_needed()
 
-        #client id list
+        # client id list
         train_file_path = self.datadir / self.DEFAULT_TRAIN_FILE
         test_file_path = self.datadir / self.DEFAULT_TEST_FILE
         self._train_data_dict = json.loads(train_file_path.read_text())
         self._test_data_dict = json.loads(test_file_path.read_text())
         self._client_ids_train = self._train_data_dict["users"]
         self._client_ids_test = self._test_data_dict["users"]
-            
-        self._n_class = len(np.unique(np.concatenate([
-            self._train_data_dict[self._EXAMPLE][self._client_ids_train[idx]][self._LABEL] \
-                for idx in range(self.DEFAULT_TRAIN_CLIENTS_NUM)
-        ])))
 
-    def get_dataloader(self,
-                       train_bs:int,
-                       test_bs:int,
-                       client_idx:Optional[int]=None,) -> Tuple[data.DataLoader, data.DataLoader]:
-        """
-        """
+        self._n_class = len(
+            np.unique(
+                np.concatenate(
+                    [
+                        self._train_data_dict[self._EXAMPLE][
+                            self._client_ids_train[idx]
+                        ][self._LABEL]
+                        for idx in range(self.DEFAULT_TRAIN_CLIENTS_NUM)
+                    ]
+                )
+            )
+        )
+
+    def get_dataloader(
+        self,
+        train_bs: int,
+        test_bs: int,
+        client_idx: Optional[int] = None,
+    ) -> Tuple[data.DataLoader, data.DataLoader]:
+        """ """
         # load data
         if client_idx is None:
             # get ids of all clients
@@ -85,48 +95,69 @@ class FedProxFEMNIST(FedVisionDataset):
             test_ids = [self._client_ids_test[client_idx]]
 
         # load data
-        train_x = np.vstack([self._train_data_dict[self._EXAMPLE][client_id][self._IMGAE] for client_id in train_ids])
-        train_y = np.concatenate([self._train_data_dict[self._EXAMPLE][client_id][self._LABEL] for client_id in train_ids])
-        test_x = np.vstack([self._test_data_dict[self._EXAMPLE][client_id][self._IMGAE] for client_id in test_ids])
-        test_y = np.concatenate([self._test_data_dict[self._EXAMPLE][client_id][self._LABEL] for client_id in test_ids])
+        train_x = np.vstack(
+            [
+                self._train_data_dict[self._EXAMPLE][client_id][self._IMGAE]
+                for client_id in train_ids
+            ]
+        )
+        train_y = np.concatenate(
+            [
+                self._train_data_dict[self._EXAMPLE][client_id][self._LABEL]
+                for client_id in train_ids
+            ]
+        )
+        test_x = np.vstack(
+            [
+                self._test_data_dict[self._EXAMPLE][client_id][self._IMGAE]
+                for client_id in test_ids
+            ]
+        )
+        test_y = np.concatenate(
+            [
+                self._test_data_dict[self._EXAMPLE][client_id][self._LABEL]
+                for client_id in test_ids
+            ]
+        )
 
         # dataloader
         train_ds = data.TensorDataset(
-            torch.from_numpy(train_x.reshape((-1,28,28)).astype(np.float32)).unsqueeze(1),
-            torch.from_numpy(train_y.astype(np.long))
+            torch.from_numpy(
+                train_x.reshape((-1, 28, 28)).astype(np.float32)
+            ).unsqueeze(1),
+            torch.from_numpy(train_y.astype(np.long)),
         )
-        train_dl = data.DataLoader(dataset=train_ds,
-                                   batch_size=train_bs,
-                                   shuffle=True,
-                                   drop_last=False)
+        train_dl = data.DataLoader(
+            dataset=train_ds, batch_size=train_bs, shuffle=True, drop_last=False
+        )
 
         test_ds = data.TensorDataset(
-            torch.from_numpy(test_x.reshape((-1,28,28)).astype(np.float32)).unsqueeze(1),
-            torch.from_numpy(test_y.astype(np.long))
+            torch.from_numpy(test_x.reshape((-1, 28, 28)).astype(np.float32)).unsqueeze(
+                1
+            ),
+            torch.from_numpy(test_y.astype(np.long)),
         )
-        test_dl = data.DataLoader(dataset=test_ds,
-                                  batch_size=test_bs,
-                                  shuffle=True,
-                                  drop_last=False)
+        test_dl = data.DataLoader(
+            dataset=test_ds, batch_size=test_bs, shuffle=True, drop_last=False
+        )
 
         return train_dl, test_dl
 
     def extra_repr_keys(self) -> List[str]:
-        """
-        """
-        return ["n_class",] + super().extra_repr_keys()
+        """ """
+        return [
+            "n_class",
+        ] + super().extra_repr_keys()
 
-    def get_class(self, label:torch.Tensor) -> str:
-        """
-        """
+    def get_class(self, label: torch.Tensor) -> str:
+        """ """
         return _label_mapping[label.item()]
 
-    def get_classes(self, labels:torch.Tensor) -> List[str]:
+    def get_classes(self, labels: torch.Tensor) -> List[str]:
         return [_label_mapping[l] for l in labels.cpu().numpy()]
 
-    def evaluate(self, probs:torch.Tensor, truths:torch.Tensor) -> Dict[str, float]:
-        """
-        """
+    def evaluate(self, probs: torch.Tensor, truths: torch.Tensor) -> Dict[str, float]:
+        """ """
         return {
             "acc": top_n_accuracy(probs, truths, 1),
             "top3_acc": top_n_accuracy(probs, truths, 3),

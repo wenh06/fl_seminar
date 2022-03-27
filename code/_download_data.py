@@ -23,17 +23,23 @@ DECOMPRESS_CMD = {
 }
 
 
-def download_if_needed(url:str, dst_dir:Union[str,Path]=CACHED_DATA_DIR, extract:bool=True) -> NoReturn:
-    """
-    """
+def download_if_needed(
+    url: str, dst_dir: Union[str, Path] = CACHED_DATA_DIR, extract: bool = True
+) -> NoReturn:
+    """ """
     dst_dir = Path(dst_dir)
     dst_dir.mkdir(parents=True, exist_ok=True)
     if dst_dir.exists() and len(list(dst_dir.iterdir())) > 0:
         return
     http_get(url, dst_dir, extract=extract)
-    
 
-def http_get(url:str, dst_dir:Union[str,Path], proxies:Optional[dict]=None, extract:bool=True) -> NoReturn:
+
+def http_get(
+    url: str,
+    dst_dir: Union[str, Path],
+    proxies: Optional[dict] = None,
+    extract: bool = True,
+) -> NoReturn:
     """Get contents of a URL and save to a file.
 
     https://github.com/huggingface/transformers/blob/master/src/transformers/file_utils.py
@@ -41,9 +47,7 @@ def http_get(url:str, dst_dir:Union[str,Path], proxies:Optional[dict]=None, extr
     print(f"Downloading {url}.")
     parent_dir = Path(dst_dir).parent
     downloaded_file = tempfile.NamedTemporaryFile(
-        dir=parent_dir,
-        suffix=_suffix(url),
-        delete=False
+        dir=parent_dir, suffix=_suffix(url), delete=False
     )
     req = requests.get(url, stream=True, proxies=proxies)
     content_length = req.headers.get("Content-Length")
@@ -67,9 +71,10 @@ def http_get(url:str, dst_dir:Union[str,Path], proxies:Optional[dict]=None, extr
     os.remove(downloaded_file.name)
 
 
-def execute_cmd(cmd:Union[str,List[str]], raise_error:bool=True) -> Tuple[int, List[str]]:
-    """
-    """
+def execute_cmd(
+    cmd: Union[str, List[str]], raise_error: bool = True
+) -> Tuple[int, List[str]]:
+    """ """
     shell_arg, executable_arg = False, None
     s = subprocess.Popen(
         cmd,
@@ -77,7 +82,7 @@ def execute_cmd(cmd:Union[str,List[str]], raise_error:bool=True) -> Tuple[int, L
         executable=executable_arg,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
-        close_fds=(not (platform.system().lower()=="windows")),
+        close_fds=(not (platform.system().lower() == "windows")),
     )
     debug_stdout = collections.deque(maxlen=1000)
     while True:
@@ -114,29 +119,31 @@ def execute_cmd(cmd:Union[str,List[str]], raise_error:bool=True) -> Tuple[int, L
     return exitcode, output_msg
 
 
-def _stem(path:Union[str,Path]) -> str:
-    """
-    """
+def _stem(path: Union[str, Path]) -> str:
+    """ """
     ret = Path(path).stem
     for _ in range(3):
         ret = Path(ret).stem
     return ret
 
 
-def _suffix(path:Union[str,Path]) -> str:
-    """
-    """
+def _suffix(path: Union[str, Path]) -> str:
+    """ """
     return "".join(Path(path).suffixes)
 
 
-def _unzip_file(path_to_zip_file:Union[str, Path], dst_dir:Union[str, Path]) -> NoReturn:
+def _unzip_file(
+    path_to_zip_file: Union[str, Path], dst_dir: Union[str, Path]
+) -> NoReturn:
     """Unzips a .zip file to folder path."""
     print(f"Extracting file {path_to_zip_file} to {dst_dir}.")
     with zipfile.ZipFile(str(path_to_zip_file)) as zip_ref:
         zip_ref.extractall(str(dst_dir))
 
 
-def _untar_file(path_to_tar_file:Union[str, Path], dst_dir:Union[str, Path]) -> NoReturn:
+def _untar_file(
+    path_to_tar_file: Union[str, Path], dst_dir: Union[str, Path]
+) -> NoReturn:
     """decompress a .tar.xx file to folder path."""
     print(f"Extracting file {path_to_tar_file} to {dst_dir}.")
     mode = Path(path_to_tar_file).suffix.replace(".", "r:").replace("tar", "")

@@ -11,37 +11,46 @@ from torch.optim.optimizer import Optimizer
 from .base import ProxSGD
 
 
-__all__ = ["pFedMeOptimizer",]
+__all__ = [
+    "pFedMeOptimizer",
+]
 
 
 class pFedMeOptimizer(ProxSGD):
-    """
-    """
+    """ """
+
     __name__ = "pFedMeOptimizer"
 
-    def __init__(self,
-                 params:Iterable[Union[dict,Parameter]],
-                 lr:float=0.01, lamda:float=0.1, mu:float=1e-3) -> NoReturn:
-        """
-        """
+    def __init__(
+        self,
+        params: Iterable[Union[dict, Parameter]],
+        lr: float = 0.01,
+        lamda: float = 0.1,
+        mu: float = 1e-3,
+    ) -> NoReturn:
+        """ """
         self.lamda = lamda
         self.mu = mu
         super().__init__(params, lr=lr, prox=lamda, momentum=mu, nesterov=True)
 
-    def __setstate__(self, state:dict) -> NoReturn:
+    def __setstate__(self, state: dict) -> NoReturn:
         super().__setstate__(state)
         for group in self.param_groups:
             group.setdefault("nesterov", True)
 
 
 class _pFedMeOptimizer(Optimizer):
-    """ legacy pFedMeOptimizer
-    """
+    """legacy pFedMeOptimizer"""
+
     __name__ = "_pFedMeOptimizer"
 
-    def __init__(self,
-                 params:Iterable[Union[dict,Parameter]],
-                 lr:float=0.01, lamda:float=0.1, mu:float=1e-3) -> NoReturn:
+    def __init__(
+        self,
+        params: Iterable[Union[dict, Parameter]],
+        lr: float = 0.01,
+        lamda: float = 0.1,
+        mu: float = 1e-3,
+    ) -> NoReturn:
         """
 
         Parameters
@@ -55,13 +64,17 @@ class _pFedMeOptimizer(Optimizer):
         mu: float, default 1e-3,
             momentum coeff.
         """
-        #self.local_weight_updated = local_weight # w_i,K
+        # self.local_weight_updated = local_weight # w_i,K
         if lr < 0.0:
             raise ValueError(f"Invalid learning rate: {lr}")
         defaults = dict(lr=lr, lamda=lamda, mu=mu)
         super().__init__(params, defaults)
-    
-    def step(self, local_weight_updated:Iterable[Parameter], closure:Optional[callable]=None) -> Tuple[Iterable[Parameter], Optional[Tensor]]:
+
+    def step(
+        self,
+        local_weight_updated: Iterable[Parameter],
+        closure: Optional[callable] = None,
+    ) -> Tuple[Iterable[Parameter], Optional[Tensor]]:
         """
 
         Parameters
@@ -82,11 +95,19 @@ class _pFedMeOptimizer(Optimizer):
         if closure is not None:
             loss = closure()
         for group in self.param_groups:
-            for p, localweight in zip( group["params"], local_weight_updated):
-                p.data = p.data - group["lr"] * (p.grad.data + group["lamda"] * (p.data - localweight.data) + group["mu"]*p.data)
-        return  group["params"], loss
-    
-    def update_param(self, local_weight_updated:Iterable[Parameter], closure:Optional[callable]=None) -> Iterable[Parameter]:
+            for p, localweight in zip(group["params"], local_weight_updated):
+                p.data = p.data - group["lr"] * (
+                    p.grad.data
+                    + group["lamda"] * (p.data - localweight.data)
+                    + group["mu"] * p.data
+                )
+        return group["params"], loss
+
+    def update_param(
+        self,
+        local_weight_updated: Iterable[Parameter],
+        closure: Optional[callable] = None,
+    ) -> Iterable[Parameter]:
         """
 
         Parameters
@@ -107,8 +128,8 @@ class _pFedMeOptimizer(Optimizer):
         for group in self.param_groups:
             for p, localweight in zip(group["params"], local_weight_updated):
                 p.data = localweight.data.clone()
-        #return  p.data
-        return  group["params"]
+        # return  p.data
+        return group["params"]
 
 
 # -----------------------------
@@ -116,16 +137,18 @@ class _pFedMeOptimizer(Optimizer):
 
 
 class FEDLOptimizer(Optimizer):
-    """
-    """
+    """ """
+
     __name__ = "FEDLOptimizer"
 
-    def __init__(self,
-                 params:Iterable[Union[dict,Parameter]],
-                 lr:float=0.01,
-                 server_grads:Optional[Tensor]=None,
-                 pre_grads:Optional[Tensor]=None,
-                 eta:float=0.1) -> NoReturn:
+    def __init__(
+        self,
+        params: Iterable[Union[dict, Parameter]],
+        lr: float = 0.01,
+        server_grads: Optional[Tensor] = None,
+        pre_grads: Optional[Tensor] = None,
+        eta: float = 0.1,
+    ) -> NoReturn:
         """
 
         Parameters
@@ -139,7 +162,7 @@ class FEDLOptimizer(Optimizer):
         defaults = dict(lr=lr, eta=eta)
         super().__init__(params, defaults)
 
-    def step(self, closure:Optional[callable]=None) -> Optional[Tensor]:
+    def step(self, closure: Optional[callable] = None) -> Optional[Tensor]:
         """
 
         Parameters
@@ -158,27 +181,32 @@ class FEDLOptimizer(Optimizer):
         for group in self.param_groups:
             i = 0
             for p in group["params"]:
-                p.data = p.data - group["lr"] * \
-                         (p.grad.data + group["eta"] * self.server_grads[i] - self.pre_grads[i])
+                p.data = p.data - group["lr"] * (
+                    p.grad.data
+                    + group["eta"] * self.server_grads[i]
+                    - self.pre_grads[i]
+                )
                 # p.data.add_(p.grad.data, alpha=-group["lr"])
                 i += 1
         return loss
 
 
 class APFLOptimizer(Optimizer):
-    """
-    """
+    """ """
+
     __name__ = "APFLOptimizer"
 
-    def __init__(self, params:Iterable[Union[dict,Parameter]], lr:float=0.01) -> NoReturn:
-        """
-        """
+    def __init__(
+        self, params: Iterable[Union[dict, Parameter]], lr: float = 0.01
+    ) -> NoReturn:
+        """ """
         defaults = dict(lr=lr)
         super(APFLOptimizer, self).__init__(params, defaults)
 
-    def step(self, closure:Optional[callable]=None, beta:float=1.0, n_k:float=1.0) -> Optional[Tensor]:
-        """
-        """
+    def step(
+        self, closure: Optional[callable] = None, beta: float = 1.0, n_k: float = 1.0
+    ) -> Optional[Tensor]:
+        """ """
         loss = None
         if closure is not None:
             loss = closure()
@@ -188,6 +216,6 @@ class APFLOptimizer(Optimizer):
             for p in group["params"]:
                 if p.grad is None:
                     continue
-                d_p = beta  * n_k * p.grad.data
+                d_p = beta * n_k * p.grad.data
                 p.data.add_(d_p, alpha=-group["lr"])
         return loss

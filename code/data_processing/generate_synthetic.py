@@ -21,55 +21,74 @@ __all__ = [
 
 
 (CACHED_DATA_DIR / "synthetic").mkdir(exist_ok=True)
-_NAME_PATTERN = "synthetic_{alpha}_{beta}_{iid}_{num_clients}_{num_classes}_{dimension}_{seed}.mat"
+_NAME_PATTERN = (
+    "synthetic_{alpha}_{beta}_{iid}_{num_clients}_{num_classes}_{dimension}_{seed}.mat"
+)
 
 
-def generate_synthetic(alpha:float,
-                       beta:float,
-                       iid:bool,
-                       num_clients:int,
-                       num_classes:int=10,
-                       dimension:int=60,
-                       seed:int=0,
-                       train_ratio:float=0.8,
-                       shuffle:bool=True,
-                       recompute:bool=False,) -> List[Dict[str,np.ndarray]]:
-    """
-    """
+def generate_synthetic(
+    alpha: float,
+    beta: float,
+    iid: bool,
+    num_clients: int,
+    num_classes: int = 10,
+    dimension: int = 60,
+    seed: int = 0,
+    train_ratio: float = 0.8,
+    shuffle: bool = True,
+    recompute: bool = False,
+) -> List[Dict[str, np.ndarray]]:
+    """ """
     file = _get_path(alpha, beta, iid, num_clients, num_classes, dimension, seed)
     if recompute or not file.exists():
         data_dict = _generate_synthetic(
-            alpha, beta, iid, num_clients, num_classes, dimension, seed,
+            alpha,
+            beta,
+            iid,
+            num_clients,
+            num_classes,
+            dimension,
+            seed,
         )
         savemat(str(file), data_dict)
     else:
         data_dict = loadmat(str(file))
     split_inds = data_dict["split"]
-    samples_per_client = split_inds[...,1] - split_inds[...,0]
+    samples_per_client = split_inds[..., 1] - split_inds[..., 0]
     if shuffle:
         shuffled_inds = [np.random.permutation(range(n)) for n in samples_per_client]
     else:
         shuffled_inds = [np.arange(n) for n in samples_per_client]
     clients = [
         {
-            "train_X": data_dict["X"][spl_i[0]:spl_i[1]][shf_i][:int(train_ratio * n)],
-            "train_y": data_dict["y"].flatten()[spl_i[0]:spl_i[1]][shf_i][:int(train_ratio * n)],
-            "test_X": data_dict["X"][spl_i[0]:spl_i[1]][shf_i][int(train_ratio * n):],
-            "test_y": data_dict["y"].flatten()[spl_i[0]:spl_i[1]][shf_i][int(train_ratio * n):],
-        } for n, spl_i, shf_i in zip(samples_per_client, split_inds, shuffled_inds)
+            "train_X": data_dict["X"][spl_i[0] : spl_i[1]][shf_i][
+                : int(train_ratio * n)
+            ],
+            "train_y": data_dict["y"].flatten()[spl_i[0] : spl_i[1]][shf_i][
+                : int(train_ratio * n)
+            ],
+            "test_X": data_dict["X"][spl_i[0] : spl_i[1]][shf_i][
+                int(train_ratio * n) :
+            ],
+            "test_y": data_dict["y"].flatten()[spl_i[0] : spl_i[1]][shf_i][
+                int(train_ratio * n) :
+            ],
+        }
+        for n, spl_i, shf_i in zip(samples_per_client, split_inds, shuffled_inds)
     ]
     return clients
 
 
-def _generate_synthetic(alpha:float,
-                        beta:float,
-                        iid:bool,
-                        num_clients:int,
-                        num_classes:int=10,
-                        dimension:int=60,
-                        seed:int=0,) -> Dict[str, np.ndarray]:
-    """
-    """
+def _generate_synthetic(
+    alpha: float,
+    beta: float,
+    iid: bool,
+    num_clients: int,
+    num_classes: int = 10,
+    dimension: int = 60,
+    seed: int = 0,
+) -> Dict[str, np.ndarray]:
+    """ """
     rng = np.random.default_rng(seed)
     samples_per_client = rng.lognormal(4, 2, (num_clients)).astype(int) + 50
     num_samples = np.sum(samples_per_client)
@@ -104,7 +123,9 @@ def _generate_synthetic(alpha:float,
             W = rng.normal(mean_W[i], 1, (dimension, num_classes))
             b = rng.normal(mean_b[i], 1, num_classes)
 
-        xx = rng.multivariate_normal(mean_x[i], cov_x, samples_per_client[i]).astype(np.float32)
+        xx = rng.multivariate_normal(mean_x[i], cov_x, samples_per_client[i]).astype(
+            np.float32
+        )
         yy = np.zeros(samples_per_client[i], dtype=int)
 
         for j in range(samples_per_client[i]):
@@ -127,20 +148,26 @@ def _generate_synthetic(alpha:float,
     return data_dict
 
 
-def _get_path(alpha:float,
-              beta:float,
-              iid:bool,
-              num_clients:int,
-              num_classes:int=10,
-              dimension:int=60,
-              seed:int=0,) -> Path:
-    """
-    """
-    return CACHED_DATA_DIR / "synthetic" / _NAME_PATTERN.format(
-        alpha=alpha, beta=beta,
-        iid=f"iid" if iid else "noniid",
-        num_clients=num_clients,
-        num_classes=num_classes,
-        dimension=dimension,
-        seed=seed,
+def _get_path(
+    alpha: float,
+    beta: float,
+    iid: bool,
+    num_clients: int,
+    num_classes: int = 10,
+    dimension: int = 60,
+    seed: int = 0,
+) -> Path:
+    """ """
+    return (
+        CACHED_DATA_DIR
+        / "synthetic"
+        / _NAME_PATTERN.format(
+            alpha=alpha,
+            beta=beta,
+            iid=f"iid" if iid else "noniid",
+            num_clients=num_clients,
+            num_classes=num_classes,
+            dimension=dimension,
+            seed=seed,
+        )
     )

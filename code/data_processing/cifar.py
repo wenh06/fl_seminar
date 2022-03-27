@@ -17,17 +17,31 @@ from misc import CACHED_DATA_DIR, ReprMixin
 
 
 __all__ = [
-    "CIFAR_truncated", "CIFAR10_truncated", "CIFAR100_truncated",
-    "load_cifar_data", "partition_cifar_data",
+    "CIFAR_truncated",
+    "CIFAR10_truncated",
+    "CIFAR100_truncated",
+    "load_cifar_data",
+    "partition_cifar_data",
 ]
 
 CIFAR_DATA_DIRS = {
-    n_class: (CACHED_DATA_DIR / f"CIFAR{n_class}") for n_class in [10, 100,]
+    n_class: (CACHED_DATA_DIR / f"CIFAR{n_class}")
+    for n_class in [
+        10,
+        100,
+    ]
 }
 CIFAR_NONIID_CACHE_DIRS = {
-    n_class: (CACHED_DATA_DIR / "non-iid-distribution" / f"CIFAR{n_class}") for n_class in [10, 100,]
+    n_class: (CACHED_DATA_DIR / "non-iid-distribution" / f"CIFAR{n_class}")
+    for n_class in [
+        10,
+        100,
+    ]
 }
-for n_class in [10, 100,]:
+for n_class in [
+    10,
+    100,
+]:
     CIFAR_DATA_DIRS[n_class].mkdir(exist_ok=True)
     CIFAR_NONIID_CACHE_DIRS[n_class].mkdir(exist_ok=True)
 
@@ -36,18 +50,20 @@ class CIFAR_truncated(ReprMixin, data.Dataset):
     """
     this class is modified from FedML
     """
+
     __name__ = "CIFAR10_truncated"
 
-    def __init__(self,
-                 n_class:int=10,
-                 root:Optional[Union[str,Path]]=None,
-                 dataidxs:Optional[List[int]]=None,
-                 train:bool=True,
-                 transform:Optional[Callable]=None,
-                 target_transform:Optional[Callable]=None,
-                 download:bool=False) -> NoReturn:
-        """
-        """
+    def __init__(
+        self,
+        n_class: int = 10,
+        root: Optional[Union[str, Path]] = None,
+        dataidxs: Optional[List[int]] = None,
+        train: bool = True,
+        transform: Optional[Callable] = None,
+        target_transform: Optional[Callable] = None,
+        download: bool = False,
+    ) -> NoReturn:
+        """ """
         self.n_class = n_class
         self.root = Path(root or CIFAR_DATA_DIRS[n_class])
         assert self.n_class in [10, 100]
@@ -60,10 +76,11 @@ class CIFAR_truncated(ReprMixin, data.Dataset):
         self.data, self.target = self.__build_truncated_dataset__()
 
     def __build_truncated_dataset__(self) -> Tuple[torch.Tensor, torch.Tensor]:
-        """
-        """
+        """ """
         DS = {10: CIFAR10, 100: CIFAR100}[self.n_class]
-        cifar_dataobj = DS(self.root, self.train, self.transform, self.target_transform, self.download)
+        cifar_dataobj = DS(
+            self.root, self.train, self.transform, self.target_transform, self.download
+        )
 
         data = cifar_dataobj.data
         target = np.array(cifar_dataobj.targets)
@@ -74,15 +91,14 @@ class CIFAR_truncated(ReprMixin, data.Dataset):
 
         return data, target
 
-    def truncate_channel(self, index:np.ndarray) -> NoReturn:
-        """
-        """
+    def truncate_channel(self, index: np.ndarray) -> NoReturn:
+        """ """
         for i in range(index.shape[0]):
             gs_index = index[i]
             self.data[gs_index, :, :, 1] = 0.0
             self.data[gs_index, :, :, 2] = 0.0
 
-    def __getitem__(self, index:int) -> Tuple[torch.Tensor, torch.Tensor]:
+    def __getitem__(self, index: int) -> Tuple[torch.Tensor, torch.Tensor]:
         """
         Args:
             index (int): Index
@@ -104,52 +120,60 @@ class CIFAR_truncated(ReprMixin, data.Dataset):
         return len(self.data)
 
     def extra_repr_keys(self) -> List[str]:
-        """
-        """
-        return super().extra_repr_keys() + ["n_class", "root",]
+        """ """
+        return super().extra_repr_keys() + [
+            "n_class",
+            "root",
+        ]
 
 
 class CIFAR10_truncated(CIFAR_truncated):
-    """
-    """
+    """ """
+
     __name__ = "CIFAR10_truncated"
 
-    def __init__(self,
-                 root:Optional[Union[str,Path]]=None,
-                 dataidxs:Optional[List[int]]=None,
-                 train:bool=True,
-                 transform:Optional[Callable]=None,
-                 target_transform:Optional[Callable]=None,
-                 download:bool=False) -> NoReturn:
-        """
-        """
-        super().__init__(10, root, dataidxs, train, transform, target_transform, download)
+    def __init__(
+        self,
+        root: Optional[Union[str, Path]] = None,
+        dataidxs: Optional[List[int]] = None,
+        train: bool = True,
+        transform: Optional[Callable] = None,
+        target_transform: Optional[Callable] = None,
+        download: bool = False,
+    ) -> NoReturn:
+        """ """
+        super().__init__(
+            10, root, dataidxs, train, transform, target_transform, download
+        )
 
 
 class CIFAR100_truncated(CIFAR_truncated):
-    """
-    """
+    """ """
+
     __name__ = "CIFAR100_truncated"
 
-    def __init__(self,
-                 root:Optional[Union[str,Path]]=None,
-                 dataidxs:Optional[List[int]]=None,
-                 train:bool=True,
-                 transform:Optional[Callable]=None,
-                 target_transform:Optional[Callable]=None,
-                 download:bool=False) -> NoReturn:
-        """
-        """
-        super().__init__(100, root, dataidxs, train, transform, target_transform, download)
+    def __init__(
+        self,
+        root: Optional[Union[str, Path]] = None,
+        dataidxs: Optional[List[int]] = None,
+        train: bool = True,
+        transform: Optional[Callable] = None,
+        target_transform: Optional[Callable] = None,
+        download: bool = False,
+    ) -> NoReturn:
+        """ """
+        super().__init__(
+            100, root, dataidxs, train, transform, target_transform, download
+        )
 
 
 class Cutout(object):
-    """
-    """
-    def __init__(self, length:int) -> NoReturn:
+    """ """
+
+    def __init__(self, length: int) -> NoReturn:
         self.length = length
 
-    def __call__(self, img:torch.Tensor) -> torch.Tensor:
+    def __call__(self, img: torch.Tensor) -> torch.Tensor:
         """
         img of shape [..., H, W]
         """
@@ -163,7 +187,7 @@ class Cutout(object):
         x1 = np.clip(x - self.length // 2, 0, w)
         x2 = np.clip(x + self.length // 2, 0, w)
 
-        mask[y1: y2, x1: x2] = 0.
+        mask[y1:y2, x1:x2] = 0.0
         mask = torch.from_numpy(mask)
         mask = mask.expand_as(img)
         img *= mask
@@ -171,47 +195,61 @@ class Cutout(object):
 
 
 def _data_transforms_cifar() -> Tuple[Callable, Callable]:
-    """
-    """
+    """ """
     CIFAR_MEAN = [0.49139968, 0.48215827, 0.44653124]
     CIFAR_STD = [0.24703233, 0.24348505, 0.26158768]
 
-    train_transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.RandomCrop(32, padding=4),
-        transforms.RandomHorizontalFlip(),
-        transforms.Normalize(CIFAR_MEAN, CIFAR_STD),
-        Cutout(16),
-    ])
+    train_transform = transforms.Compose(
+        [
+            transforms.ToTensor(),
+            transforms.RandomCrop(32, padding=4),
+            transforms.RandomHorizontalFlip(),
+            transforms.Normalize(CIFAR_MEAN, CIFAR_STD),
+            Cutout(16),
+        ]
+    )
 
-    test_transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize(CIFAR_MEAN, CIFAR_STD),
-    ])
+    test_transform = transforms.Compose(
+        [
+            transforms.ToTensor(),
+            transforms.Normalize(CIFAR_MEAN, CIFAR_STD),
+        ]
+    )
 
     return train_transform, test_transform
 
 
-def load_cifar_data(n_class:int, datadir:Optional[Union[str,Path]]=None, to_numpy:bool=False) -> Tuple[Union[np.ndarray,torch.Tensor],...]:
-    """
-    """
+def load_cifar_data(
+    n_class: int, datadir: Optional[Union[str, Path]] = None, to_numpy: bool = False
+) -> Tuple[Union[np.ndarray, torch.Tensor], ...]:
+    """ """
     train_transform, test_transform = _data_transforms_cifar()
 
-    cifar_train_ds = CIFAR_truncated(datadir, n_class, train=True, download=True, transform=train_transform)
-    cifar_test_ds = CIFAR_truncated(datadir, n_class, train=False, download=True, transform=test_transform)
+    cifar_train_ds = CIFAR_truncated(
+        datadir, n_class, train=True, download=True, transform=train_transform
+    )
+    cifar_test_ds = CIFAR_truncated(
+        datadir, n_class, train=False, download=True, transform=test_transform
+    )
 
     X_train, y_train = cifar_train_ds.data, cifar_train_ds.target
     X_test, y_test = cifar_test_ds.data, cifar_test_ds.target
-    
+
     if to_numpy:
-        (X_train.cpu().numpy(), y_train.cpu().numpy(), X_test.cpu().numpy(), y_test.cpu().numpy())
+        (
+            X_train.cpu().numpy(),
+            y_train.cpu().numpy(),
+            X_test.cpu().numpy(),
+            y_test.cpu().numpy(),
+        )
     else:
         return (X_train, y_train, X_test, y_test)
 
 
-def record_net_data_stats(y_train:torch.Tensor, net_dataidx_map:Dict[int,List[int]]) -> Dict[int,int]:
-    """
-    """
+def record_net_data_stats(
+    y_train: torch.Tensor, net_dataidx_map: Dict[int, List[int]]
+) -> Dict[int, int]:
+    """ """
     net_cls_counts = {}
     for net_i, dataidx in net_dataidx_map.items():
         unq, unq_cnt = np.unique(y_train[dataidx].cpu().numpy(), return_counts=True)
@@ -220,14 +258,15 @@ def record_net_data_stats(y_train:torch.Tensor, net_dataidx_map:Dict[int,List[in
     return net_cls_counts
 
 
-def partition_cifar_data(dataset:CIFAR_truncated,
-                         partition:str,
-                         n_net:int,
-                         alpha:float,
-                         to_numpy:bool=False,
-                         datadir:Optional[Union[str,Path]]=None,) -> tuple:
-    """
-    """
+def partition_cifar_data(
+    dataset: CIFAR_truncated,
+    partition: str,
+    n_net: int,
+    alpha: float,
+    to_numpy: bool = False,
+    datadir: Optional[Union[str, Path]] = None,
+) -> tuple:
+    """ """
     n_class = dataset.n_class
     X_train, y_train, X_test, y_test = load_cifar_data(n_class, datadir, to_numpy)
     n_train = X_train.shape[0]
@@ -255,10 +294,18 @@ def partition_cifar_data(dataset:CIFAR_truncated,
                 np.random.shuffle(idx_k)
                 proportions = np.random.dirichlet(np.repeat(alpha, n_net))
                 ## Balance
-                proportions = np.array([p * (len(idx_j) < N / n_net) for p, idx_j in zip(proportions, idx_batch)])
+                proportions = np.array(
+                    [
+                        p * (len(idx_j) < N / n_net)
+                        for p, idx_j in zip(proportions, idx_batch)
+                    ]
+                )
                 proportions = proportions / proportions.sum()
                 proportions = (np.cumsum(proportions) * len(idx_k)).astype(int)[:-1]
-                idx_batch = [idx_j + idx.tolist() for idx_j, idx in zip(idx_batch, np.split(idx_k, proportions))]
+                idx_batch = [
+                    idx_j + idx.tolist()
+                    for idx_j, idx in zip(idx_batch, np.split(idx_k, proportions))
+                ]
                 min_size = min([len(idx_j) for idx_j in idx_batch])
 
         for j in range(n_net):
@@ -266,7 +313,9 @@ def partition_cifar_data(dataset:CIFAR_truncated,
             net_dataidx_map[j] = idx_batch[j]
 
     elif partition == "hetero-fix":
-        dataidx_map_file_path = CIFAR_NONIID_CACHE_DIRS[n_class] / "net_dataidx_map.json"
+        dataidx_map_file_path = (
+            CIFAR_NONIID_CACHE_DIRS[n_class] / "net_dataidx_map.json"
+        )
         with open(dataidx_map_file_path, "r") as f:
             net_dataidx_map = json.load(dataidx_map_file_path)
 
@@ -277,6 +326,8 @@ def partition_cifar_data(dataset:CIFAR_truncated,
     else:
         distribution_file_path = CIFAR_NONIID_CACHE_DIRS[n_class] / "distribution.json"
         with open(distribution_file_path, "w") as f:
-            traindata_cls_counts = json.dump(traindata_cls_counts, distribution_file_path, ensure_ascii=False)
+            traindata_cls_counts = json.dump(
+                traindata_cls_counts, distribution_file_path, ensure_ascii=False
+            )
 
     return X_train, y_train, X_test, y_test, net_dataidx_map, traindata_cls_counts

@@ -15,6 +15,7 @@ from torch.utils.data import DataLoader
 from torch.nn.parameter import Parameter
 from torch.optim import Optimizer, SGD, Adam, AdamW
 from torch.optim.lr_scheduler import LambdaLR, StepLR, OneCycleLR
+
 try:
     from tqdm.auto import tqdm
 except ImportError:
@@ -28,28 +29,31 @@ from algorithms.optimizers import get_optimizer
 
 
 __all__ = [
-    "Server", "Client",
-    "ServerConfig", "ClientConfig",
+    "Server",
+    "Client",
+    "ServerConfig",
+    "ClientConfig",
     "ClientMessage",
 ]
 
 
 class ServerConfig(ReprMixin):
-    """
-    """
+    """ """
+
     __name__ = "ServerConfig"
 
-    def __init__(self,
-                 algorithm:str,
-                 num_iters:int,
-                 num_clients:int,
-                 clients_sample_ratio:float,
-                 txt_logger:bool=True,
-                 csv_logger:bool=True,
-                 eval_every:int=1,
-                 **kwargs:Any) -> NoReturn:
-        """
-        """
+    def __init__(
+        self,
+        algorithm: str,
+        num_iters: int,
+        num_clients: int,
+        clients_sample_ratio: float,
+        txt_logger: bool = True,
+        csv_logger: bool = True,
+        eval_every: int = 1,
+        **kwargs: Any,
+    ) -> NoReturn:
+        """ """
         self.algorithm = algorithm
         self.num_iters = num_iters
         self.num_clients = num_clients
@@ -61,25 +65,25 @@ class ServerConfig(ReprMixin):
             setattr(self, k, v)
 
     def extra_repr_keys(self) -> List[str]:
-        """
-        """
+        """ """
         return super().extra_repr_keys() + list(self.__dict__)
 
 
 class ClientConfig(ReprMixin):
-    """
-    """
+    """ """
+
     __name__ = "ClientConfig"
 
-    def __init__(self,
-                 algorithm:str,
-                 optimizer:str,
-                 batch_size:int,
-                 num_epochs:int,
-                 lr:float,
-                 **kwargs:Any) -> NoReturn:
-        """
-        """
+    def __init__(
+        self,
+        algorithm: str,
+        optimizer: str,
+        batch_size: int,
+        num_epochs: int,
+        lr: float,
+        **kwargs: Any,
+    ) -> NoReturn:
+        """ """
         self.algorithm = algorithm
         self.optimizer = optimizer
         self.batch_size = batch_size
@@ -89,18 +93,17 @@ class ClientConfig(ReprMixin):
             setattr(self, k, v)
 
     def extra_repr_keys(self) -> List[str]:
-        """
-        """
+        """ """
         return super().extra_repr_keys() + list(self.__dict__)
 
 
 class Node(ReprMixin, ABC):
-    """
-    """
+    """ """
+
     __name__ = "Node"
 
     @abstractmethod
-    def communicate(self, target:"Node") -> NoReturn:
+    def communicate(self, target: "Node") -> NoReturn:
         """
         communicate model parameters, gradients, etc. to `target` node
         for example, for a client node, communicate model parameters to server node via
@@ -136,23 +139,23 @@ class Node(ReprMixin, ABC):
     @property
     @abstractmethod
     def required_config_fields(self) -> List[str]:
-        """
-        """
+        """ """
         raise NotImplementedError
 
 
 class Server(Node):
-    """
-    """
+    """ """
+
     __name__ = "Server"
 
-    def __init__(self,
-                 model:nn.Module,
-                 dataset:FedDataset,
-                 config:ServerConfig,
-                 client_config:ClientConfig,) -> NoReturn:
-        """
-        """
+    def __init__(
+        self,
+        model: nn.Module,
+        dataset: FedDataset,
+        config: ServerConfig,
+        client_config: ClientConfig,
+    ) -> NoReturn:
+        """ """
         self.model = model
         self.dataset = dataset
         self.criterion = deepcopy(dataset.criterion)
@@ -179,14 +182,20 @@ class Server(Node):
 
         self._post_init()
 
-    def _setup_clients(self, dataset:FedDataset, client_config:ClientConfig) -> List[Node]:
+    def _setup_clients(
+        self, dataset: FedDataset, client_config: ClientConfig
+    ) -> List[Node]:
         """
         setup clients
         """
         print(f"setup clients...")
         return [
-            self.client_cls(client_id, device, deepcopy(self.model), dataset, client_config) \
-                for client_id, device in zip(range(self.config.num_clients), self._allocate_devices())
+            self.client_cls(
+                client_id, device, deepcopy(self.model), dataset, client_config
+            )
+            for client_id, device in zip(
+                range(self.config.num_clients), self._allocate_devices()
+            )
         ]
 
     def _allocate_devices(self) -> List[torch.device]:
@@ -197,7 +206,9 @@ class Server(Node):
         num_gpus = torch.cuda.device_count()
         if num_gpus == 0:
             return list(repeat(torch.device("cpu"), self.config.num_clients))
-        return [torch.device(f"cuda:{i%num_gpus}") for i in range(self.config.num_clients)]
+        return [
+            torch.device(f"cuda:{i%num_gpus}") for i in range(self.config.num_clients)
+        ]
 
     def _sample_clients(self) -> List[int]:
         """
@@ -206,28 +217,30 @@ class Server(Node):
         k = int(self.config.num_clients * self.config.clients_sample_ratio)
         return random.sample(range(self.config.num_clients), k)
 
-    def _communicate(self, target:"Client") -> NoReturn:
-        """ broadcast to target client, and maintain state variables
-        """
+    def _communicate(self, target: "Client") -> NoReturn:
+        """broadcast to target client, and maintain state variables"""
         self.communicate(target)
         self._num_communications += 1
 
     def _update(self) -> NoReturn:
-        """ server update, and clear cached messages from clients of the previous iteration
-        """
+        """server update, and clear cached messages from clients of the previous iteration"""
         self._logger_manager.log_message("Server update...")
         if len(self._received_messages) == 0:
-            warnings.warn("No message received from the clients, unable to update server model")
+            warnings.warn(
+                "No message received from the clients, unable to update server model"
+            )
             return
-        assert all([isinstance(m, ClientMessage) for m in self._received_messages]), \
-            "received messages must be of type `ClientMessage`"
+        assert all(
+            [isinstance(m, ClientMessage) for m in self._received_messages]
+        ), "received messages must be of type `ClientMessage`"
         self.update()
         self._received_messages = []
         self._logger_manager.log_message("Server update finished...")
 
-    def train(self, mode:str="federated", extra_configs:Optional[dict]=None) -> NoReturn:
-        """
-        """
+    def train(
+        self, mode: str = "federated", extra_configs: Optional[dict] = None
+    ) -> NoReturn:
+        """ """
         if mode == "federated":
             self.train_federated(extra_configs)
         elif mode == "centralized":
@@ -235,17 +248,15 @@ class Server(Node):
         else:
             raise ValueError(f"mode {mode} is not supported")
 
-    def train_centralized(self, extra_configs:Optional[dict]=None) -> NoReturn:
-        """
-        """
+    def train_centralized(self, extra_configs: Optional[dict] = None) -> NoReturn:
+        """ """
         self._logger_manager.log_message("Training centralized...")
         extra_configs = ED(extra_configs or {})
 
         batch_size = extra_configs.get("batch_size", self.config.batch_size)
-        train_loader, val_loader = \
-            self.dataset.get_dataloader(
-                batch_size, batch_size, None
-            )
+        train_loader, val_loader = self.dataset.get_dataloader(
+            batch_size, batch_size, None
+        )
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.model.train()
         self.model.to(device)
@@ -253,7 +264,9 @@ class Server(Node):
         criterion = deepcopy(self.dataset.criterion)
         lr = extra_configs.get("lr", 1e-2)
         optimizer = extra_configs.get("optimizer", SGD(self.model.parameters(), lr))
-        scheduler = extra_configs.get("scheduler", LambdaLR(optimizer, lambda epoch: 1 / (epoch + 1)))
+        scheduler = extra_configs.get(
+            "scheduler", LambdaLR(optimizer, lambda epoch: 1 / (epoch + 1))
+        )
 
         epoch_losses = []
         self.n_iter, global_step = 0, 0
@@ -274,28 +287,38 @@ class Server(Node):
                     batch_losses.append(loss.item())
                     optimizer.step()
                     global_step += 1
-                    pbar.set_postfix(**{
-                        "loss (batch)": loss.item(),
-                        "lr": scheduler.get_last_lr()[0],
-                    })
+                    pbar.set_postfix(
+                        **{
+                            "loss (batch)": loss.item(),
+                            "lr": scheduler.get_last_lr()[0],
+                        }
+                    )
                     pbar.update(data.shape[0])
                 epoch_loss.append(sum(batch_losses) / len(batch_losses))
                 if (self.n_iter + 1) % self.config.eval_every == 0:
                     print("evaluating...")
                     metrics = self.evaluate_centralized(val_loader)
                     self._logger_manager.log_metrics(
-                        None, metrics, step=global_step, epoch=self.n_iter+1, part="val",
+                        None,
+                        metrics,
+                        step=global_step,
+                        epoch=self.n_iter + 1,
+                        part="val",
                     )
                     metrics = self.evaluate_centralized(train_loader)
                     self._logger_manager.log_metrics(
-                        None, metrics, step=global_step, epoch=self.n_iter+1, part="train",
+                        None,
+                        metrics,
+                        step=global_step,
+                        epoch=self.n_iter + 1,
+                        part="train",
                     )
                 scheduler.step()
 
         self.model.to(self.device)  # move to the original device
         self._logger_manager.log_message("Centralized training finished...")
 
-    def train_federated(self, extra_configs:Optional[dict]=None) -> NoReturn:
+    def train_federated(self, extra_configs: Optional[dict] = None) -> NoReturn:
         """
         TODO: run clients in parallel
         """
@@ -319,8 +342,10 @@ class Server(Node):
                             metrics = client.evaluate(part)
                             # print(f"metrics: {metrics}")
                             self._logger_manager.log_metrics(
-                                client_id, metrics,
-                                step=self.n_iter+1, epoch=self.n_iter+1,
+                                client_id,
+                                metrics,
+                                step=self.n_iter + 1,
+                                epoch=self.n_iter + 1,
                                 part=part,
                             )
                     client._communicate(self)
@@ -330,9 +355,8 @@ class Server(Node):
                 self._update()
         self._logger_manager.log_message("Federated training finished...")
 
-    def evaluate_centralized(self, dataloader:DataLoader) -> Dict[str, float]:
-        """
-        """
+    def evaluate_centralized(self, dataloader: DataLoader) -> Dict[str, float]:
+        """ """
         metrics = []
         for (X, y) in dataloader:
             X, y = X.to(self.model.device), y.to(self.model.device)
@@ -340,13 +364,15 @@ class Server(Node):
             metrics.append(self.dataset.evaluate(probs, y))
         num_samples = sum([m["num_samples"] for m in metrics])
         metrics_names = [k for k in metrics[0] if k != "num_samples"]
-        metrics = {k: sum([m[k] * m["num_samples"] for m in metrics]) / num_samples for k in metrics_names}
+        metrics = {
+            k: sum([m[k] * m["num_samples"] for m in metrics]) / num_samples
+            for k in metrics_names
+        }
         metrics["num_samples"] = num_samples
         return metrics
 
     def aggregate_client_metrics(self) -> NoReturn:
-        """
-        """
+        """ """
         if not any(["metrics" in m for m in self._received_messages]):
             raise ValueError("no metrics received from clients")
         for part in self.dataset.data_parts:
@@ -356,48 +382,57 @@ class Server(Node):
                     continue
                 for k, v in m["metrics"][part].items():
                     if k != "num_samples":
-                        metrics[k] += m["metrics"][part][k] * m["metrics"][part]["num_samples"]
+                        metrics[k] += (
+                            m["metrics"][part][k] * m["metrics"][part]["num_samples"]
+                        )
                     else:
                         metrics[k] += m["metrics"][part][k]
             for k in metrics:
                 if k != "num_samples":
                     metrics[k] /= metrics["num_samples"]
             self._logger_manager.log_metrics(
-                None, dict(metrics), step=self.n_iter+1, epoch=self.n_iter+1, part=part,
+                None,
+                dict(metrics),
+                step=self.n_iter + 1,
+                epoch=self.n_iter + 1,
+                part=part,
             )
 
-    def add_parameters(self, params:Iterable[Parameter], ratio:float) -> NoReturn:
-        """
-        """
+    def add_parameters(self, params: Iterable[Parameter], ratio: float) -> NoReturn:
+        """ """
         for server_param, param in zip(self.model.parameters(), params):
-            server_param.data.add_(param.data.detach().clone().to(self.device), alpha=ratio)
+            server_param.data.add_(
+                param.data.detach().clone().to(self.device), alpha=ratio
+            )
 
     def extra_repr_keys(self) -> List[str]:
-        """
-        """
-        return super().extra_repr_keys() + ["config", "client_config",]
+        """ """
+        return super().extra_repr_keys() + [
+            "config",
+            "client_config",
+        ]
 
     @property
     @abstractmethod
     def client_cls(self) -> "Client":
-        """
-        """
+        """ """
         raise NotImplementedError
 
 
 class Client(Node):
-    """
-    """
+    """ """
+
     __name__ = "Client"
 
-    def __init__(self,
-                 client_id:int,
-                 device:torch.device,
-                 model:nn.Module,
-                 dataset:FedDataset,
-                 config:ClientConfig,) -> NoReturn:
-        """
-        """
+    def __init__(
+        self,
+        client_id: int,
+        device: torch.device,
+        model: nn.Module,
+        dataset: FedDataset,
+        config: ClientConfig,
+    ) -> NoReturn:
+        """ """
         self.client_id = client_id
         self.device = device
         self.model = model
@@ -407,10 +442,13 @@ class Client(Node):
         self.config = config
 
         self.optimizer = get_optimizer(
-            optimizer_name=config.optimizer, params=self.model.parameters(), config=config
+            optimizer_name=config.optimizer,
+            params=self.model.parameters(),
+            config=config,
         )
-        self.train_loader, self.val_loader = \
-            self.dataset.get_dataloader(self.config.batch_size, self.config.batch_size, self.client_id)
+        self.train_loader, self.val_loader = self.dataset.get_dataloader(
+            self.config.batch_size, self.config.batch_size, self.client_id
+        )
 
         self._cached_parameters = None
         self._received_messages = {}
@@ -418,16 +456,14 @@ class Client(Node):
 
         self._post_init()
 
-    def _communicate(self, target:"Server") -> NoReturn:
-        """ send messages to the server, and maintain state variables
-        """
+    def _communicate(self, target: "Server") -> NoReturn:
+        """send messages to the server, and maintain state variables"""
         self.communicate(target)
         target._num_communications += 1
         self._metrics = {}
 
     def _update(self) -> NoReturn:
-        """ client update, and clear cached messages from the server of the previous iteration
-        """
+        """client update, and clear cached messages from the server of the previous iteration"""
         self.update()
         self._received_messages = {}
 
@@ -468,9 +504,8 @@ class Client(Node):
         return next(iter(self.train_loader))
 
     @torch.no_grad()
-    def evaluate(self, part:str) -> Dict[str, float]:
-        """
-        """
+    def evaluate(self, part: str) -> Dict[str, float]:
+        """ """
         assert part in self.dataset.data_parts, "Invalid part name"
         self.model.eval()
         _metrics = []
@@ -479,26 +514,28 @@ class Client(Node):
             X, y = X.to(self.device), y.to(self.device)
             logits = self.model(X)
             _metrics.append(self.dataset.evaluate(logits, y))
-        self._metrics[part] = {"num_samples": sum([m["num_samples"] for m in _metrics]),}
+        self._metrics[part] = {
+            "num_samples": sum([m["num_samples"] for m in _metrics]),
+        }
         for k in _metrics[0]:
             if k != "num_samples":  # average over all metrics
-                self._metrics[part][k] = sum([m[k] * m["num_samples"] for m in _metrics]) / self._metrics[part]["num_samples"]
+                self._metrics[part][k] = (
+                    sum([m[k] * m["num_samples"] for m in _metrics])
+                    / self._metrics[part]["num_samples"]
+                )
         return self._metrics[part]
 
     def get_parameters(self) -> Iterable[Parameter]:
-        """
-        """
+        """ """
         return self.model.parameters()
 
-    def set_parameters(self, params:Iterable[Parameter]) -> NoReturn:
-        """
-        """
+    def set_parameters(self, params: Iterable[Parameter]) -> NoReturn:
+        """ """
         for client_param, param in zip(self.model.parameters(), params):
             client_param.data = param.data.detach().clone().to(self.device)
 
     def get_gradients(self) -> List[Tensor]:
-        """
-        """
+        """ """
         grads = []
         for param in self.model.parameters():
             if param.grad is None:
@@ -508,23 +545,24 @@ class Client(Node):
         return grads
 
     def extra_repr_keys(self) -> List[str]:
-        """
-        """
-        return super().extra_repr_keys() + ["client_id", "config",]
+        """ """
+        return super().extra_repr_keys() + [
+            "client_id",
+            "config",
+        ]
 
 
 class ClientMessage(dict):
     """
     a class used to specify required fields for a message from client to server
     """
+
     __name__ = "ClientMessage"
 
-    def __init__(self, client_id:int, train_samples:int, metrics:dict, **kwargs) -> NoReturn:
-        """
-        """
+    def __init__(
+        self, client_id: int, train_samples: int, metrics: dict, **kwargs
+    ) -> NoReturn:
+        """ """
         super().__init__(
-            client_id=client_id,
-            train_samples=train_samples,
-            metrics=metrics,
-            **kwargs
+            client_id=client_id, train_samples=train_samples, metrics=metrics, **kwargs
         )
