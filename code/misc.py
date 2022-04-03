@@ -11,6 +11,9 @@ __all__ = [
     "BUILTIN_DATA_DIR",
     "CACHED_DATA_DIR",
     "LOG_DIR",
+    "SEED",
+    "RNG",
+    "set_seed",
     "default_class_repr",
     "ReprMixin",
     "isclass",
@@ -29,6 +32,26 @@ LOG_DIR = PROJECT_DIR / ".logs"
 
 CACHED_DATA_DIR.mkdir(exist_ok=True)
 LOG_DIR.mkdir(exist_ok=True)
+
+
+SEED = 42
+RNG = np.random.default_rng(seed=SEED)
+
+
+def set_seed(seed: int) -> NoReturn:
+    """
+    set the seed of the random number generator
+
+    Parameters
+    ----------
+    seed: int,
+        the seed to be set
+
+    """
+
+    global RNG, SEED
+    SEED = seed
+    RNG = np.random.default_rng(seed=seed)
 
 
 def default_class_repr(c: object, align: str = "center", depth: int = 1) -> str:
