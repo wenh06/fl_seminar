@@ -1,4 +1,8 @@
 # fl_seminar
+
+![docker-ci](https://github.com/wenh06/fl_seminar/actions/workflows/docker-image.yml/badge.svg)
+![format_check](https://github.com/wenh06/fl_seminar/actions/workflows/check-formatting.yml/badge.svg)
+
 federated seminar held at BUAA
 
 <!-- toc -->
