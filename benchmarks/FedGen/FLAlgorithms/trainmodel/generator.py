@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
 MAXLOG = 0.1
 from torch.autograd import Variable
 import collections
@@ -9,26 +10,38 @@ from utils.model_config import GENERATORCONFIGS
 
 
 class Generator(nn.Module):
-    def __init__(self, dataset='mnist', model='cnn', embedding=False, latent_layer_idx=-1):
+    def __init__(
+        self, dataset="mnist", model="cnn", embedding=False, latent_layer_idx=-1
+    ):
         super(Generator, self).__init__()
         print("Dataset {}".format(dataset))
         self.embedding = embedding
         self.dataset = dataset
-        #self.model=model
+        # self.model=model
         self.latent_layer_idx = latent_layer_idx
-        self.hidden_dim, self.latent_dim, self.input_channel, self.n_class, self.noise_dim = GENERATORCONFIGS[dataset]
-        input_dim = self.noise_dim * 2 if self.embedding else self.noise_dim + self.n_class
+        (
+            self.hidden_dim,
+            self.latent_dim,
+            self.input_channel,
+            self.n_class,
+            self.noise_dim,
+        ) = GENERATORCONFIGS[dataset]
+        input_dim = (
+            self.noise_dim * 2 if self.embedding else self.noise_dim + self.n_class
+        )
         self.fc_configs = [input_dim, self.hidden_dim]
         self.init_loss_fn()
         self.build_network()
 
     def get_number_of_parameters(self):
-        pytorch_total_params=sum(p.numel() for p in self.parameters() if p.requires_grad)
+        pytorch_total_params = sum(
+            p.numel() for p in self.parameters() if p.requires_grad
+        )
         return pytorch_total_params
 
     def init_loss_fn(self):
-        self.crossentropy_loss=nn.NLLLoss(reduce=False) # same as above
-        self.diversity_loss = DiversityLoss(metric='l1')
+        self.crossentropy_loss = nn.NLLLoss(reduce=False)  # same as above
+        self.diversity_loss = DiversityLoss(metric="l1")
         self.dist_loss = nn.MSELoss()
 
     def build_network(self):
@@ -60,22 +73,22 @@ class Generator(nn.Module):
         """
         result = {}
         batch_size = labels.shape[0]
-        eps = torch.rand((batch_size, self.noise_dim)) # sampling from Gaussian
+        eps = torch.rand((batch_size, self.noise_dim))  # sampling from Gaussian
         if verbose:
-            result['eps'] = eps
-        if self.embedding: # embedded dense vector
+            result["eps"] = eps
+        if self.embedding:  # embedded dense vector
             y_input = self.embedding_layer(labels)
-        else: # one-hot (sparse) vector
+        else:  # one-hot (sparse) vector
             y_input = torch.FloatTensor(batch_size, self.n_class)
             y_input.zero_()
-            #labels = labels.view
-            y_input.scatter_(1, labels.view(-1,1), 1)
+            # labels = labels.view
+            y_input.scatter_(1, labels.view(-1, 1), 1)
         z = torch.cat((eps, y_input), dim=1)
         ### FC layers
         for layer in self.fc_layers:
             z = layer(z)
         z = self.representation_layer(z)
-        result['output'] = z
+        result["output"] = z
         return result
 
     @staticmethod
@@ -84,9 +97,14 @@ class Generator(nn.Module):
         Normalize images into zero-mean and unit-variance.
         """
         mean = layer.mean(dim=(2, 3), keepdim=True)
-        std = layer.view((layer.size(0), layer.size(1), -1)) \
-            .std(dim=2, keepdim=True).unsqueeze(3)
+        std = (
+            layer.view((layer.size(0), layer.size(1), -1))
+            .std(dim=2, keepdim=True)
+            .unsqueeze(3)
+        )
         return (layer - mean) / std
+
+
 #
 # class Decoder(nn.Module):
 #     """
@@ -127,6 +145,7 @@ class Generator(nn.Module):
 #         out = self.layers(out)
 #         return out
 
+
 class DivLoss(nn.Module):
     """
     Diversity loss for improving the performance.
@@ -147,12 +166,11 @@ class DivLoss(nn.Module):
         chunk_size = layer.size(0) // 2
 
         ####### diversity loss ########
-        eps1, eps2=torch.split(noises, chunk_size, dim=0)
-        chunk1, chunk2=torch.split(layer, chunk_size, dim=0)
-        lz=torch.mean(torch.abs(chunk1 - chunk2)) / torch.mean(
-            torch.abs(eps1 - eps2))
-        eps=1 * 1e-5
-        diversity_loss=1 / (lz + eps)
+        eps1, eps2 = torch.split(noises, chunk_size, dim=0)
+        chunk1, chunk2 = torch.split(layer, chunk_size, dim=0)
+        lz = torch.mean(torch.abs(chunk1 - chunk2)) / torch.mean(torch.abs(eps1 - eps2))
+        eps = 1 * 1e-5
+        diversity_loss = 1 / (lz + eps)
         return diversity_loss
 
     def forward(self, noises, layer):
@@ -160,17 +178,17 @@ class DivLoss(nn.Module):
         Forward propagation.
         """
         if len(layer.shape) > 2:
-            layer=layer.view((layer.size(0), -1))
-        chunk_size=layer.size(0) // 2
+            layer = layer.view((layer.size(0), -1))
+        chunk_size = layer.size(0) // 2
 
         ####### diversity loss ########
-        eps1, eps2=torch.split(noises, chunk_size, dim=0)
-        chunk1, chunk2=torch.split(layer, chunk_size, dim=0)
-        lz=torch.mean(torch.abs(chunk1 - chunk2)) / torch.mean(
-            torch.abs(eps1 - eps2))
-        eps=1 * 1e-5
-        diversity_loss=1 / (lz + eps)
+        eps1, eps2 = torch.split(noises, chunk_size, dim=0)
+        chunk1, chunk2 = torch.split(layer, chunk_size, dim=0)
+        lz = torch.mean(torch.abs(chunk1 - chunk2)) / torch.mean(torch.abs(eps1 - eps2))
+        eps = 1 * 1e-5
+        diversity_loss = 1 / (lz + eps)
         return diversity_loss
+
 
 class DiversityLoss(nn.Module):
     """
@@ -189,11 +207,11 @@ class DiversityLoss(nn.Module):
         """
         Compute the distance between two tensors.
         """
-        if metric == 'l1':
+        if metric == "l1":
             return torch.abs(tensor1 - tensor2).mean(dim=(2,))
-        elif metric == 'l2':
+        elif metric == "l2":
             return torch.pow(tensor1 - tensor2, 2).mean(dim=(2,))
-        elif metric == 'cosine':
+        elif metric == "cosine":
             return 1 - self.cosine(tensor1, tensor2)
         else:
             raise ValueError(metric)
@@ -214,5 +232,5 @@ class DiversityLoss(nn.Module):
         if len(layer.shape) > 2:
             layer = layer.view((layer.size(0), -1))
         layer_dist = self.pairwise_distance(layer, how=self.metric)
-        noise_dist = self.pairwise_distance(noises, how='l2')
+        noise_dist = self.pairwise_distance(noises, how="l2")
         return torch.exp(torch.mean(-noise_dist * layer_dist))

@@ -1,14 +1,12 @@
 """
 """
 
-from pathlib import Path
-from typing import NoReturn, Optional, Union, List, Callable, Tuple, Dict, Sequence
+from typing import NoReturn, Optional, List, Tuple, Dict
 
 import numpy as np
-import torch
+import torch  # noqa: F401
 import torch.utils.data as data
 
-from misc import CACHED_DATA_DIR
 from models import nn as mnn
 from models.utils import top_n_accuracy
 from .fed_dataset import FedDataset

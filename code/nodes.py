@@ -1,20 +1,21 @@
 """
 """
 
-import random, warnings
+import random
+import warnings
 from abc import ABC, abstractmethod
 from itertools import repeat
 from copy import deepcopy
 from collections import defaultdict
-from typing import Any, Optional, NoReturn, Iterable, List, Sequence, Tuple, Dict
+from typing import Any, Optional, NoReturn, Iterable, List, Tuple, Dict
 
-import torch
+import torch  # noqa: F401
 import torch.nn as nn
 from torch import Tensor
 from torch.utils.data import DataLoader
 from torch.nn.parameter import Parameter
-from torch.optim import Optimizer, SGD, Adam, AdamW
-from torch.optim.lr_scheduler import LambdaLR, StepLR, OneCycleLR
+from torch.optim import Optimizer, SGD, Adam, AdamW  # noqa: F401
+from torch.optim.lr_scheduler import LambdaLR, StepLR, OneCycleLR  # noqa: F401
 
 try:
     from tqdm.auto import tqdm
@@ -188,7 +189,7 @@ class Server(Node):
         """
         setup clients
         """
-        print(f"setup clients...")
+        print("setup clients...")
         return [
             self.client_cls(
                 client_id, device, deepcopy(self.model), dataset, client_config
@@ -202,7 +203,7 @@ class Server(Node):
         """
         allocate devices for clients, can be used in `_setup_clients`
         """
-        print(f"allocate devices...")
+        print("allocate devices...")
         num_gpus = torch.cuda.device_count()
         if num_gpus == 0:
             return list(repeat(torch.device("cpu"), self.config.num_clients))

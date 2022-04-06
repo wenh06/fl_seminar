@@ -14,21 +14,26 @@ from .update import DatasetSplit
 
 
 def get_dataset(args):
-    """ Returns train and test datasets and a user group which is a dict where
+    """Returns train and test datasets and a user group which is a dict where
     the keys are the user index and the values are the corresponding data for
     each of those users.
     """
-    if args.dataset == 'cifar':
-        data_dir = '../data/cifar/'
+    if args.dataset == "cifar":
+        data_dir = "../data/cifar/"
         apply_transform = transforms.Compose(
-            [transforms.ToTensor(),
-             transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+            [
+                transforms.ToTensor(),
+                transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5)),
+            ]
+        )
 
-        train_dataset = datasets.MNIST(data_dir, train=True, download=True,
-                                       transform=apply_transform)
+        train_dataset = datasets.MNIST(
+            data_dir, train=True, download=True, transform=apply_transform
+        )
 
-        test_dataset = datasets.MNIST(data_dir, train=False, download=True,
-                                      transform=apply_transform)
+        test_dataset = datasets.MNIST(
+            data_dir, train=False, download=True, transform=apply_transform
+        )
 
         # sample training data amongst users
         if args.iid:
@@ -43,21 +48,23 @@ def get_dataset(args):
                 # Chose euqal splits for every user
                 user_groups = cifar_noniid(train_dataset, args.num_users)
 
-    elif args.dataset == 'mnist' or args.dataset == 'fmnist':
-        if args.dataset == 'mnist':
-            data_dir = '../data/mnist/'
+    elif args.dataset == "mnist" or args.dataset == "fmnist":
+        if args.dataset == "mnist":
+            data_dir = "../data/mnist/"
         else:
-            data_dir = '../data/fmnist/'
+            data_dir = "../data/fmnist/"
 
-        apply_transform = transforms.Compose([
-            transforms.ToTensor(),
-            transforms.Normalize((0.1307,), (0.3081,))])
+        apply_transform = transforms.Compose(
+            [transforms.ToTensor(), transforms.Normalize((0.1307,), (0.3081,))]
+        )
 
-        train_dataset = datasets.MNIST(data_dir, train=True, download=True,
-                                       transform=apply_transform)
+        train_dataset = datasets.MNIST(
+            data_dir, train=True, download=True, transform=apply_transform
+        )
 
-        test_dataset = datasets.MNIST(data_dir, train=False, download=True,
-                                      transform=apply_transform)
+        test_dataset = datasets.MNIST(
+            data_dir, train=False, download=True, transform=apply_transform
+        )
 
         # sample training data amongst users
         if args.iid:
@@ -71,10 +78,12 @@ def get_dataset(args):
             else:
                 # Chose euqal splits for every user
                 user_groups = mnist_noniid(train_dataset, args.num_users)
-    elif args.dataset == 'femnist':
-        data_dir = '../data/femnist/'
-        print('using femnist')
-        train_dataset, test_dataset, user_groups = read_data(data_dir + '/train', data_dir + '/test', args.num_users)
+    elif args.dataset == "femnist":
+        data_dir = "../data/femnist/"
+        print("using femnist")
+        train_dataset, test_dataset, user_groups = read_data(
+            data_dir + "/train", data_dir + "/test", args.num_users
+        )
 
     return train_dataset, test_dataset, user_groups
 
@@ -82,18 +91,18 @@ def get_dataset(args):
 def read_dir(data_dir):
     clients = []
     groups = []
-    data = defaultdict(lambda : None)
+    data = defaultdict(lambda: None)
 
     files = os.listdir(data_dir)
-    files = [f for f in files if f.endswith('.json')]
+    files = [f for f in files if f.endswith(".json")]
     for f in files:
-        file_path = os.path.join(data_dir,f)
-        with open(file_path, 'r') as inf:
+        file_path = os.path.join(data_dir, f)
+        with open(file_path, "r") as inf:
             cdata = json.load(inf)
-        clients.extend(cdata['users'])
-        if 'hierarchies' in cdata:
-            groups.extend(cdata['hierarchies'])
-        data.update(cdata['user_data'])
+        clients.extend(cdata["users"])
+        if "hierarchies" in cdata:
+            groups.extend(cdata["hierarchies"])
+        data.update(cdata["user_data"])
 
     clients = list(sorted(data.keys()))
     return clients, groups, data
@@ -115,23 +124,46 @@ def read_data(train_data_dir, test_data_dir, num_users):
 
     i = 0
     for user in train_clients:
-        length_train = len(train_data[user]['x'])
-        length_test = len(test_data[user]['x'])
-        dict_users[i%num_users] = np.concatenate((dict_users[i%num_users], np.arange(train_size,train_size+length_train)), axis=0)
+        length_train = len(train_data[user]["x"])
+        length_test = len(test_data[user]["x"])
+        dict_users[i % num_users] = np.concatenate(
+            (
+                dict_users[i % num_users],
+                np.arange(train_size, train_size + length_train),
+            ),
+            axis=0,
+        )
 
-        train_data_new.extend([[np.array(x,dtype=np.float).reshape([1,28,28]),np.array(y,dtype=np.int64)] for x,y in zip(train_data[user]['x'],train_data[user]['y'])])
-        test_data_new.extend([[np.array(x,dtype=np.float).reshape([1,28,28]),np.array(y,dtype=np.int64)] for x,y in zip(test_data[user]['x'],test_data[user]['y'])])
-        
+        train_data_new.extend(
+            [
+                [
+                    np.array(x, dtype=np.float).reshape([1, 28, 28]),
+                    np.array(y, dtype=np.int64),
+                ]
+                for x, y in zip(train_data[user]["x"], train_data[user]["y"])
+            ]
+        )
+        test_data_new.extend(
+            [
+                [
+                    np.array(x, dtype=np.float).reshape([1, 28, 28]),
+                    np.array(y, dtype=np.int64),
+                ]
+                for x, y in zip(test_data[user]["x"], test_data[user]["y"])
+            ]
+        )
+
         train_size = train_size + length_train
         test_size = test_size + length_test
-        i = i+1
-    
+        i = i + 1
+
     idxs_train = np.arange(train_size)
     train_data = DatasetSplit(train_data_new, idxs_train)
     idxs_test = np.arange(test_size)
     test_data = DatasetSplit(test_data_new, idxs_test)
 
     return train_data, test_data, dict_users
+
 
 def average_weights(w):
     """
@@ -146,18 +178,18 @@ def average_weights(w):
 
 
 def exp_details(args):
-    print('\nExperimental details:')
-    print(f'    Model     : {args.model}')
-    print(f'    Optimizer : {args.optimizer}')
-    print(f'    Learning  : {args.lr}')
-    print(f'    Global Rounds   : {args.epochs}\n')
+    print("\nExperimental details:")
+    print(f"    Model     : {args.model}")
+    print(f"    Optimizer : {args.optimizer}")
+    print(f"    Learning  : {args.lr}")
+    print(f"    Global Rounds   : {args.epochs}\n")
 
-    print('    Federated parameters:')
+    print("    Federated parameters:")
     if args.iid:
-        print('    IID')
+        print("    IID")
     else:
-        print('    Non-IID')
-    print(f'    Fraction of users  : {args.frac}')
-    print(f'    Local Batch size   : {args.local_bs}')
-    print(f'    Local Epochs       : {args.local_ep}\n')
+        print("    Non-IID")
+    print(f"    Fraction of users  : {args.frac}")
+    print(f"    Local Batch size   : {args.local_bs}")
+    print(f"    Local Epochs       : {args.local_ep}\n")
     return

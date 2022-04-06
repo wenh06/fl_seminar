@@ -1,5 +1,3 @@
-
-
 import os
 import copy
 import time
@@ -9,6 +7,7 @@ from tqdm import tqdm
 
 import torch
 from torch import nn
+
 # from tensorboardX import SummaryWriter
 
 from .options import args_parser
@@ -18,11 +17,11 @@ from .utils import get_dataset, average_weights, exp_details
 from .agent import Agent
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     start_time = time.time()
 
     # define paths
-    path_project = os.path.abspath('.')
+    path_project = os.path.abspath(".")
     # logger = SummaryWriter('../logs')
 
     args = args_parser()
@@ -30,33 +29,32 @@ if __name__ == '__main__':
 
     if args.gpu:
         torch.cuda.set_device(args.gpu)
-    device = 'cuda' if args.gpu else 'cpu'
+    device = "cuda" if args.gpu else "cpu"
 
     # load dataset and user groups
     train_dataset, test_dataset, user_groups = get_dataset(args)
 
     # BUILD MODEL
-    if args.model == 'cnn':
+    if args.model == "cnn":
         # Convolutional neural netork
-        if args.dataset == 'mnist':
+        if args.dataset == "mnist":
             global_model = CNNMnist(args=args)
-        elif args.dataset == 'fmnist':
+        elif args.dataset == "fmnist":
             global_model = CNNFashion_Mnist(args=args)
-        elif args.dataset == 'cifar':
+        elif args.dataset == "cifar":
             global_model = CNNCifar(args=args)
-        elif args.dataset == 'femnist':
+        elif args.dataset == "femnist":
             global_model = CNNFEMnist(args=args)
 
-    elif args.model == 'mlp':
+    elif args.model == "mlp":
         # Multi-layer preceptron
         img_size = train_dataset[0][0].shape
         len_in = 1
         for x in img_size:
             len_in *= x
-            global_model = MLP(dim_in=len_in, dim_hidden=64,
-                               dim_out=args.num_classes)
+            global_model = MLP(dim_in=len_in, dim_hidden=64, dim_out=args.num_classes)
     else:
-        exit('Error: unrecognized model')
+        exit("Error: unrecognized model")
 
     # Set the model to train and send it to device.
     # global_model.to(device)
@@ -65,8 +63,8 @@ if __name__ == '__main__':
 
     agent_list = []
     for i in range(args.num_users):
-        agent_list.append(Agent(global_model,args,i, nn.NLLLoss().to(device)))
-    
+        agent_list.append(Agent(global_model, args, i, nn.NLLLoss().to(device)))
+
     # copy weights
     global_weights = global_model.state_dict()
 
@@ -79,10 +77,10 @@ if __name__ == '__main__':
 
     for epoch in tqdm(range(args.epochs)):
         local_weights = []
-        print(f'\n | Global Training Round : {epoch+1} |\n')
+        print(f"\n | Global Training Round : {epoch+1} |\n")
 
         m = args.num_users
-        if epoch % args.freq_out ==0:
+        if epoch % args.freq_out == 0:
             compute_full = True
             update_model = True
         else:
@@ -90,7 +88,14 @@ if __name__ == '__main__':
             update_model = False
         global_model.train()
         for idx in range(args.num_users):
-            w= agent_list[idx].train_(global_model, args.freq_in, train_dataset, user_groups, update_model, compute_full)
+            w = agent_list[idx].train_(
+                global_model,
+                args.freq_in,
+                train_dataset,
+                user_groups,
+                update_model,
+                compute_full,
+            )
             # print(w['layer3.0.bias'])
             local_weights.append(copy.deepcopy(w))
         # for idx in range(args.num_users):
@@ -117,28 +122,39 @@ if __name__ == '__main__':
         train_loss.append(test_loss)
 
         # print global training loss after every 'i' rounds
-        if (epoch+1) % print_every == 0:
-            print(f' \nAvg Training Stats after {epoch+1} global rounds:')
-            print(f'Training Loss : {np.mean(np.array(train_loss))}')
-            print('Train Accuracy: {:.2f}% \n'.format(100*train_accuracy[-1]),flush=True)
+        if (epoch + 1) % print_every == 0:
+            print(f" \nAvg Training Stats after {epoch+1} global rounds:")
+            print(f"Training Loss : {np.mean(np.array(train_loss))}")
+            print(
+                "Train Accuracy: {:.2f}% \n".format(100 * train_accuracy[-1]),
+                flush=True,
+            )
 
     # Test inference after completion of training
     test_acc, test_loss = test_inference(args, global_model, test_dataset)
 
-    print(f' \n Results after {args.epochs} global rounds of training:')
-    print("|---- Avg Train Accuracy: {:.2f}%".format(100*train_accuracy[-1]))
-    print("|---- Test Accuracy: {:.2f}%".format(100*test_acc))
+    print(f" \n Results after {args.epochs} global rounds of training:")
+    print("|---- Avg Train Accuracy: {:.2f}%".format(100 * train_accuracy[-1]))
+    print("|---- Test Accuracy: {:.2f}%".format(100 * test_acc))
 
     # Saving the objects train_loss and train_accuracy:
-    file_name = '../save/objects/{}_{}_T[{}]_Q[{}]_I[{}]_B[{}]_lr[{}].csv'.\
-        format(args.dataset, args.optimizer, args.epochs,
-               args.local_ep, args.freq_out, args.local_bs, args.lr)
+    file_name = "../save/objects/{}_{}_T[{}]_Q[{}]_I[{}]_B[{}]_lr[{}].csv".format(
+        args.dataset,
+        args.optimizer,
+        args.epochs,
+        args.local_ep,
+        args.freq_out,
+        args.local_bs,
+        args.lr,
+    )
 
-    with open(file_name, 'w') as f:
+    with open(file_name, "w") as f:
         # pickle.dump([train_loss, train_accuracy], f)
-        f.write("\n".join(str([loss, acc]) for loss, acc in zip(train_loss, train_accuracy)))
+        f.write(
+            "\n".join(str([loss, acc]) for loss, acc in zip(train_loss, train_accuracy))
+        )
 
-    print('\n Total Run Time: {0:0.4f}'.format(time.time()-start_time))
+    print("\n Total Run Time: {0:0.4f}".format(time.time() - start_time))
 
     # PLOTTING (optional)
     # import matplotlib

@@ -4,11 +4,10 @@ this file is forked from https://github.com/unc-optimization/FedDR/tree/main/Fed
 
 import re
 from abc import ABC, abstractmethod
-from copy import deepcopy
 from math import sqrt
 from typing import Iterable, List, NoReturn, Optional
 
-import torch
+import torch  # noqa: F401
 from torch.nn.parameter import Parameter
 
 from misc import ReprMixin
@@ -55,7 +54,7 @@ class Regularizer(ReprMixin, ABC):
 
 def get_regularizer(reg_type: str, reg_coeff: float = 1.0) -> Regularizer:
     """ """
-    reg_type = re.sub("regularizer|norm|[\s\_\-]+", "", reg_type.lower())
+    reg_type = re.sub("regularizer|norm|[\\s\\_\\-]+", "", reg_type.lower())
     if reg_type in [
         "l1",
     ]:

@@ -10,12 +10,11 @@ References
 
 import json
 from pathlib import Path
-from typing import NoReturn, Optional, Union, List, Callable, Tuple, Dict, Sequence
+from typing import NoReturn, Optional, Union, List, Tuple, Dict
 
 import numpy as np
-import torch
+import torch  # noqa: F401
 import torch.utils.data as data
-import torchvision.transforms as transforms
 
 from misc import CACHED_DATA_DIR
 from models import nn as mnn
@@ -154,7 +153,7 @@ class FedProxFEMNIST(FedVisionDataset):
         return _label_mapping[label.item()]
 
     def get_classes(self, labels: torch.Tensor) -> List[str]:
-        return [_label_mapping[l] for l in labels.cpu().numpy()]
+        return [_label_mapping[lb] for lb in labels.cpu().numpy()]
 
     def evaluate(self, probs: torch.Tensor, truths: torch.Tensor) -> Dict[str, float]:
         """ """

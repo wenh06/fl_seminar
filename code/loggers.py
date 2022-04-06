@@ -4,14 +4,17 @@ loggers, including (planned) CSVLogger
 with reference to `loggers` of `textattack` and `loggers` of `pytorch-lightning`
 """
 
-import logging, csv, importlib, re, sys
+import csv
+import logging
+import re
+import sys
 from pathlib import Path
 from datetime import datetime
 from abc import ABC, abstractmethod
 from typing import NoReturn, Optional, Union, List, Any, Dict
 from numbers import Real
 
-import torch
+import torch  # noqa: F401
 import pandas as pd
 
 from misc import ReprMixin, LOG_DIR
@@ -159,7 +162,7 @@ class TxtLogger(BaseLogger):
         assert all(
             [isinstance(x, str) for x in [algorithm, dataset, model]]
         ), "algorithm, dataset, model must be str"
-        log_prefix = re.sub("[\s]+", "_", f"{algorithm}-{dataset}-{model}")
+        log_prefix = re.sub("[\\s]+", "_", f"{algorithm}-{dataset}-{model}")
         self._log_dir = Path(log_dir or LOG_DIR)
         if log_suffix is None:
             log_suffix = ""
@@ -315,7 +318,7 @@ class CSVLogger(BaseLogger):
         assert all(
             [isinstance(x, str) for x in [algorithm, dataset, model]]
         ), "algorithm, dataset, model must be str"
-        log_prefix = re.sub("[\s]+", "_", f"{algorithm}-{dataset}-{model}")
+        log_prefix = re.sub("[\\s]+", "_", f"{algorithm}-{dataset}-{model}")
         self._log_dir = Path(log_dir or LOG_DIR)
         if log_suffix is None:
             log_suffix = ""
@@ -477,8 +480,8 @@ class LoggerManager(ReprMixin):
             the part of the training data the metrics computed from,
             can be "train" or "val" or "test", etc.
         """
-        for l in self.loggers:
-            l.log_metrics(client_id, metrics, step, epoch, part)
+        for lgs in self.loggers:
+            lgs.log_metrics(client_id, metrics, step, epoch, part)
 
     def log_message(self, msg: str, level: int = logging.INFO) -> NoReturn:
         """
@@ -492,8 +495,8 @@ class LoggerManager(ReprMixin):
             the level of the message,
             can be logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR, logging.CRITICAL
         """
-        for l in self.loggers:
-            l.log_message(msg, level)
+        for lgs in self.loggers:
+            lgs.log_message(msg, level)
 
     def epoch_start(self, epoch: int) -> NoReturn:
         """
@@ -504,8 +507,8 @@ class LoggerManager(ReprMixin):
         epoch: int,
             the epoch number
         """
-        for l in self.loggers:
-            l.epoch_start(epoch)
+        for lgs in self.loggers:
+            lgs.epoch_start(epoch)
 
     def epoch_end(self, epoch: int) -> NoReturn:
         """
@@ -516,18 +519,18 @@ class LoggerManager(ReprMixin):
         epoch: int,
             the epoch number
         """
-        for l in self.loggers:
-            l.epoch_end(epoch)
+        for lgs in self.loggers:
+            lgs.epoch_end(epoch)
 
     def flush(self) -> NoReturn:
         """ """
-        for l in self.loggers:
-            l.flush()
+        for lgs in self.loggers:
+            lgs.flush()
 
     def close(self) -> NoReturn:
         """ """
-        for l in self.loggers:
-            l.close()
+        for lgs in self.loggers:
+            lgs.close()
 
     @property
     def loggers(self) -> List[BaseLogger]:

@@ -3,17 +3,23 @@
 
 from copy import deepcopy
 import warnings
-from typing import List, NoReturn, Dict, Sequence
+from typing import List, NoReturn, Sequence
 
-import torch
+import torch  # noqa: F401
 
 try:
     from tqdm.auto import tqdm
 except ImportError:
     from tqdm import tqdm
 
-from nodes import Server, Client, ServerConfig, ClientConfig, ClientMessage
-from ..optimizers import get_optimizer
+from nodes import (
+    Server,
+    Client,
+    ServerConfig,
+    ClientConfig,
+    ClientMessage,
+)  # noqa: F401
+from ..optimizers import get_optimizer  # noqa: F401
 
 
 __all__ = [
@@ -114,7 +120,7 @@ class FedOptServer(Server):
         if self.config.optimizer.lower() != "avg":
             self.v_parameters = deepcopy(self.delta_parameters)
             for p in self.v_parameters:
-                p.data.random_(1, 100).mul_(self.config.tau ** 2)
+                p.data.random_(1, 100).mul_(self.config.tau**2)
         else:
             self.config.lr = 1
             self.config.betas = (1, 0)

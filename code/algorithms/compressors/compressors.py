@@ -5,7 +5,8 @@ This file is forked from
 https://github.com/burlachenkok/marina/blob/main/linear_model_with_non_convex_loss/compressors.py
 """
 
-import random, math
+import math
+import random
 from enum import Enum, unique
 
 import numpy as np
@@ -79,7 +80,7 @@ class Compressor:
     def name(self):
         omega = r"$\omega$"
         if self.compressorType == CompressorType.IDENTICAL:
-            return f"Identical"
+            return "Identical"
         if self.compressorType == CompressorType.LAZY_COMPRESSOR:
             return f"Bernoulli(Lazy) [p={self.P:g},{omega}={self.getW():.1f}]"
         if self.compressorType == CompressorType.RANDK_COMPRESSOR:
@@ -99,7 +100,7 @@ class Compressor:
         if self.compressorType == CompressorType.NATURAL_DITHERING_FP64:
             return f"Natural Dithering for fp64[s={self.s},{omega}={self.getW():.1f}]"
         if self.compressorType == CompressorType.ADAPTIVE_RANDOM_COMPRESSOR:
-            return f"Adaptive Random Compressor"
+            return "Adaptive Random Compressor"
 
         return "?"
 
@@ -107,7 +108,7 @@ class Compressor:
     def fullName(self):
         omega = r"$\omega$"
         if self.compressorType == CompressorType.IDENTICAL:
-            return f"Identical"
+            return "Identical"
         if self.compressorType == CompressorType.LAZY_COMPRESSOR:
             return f"Bernoulli(Lazy) [p={self.P:g},{omega}={self.getW():.1f}]"
         if self.compressorType == CompressorType.RANDK_COMPRESSOR:
@@ -186,7 +187,7 @@ class Compressor:
         norm_compressor.makeIdenticalCompressor()
         self.makeStandardDitheringFP64(levels, norm_compressor, p=2)
         # Lemma 3.1. from https://arxiv.org/pdf/1610.02132.pdf, page 5
-        self.__w = min(dInput / (levels * levels), dInput ** 0.5 / levels)
+        self.__w = min(dInput / (levels * levels), dInput**0.5 / levels)
 
     def makeNaturalDitheringFP64(self, levels, dInput, p=np.inf):
         self.__compressorName = "NaturalDitheringFP64"
@@ -318,12 +319,12 @@ class Compressor:
                     alpha = math.log2(abs(x[i]))
                     alpha_down = math.floor(alpha)
                     alpha_up = math.ceil(alpha)
-                    pt = (2 ** (alpha_up) - abs(x[i])) / (2 ** alpha_down)
+                    pt = (2 ** (alpha_up) - abs(x[i])) / (2**alpha_down)
                     testp = random.random()
                     if testp < pt:
-                        out[i] = sign * (2 ** alpha_down)
+                        out[i] = sign * (2**alpha_down)
                     else:
-                        out[i] = sign * (2 ** alpha_up)
+                        out[i] = sign * (2**alpha_up)
 
             if self.compressorType == CompressorType.NATURAL_COMPRESSOR_FP64:
                 self.last_need_to_send_advance = (

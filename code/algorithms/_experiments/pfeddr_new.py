@@ -5,16 +5,17 @@ from copy import deepcopy
 import warnings
 from typing import List, NoReturn, Dict
 
-import torch
+import torch  # noqa: F401
 
 try:
-    from tqdm.auto import tqdm
+    from tqdm.auto import tqdm  # noqa: F401
 except ImportError:
-    from tqdm import tqdm
+    from tqdm import tqdm  # noqa: F401
 
-from nodes import Server, Client, ServerConfig, ClientConfig
-from ..optimizers import get_optimizer
-from ..regularizers import get_regularizer
+from nodes import Server, Client, ServerConfig, ClientConfig  # noqa: F401
+from ..optimizers import get_optimizer  # noqa: F401
+from ..regularizers import get_regularizer  # noqa: F401
+from ...data_processing.fed_dataset import FedDataset
 
 
 class pFedDRServerConfig(ServerConfig):
@@ -73,7 +74,7 @@ class pFedDRServer(Server):
 
     def __init__(
         self,
-        model: nn.Module,
+        model: torch.nn.Module,
         dataset: FedDataset,
         config: ServerConfig,
         client_config: ClientConfig,
@@ -125,7 +126,7 @@ class pFedDRClient(Client):
         self,
         client_id: int,
         device: torch.device,
-        model: nn.Module,
+        model: torch.nn.Module,
         dataset: FedDataset,
         config: ClientConfig,
     ) -> NoReturn:

@@ -5,9 +5,9 @@ simple neural network models
 import re
 from typing import NoReturn, Optional, Union, Sequence
 
-import torch
+import torch  # noqa: F401
 from torch import nn, Tensor
-import torch.nn.functional as F
+import torch.nn.functional as F  # noqa: F401
 from torchvision.models.resnet import ResNet, BasicBlock, resnet18
 import einops
 from einops.layers.torch import Rearrange
@@ -343,7 +343,7 @@ class ResNet18(CLFMixin, SizeMixin, ResNet):
                 {
                     k: v
                     for k, v in _model.state_dict().items()
-                    if not re.findall("^fc\.", k)
+                    if not re.findall("^fc\\.", k)
                 },
                 strict=False,
             )

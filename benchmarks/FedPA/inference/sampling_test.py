@@ -97,9 +97,7 @@ class IASGSampler(absltest.TestCase):
 
         sample_cov_fro_err = jnp.linalg.norm(sample_cov - posterior_cov, "fro")
         np.testing.assert_allclose(sample_mean, opt, rtol=1e-1, atol=1e-1)
-        np.testing.assert_allclose(
-            sample_cov_fro_err, 0.0, rtol=1e-1, atol=1e-1
-        )
+        np.testing.assert_allclose(sample_cov_fro_err, 0.0, rtol=1e-1, atol=1e-1)
 
 
 class HMCSampler(absltest.TestCase):
@@ -142,9 +140,7 @@ class HMCSampler(absltest.TestCase):
 
         sample_cov_fro_err = jnp.linalg.norm(sample_cov - posterior_cov, "fro")
         np.testing.assert_allclose(sample_mean, opt, rtol=1e-1, atol=1e-1)
-        np.testing.assert_allclose(
-            sample_cov_fro_err, 0.0, rtol=1e-1, atol=1e-1
-        )
+        np.testing.assert_allclose(sample_cov_fro_err, 0.0, rtol=1e-1, atol=1e-1)
 
 
 if __name__ == "__main__":

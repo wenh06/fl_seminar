@@ -3,7 +3,7 @@
 
 from typing import Iterable, Union, NoReturn, Optional, Tuple
 
-import torch
+import torch  # noqa: F401
 from torch import Tensor
 from torch.nn import Parameter
 from torch.optim.optimizer import Optimizer

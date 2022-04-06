@@ -4,11 +4,10 @@ dataset readers, including Cifar10, Cifar100
 
 import json
 from pathlib import Path
-from typing import NoReturn, Optional, Union, List, Callable, Tuple, Dict, Sequence
+from typing import NoReturn, Optional, Union, List, Callable, Tuple, Dict
 
 import numpy as np
-import torch
-from PIL import Image
+import torch  # noqa: F401
 import torch.utils.data as data
 import torchvision.transforms as transforms
 from torchvision.datasets import CIFAR10, CIFAR100
@@ -293,7 +292,7 @@ def partition_cifar_data(
                     idx_k = np.where(y_train.cpu().numpy() == k)[0]
                 np.random.shuffle(idx_k)
                 proportions = np.random.dirichlet(np.repeat(alpha, n_net))
-                ## Balance
+                # Balance
                 proportions = np.array(
                     [
                         p * (len(idx_j) < N / n_net)

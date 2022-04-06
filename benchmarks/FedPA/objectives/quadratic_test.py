@@ -60,9 +60,7 @@ class QuadraticTests(absltest.TestCase):
 
         for _ in range(10):
             x = np.random.randn(10, 2)
-            np.testing.assert_allclose(
-                obj.grad(x), self.exact_grad(obj, x), rtol=1e-5
-            )
+            np.testing.assert_allclose(obj.grad(x), self.exact_grad(obj, x), rtol=1e-5)
 
 
 class LeastSquaresTest(absltest.TestCase):
@@ -117,9 +115,7 @@ class LeastSquaresTest(absltest.TestCase):
 
         subkey = random.split(prng_key, 1)[0]
         x_batch, y_batch = obj._sample_batch(batch_size, obj.data, subkey)
-        obj_batch = LeastSquares(
-            X=x_batch, y=y_batch, batch_size=batch_size, lam=lam
-        )
+        obj_batch = LeastSquares(X=x_batch, y=y_batch, batch_size=batch_size, lam=lam)
         q_obj = Quadratic.from_least_squares(obj_batch)
 
         x = np.random.randn(d)
@@ -144,9 +140,7 @@ class LeastSquaresTest(absltest.TestCase):
             x = np.random.randn(np.random.randint(1, 5), d)
             obj_grad_d = obj.grad(x, prng_key=subkey, deterministic=True)
             np.testing.assert_allclose(obj_grad_d, q_obj.grad(x), rtol=1e-3)
-            np.testing.assert_allclose(
-                obj_grad_d, self.exact_grad(obj, x), rtol=1e-3
-            )
+            np.testing.assert_allclose(obj_grad_d, self.exact_grad(obj, x), rtol=1e-3)
 
     def test_least_squares_grad_stochastic(self):
         np.random.seed(0)
@@ -163,9 +157,7 @@ class LeastSquaresTest(absltest.TestCase):
 
         subkey = random.split(prng_key, 1)[0]
         x_batch, y_batch = obj._sample_batch(batch_size, obj.data, subkey)
-        obj_batch = LeastSquares(
-            X=x_batch, y=y_batch, batch_size=batch_size, lam=lam
-        )
+        obj_batch = LeastSquares(X=x_batch, y=y_batch, batch_size=batch_size, lam=lam)
         q_obj = Quadratic.from_least_squares(obj_batch)
 
         x = np.random.randn(d)
@@ -182,9 +174,7 @@ class CreateObjectives(absltest.TestCase):
         for o in objectives:
             self.assertTrue(o.dim == 10)
 
-        global_objective = create_global_quadratic(
-            objectives, weights=np.ones(5)
-        )
+        global_objective = create_global_quadratic(objectives, weights=np.ones(5))
         self.assertTrue(global_objective.dim == 10)
 
     def test_create_least_squares(self):
@@ -203,9 +193,7 @@ class CreateObjectives(absltest.TestCase):
             q_objectives, weights=np.asarray([o.num_points for o in objectives])
         )
         self.assertTrue(global_obj.dim == global_q_obj.dim == 21)
-        np.testing.assert_allclose(
-            global_obj.solve(), global_q_obj.solve(), rtol=1e-4
-        )
+        np.testing.assert_allclose(global_obj.solve(), global_q_obj.solve(), rtol=1e-4)
 
         prng_key = random.PRNGKey(0)
         for _ in range(10):

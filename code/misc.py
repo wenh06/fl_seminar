@@ -2,8 +2,11 @@
 """
 
 import pathlib
+import re
 from functools import wraps
-from typing import List, Any, Callable
+from typing import List, Any, Callable, NoReturn
+
+import numpy as np
 
 
 __all__ = [
@@ -168,7 +171,7 @@ def add_docstring(doc: str, mode: str = "replace") -> Callable:
             """ """
             return func(*args, **kwargs)
 
-        pattern = "(\s^\n){1,}"
+        pattern = "(\\s^\n){1,}"
         if mode.lower() == "replace":
             wrapper.__doc__ = doc
         elif mode.lower() == "append":

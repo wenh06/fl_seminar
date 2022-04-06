@@ -104,7 +104,7 @@ import time
 #     print(len(comb))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     torch.manual_seed(4)
     N = 100
     C = 10

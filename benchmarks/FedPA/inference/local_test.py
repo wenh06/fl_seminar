@@ -73,9 +73,7 @@ class ComputeDeltaTests(absltest.TestCase):
                 num_steps=num_local_steps,
                 learning_rate_schedule=client_lr_schedule,
             )
-            np.testing.assert_allclose(
-                fed_avg_delta, (init_state - opt), rtol=1e-1
-            )
+            np.testing.assert_allclose(fed_avg_delta, (init_state - opt), rtol=1e-1)
 
     def test_compute_mb_sgd_delta(self):
         np.random.seed(0)
@@ -118,9 +116,7 @@ class ComputeDeltaTests(absltest.TestCase):
                 sampler=sampler,
                 moment_estimator=moment_estimator,
             )
-            exact_delta = compute_exact_delta(
-                objective=obj, init_state=init_state
-            )
+            exact_delta = compute_exact_delta(objective=obj, init_state=init_state)
             np.testing.assert_allclose(post_avg_delta, exact_delta, rtol=1e-0)
 
     def test_compute_post_avg_delta_dp(self):
@@ -152,6 +148,4 @@ class ComputeDeltaTests(absltest.TestCase):
                 sampler=sampler,
                 rho_fn=lambda _: rho,
             )
-            np.testing.assert_allclose(
-                post_avg_delta, post_avg_delta_dp, rtol=1e-3
-            )
+            np.testing.assert_allclose(post_avg_delta, post_avg_delta_dp, rtol=1e-3)

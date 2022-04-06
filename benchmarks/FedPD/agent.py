@@ -5,6 +5,7 @@ import copy
 import torch
 from torch import optim
 from torch.utils.data import sampler
+
 # from torch.utils.tensorboard import SummaryWriter
 from torch.utils.data import DataLoader, Dataset
 
@@ -12,8 +13,7 @@ from .optimizer import PSVRG, FedPD_SGD, FedPD_VR, PSGD
 
 
 class DatasetSplit(Dataset):
-    """An abstract Dataset class wrapped around Pytorch Dataset class.
-    """
+    """An abstract Dataset class wrapped around Pytorch Dataset class."""
 
     def __init__(self, dataset, idxs):
         self.dataset = dataset
@@ -24,29 +24,53 @@ class DatasetSplit(Dataset):
 
     def __getitem__(self, item):
         image, label = self.dataset[self.idxs[item]]
-        return torch.tensor(image,dtype=torch.float32), torch.tensor(label)
+        return torch.tensor(image, dtype=torch.float32), torch.tensor(label)
+
 
 class Agent:
     def __init__(self, model, args, agent_id, criterion):
         self.local_model = copy.deepcopy(model)
         if args.VR:
             self.local_model_old = copy.deepcopy(model)
-        if args.optimizer == 'sgd':
-            self.optimizer = torch.optim.SGD(self.local_model.parameters(), lr=args.lr,
-                                        momentum=args.momentum)
-        elif args.optimizer == 'adam':
-            self.optimizer = torch.optim.Adam(self.local_model.parameters(), lr=args.lr,
-                                         weight_decay=1e-4)
-        elif args.optimizer == 'FedProx':
+        if args.optimizer == "sgd":
+            self.optimizer = torch.optim.SGD(
+                self.local_model.parameters(), lr=args.lr, momentum=args.momentum
+            )
+        elif args.optimizer == "adam":
+            self.optimizer = torch.optim.Adam(
+                self.local_model.parameters(), lr=args.lr, weight_decay=1e-4
+            )
+        elif args.optimizer == "FedProx":
             if args.VR:
-                self.optimizer = PSVRG(self.local_model.parameters(), lr=args.lr, mu=args.mu, freq=args.freq_in)
+                self.optimizer = PSVRG(
+                    self.local_model.parameters(),
+                    lr=args.lr,
+                    mu=args.mu,
+                    freq=args.freq_in,
+                )
             else:
-                self.optimizer = PSGD(self.local_model.parameters(), lr=args.lr, mu=args.mu, freq=args.freq_in)
-        elif args.optimizer == 'FedPD':
+                self.optimizer = PSGD(
+                    self.local_model.parameters(),
+                    lr=args.lr,
+                    mu=args.mu,
+                    freq=args.freq_in,
+                )
+        elif args.optimizer == "FedPD":
             if args.VR:
-                self.optimizer = FedPD_VR(self.local_model.parameters(), lr=args.lr, mu=args.mu, freq_1=args.freq_in, freq_2 = args.freq_out)
+                self.optimizer = FedPD_VR(
+                    self.local_model.parameters(),
+                    lr=args.lr,
+                    mu=args.mu,
+                    freq_1=args.freq_in,
+                    freq_2=args.freq_out,
+                )
             else:
-                self.optimizer = FedPD_SGD(self.local_model.parameters(), lr=args.lr, mu=args.mu, freq=args.freq_in)
+                self.optimizer = FedPD_SGD(
+                    self.local_model.parameters(),
+                    lr=args.lr,
+                    mu=args.mu,
+                    freq=args.freq_in,
+                )
         self.id = agent_id
         self.VR = args.VR
         self.opti = args.optimizer
@@ -60,17 +84,17 @@ class Agent:
         loader = DataLoader(sub_data, batch_size=self.batch_size, shuffle=True)
 
         if self.use_cuda:
-            device = torch.device('cuda')
+            device = torch.device("cuda")
         else:
-            device = torch.device('cpu')
-        if update_model or self.VR or self.opti != 'FedPD':
+            device = torch.device("cpu")
+        if update_model or self.VR or self.opti != "FedPD":
             self.local_model.load_state_dict(model.state_dict())
             # print(self.local_model.state_dict()['layer3.0.bias'])
         self.local_model.to(device)
         self.local_model.train()
         if self.VR:
             self.local_model_old.to(device)
-        if self.opti == 'FedPD':
+        if self.opti == "FedPD":
             self.optimizer.zero_grad()
             if not self.init:
                 # print('first')
@@ -98,7 +122,7 @@ class Agent:
                     loss += self.criterion(outputs, labels)
                 loss.backward()
             self.optimizer.step()
-            
+
         count = 0
         while True:
             for idx, data in enumerate(loader, 0):  # _ start from 0
@@ -131,5 +155,5 @@ class Agent:
 
                 count += 1
                 if count == num_its:
-                    self.local_model.to('cpu')
+                    self.local_model.to("cpu")
                     return self.local_model.state_dict()

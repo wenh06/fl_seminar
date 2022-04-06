@@ -1,11 +1,19 @@
 """
 """
 
-import os, shlex, shutil, collections, subprocess, platform, re, tempfile, zipfile, tarfile
+import collections
+import os
+import shutil
+import subprocess
+import platform
+import tempfile
+import tarfile
+import zipfile
 from pathlib import Path
 from typing import NoReturn, Union, List, Tuple, Optional
 
-import requests, tqdm
+import requests
+import tqdm
 
 from misc import CACHED_DATA_DIR
 

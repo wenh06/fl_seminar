@@ -4,7 +4,6 @@ from torch.nn.utils import spectral_norm
 
 
 class LocalLayer(nn.Module):
-
     def __init__(self, n_input=84, n_output=2, nonlinearity=False):
         super().__init__()
         self.nonlinearity = nonlinearity
@@ -21,29 +20,47 @@ class LocalLayer(nn.Module):
 
 class CNNHyperPC(nn.Module):
     def __init__(
-            self, n_nodes, embedding_dim, in_channels=3, out_dim=10, n_kernels=16, hidden_dim=100,
-            spec_norm=False, n_hidden=1):
+        self,
+        n_nodes,
+        embedding_dim,
+        in_channels=3,
+        out_dim=10,
+        n_kernels=16,
+        hidden_dim=100,
+        spec_norm=False,
+        n_hidden=1,
+    ):
         super().__init__()
 
         self.in_channels = in_channels
         self.out_dim = out_dim
         self.n_kernels = n_kernels
-        self.embeddings = nn.Embedding(num_embeddings=n_nodes, embedding_dim=embedding_dim)
+        self.embeddings = nn.Embedding(
+            num_embeddings=n_nodes, embedding_dim=embedding_dim
+        )
 
         layers = [
-            spectral_norm(nn.Linear(embedding_dim, hidden_dim)) if spec_norm else nn.Linear(embedding_dim, hidden_dim),
+            spectral_norm(nn.Linear(embedding_dim, hidden_dim))
+            if spec_norm
+            else nn.Linear(embedding_dim, hidden_dim),
         ]
         for _ in range(n_hidden):
             layers.append(nn.ReLU(inplace=True))
             layers.append(
-                spectral_norm(nn.Linear(hidden_dim, hidden_dim)) if spec_norm else nn.Linear(hidden_dim, hidden_dim),
+                spectral_norm(nn.Linear(hidden_dim, hidden_dim))
+                if spec_norm
+                else nn.Linear(hidden_dim, hidden_dim),
             )
 
         self.mlp = nn.Sequential(*layers)
 
-        self.c1_weights = nn.Linear(hidden_dim, self.n_kernels * self.in_channels * 5 * 5)
+        self.c1_weights = nn.Linear(
+            hidden_dim, self.n_kernels * self.in_channels * 5 * 5
+        )
         self.c1_bias = nn.Linear(hidden_dim, self.n_kernels)
-        self.c2_weights = nn.Linear(hidden_dim, 2 * self.n_kernels * self.n_kernels * 5 * 5)
+        self.c2_weights = nn.Linear(
+            hidden_dim, 2 * self.n_kernels * self.n_kernels * 5 * 5
+        )
         self.c2_bias = nn.Linear(hidden_dim, 2 * self.n_kernels)
         self.l1_weights = nn.Linear(hidden_dim, 120 * 2 * self.n_kernels * 5 * 5)
         self.l1_bias = nn.Linear(hidden_dim, 120)
@@ -65,11 +82,17 @@ class CNNHyperPC(nn.Module):
         features = self.mlp(emd)
 
         weights = {
-            "conv1.weight": self.c1_weights(features).view(self.n_kernels, self.in_channels, 5, 5),
+            "conv1.weight": self.c1_weights(features).view(
+                self.n_kernels, self.in_channels, 5, 5
+            ),
             "conv1.bias": self.c1_bias(features).view(-1),
-            "conv2.weight": self.c2_weights(features).view(2 * self.n_kernels, self.n_kernels, 5, 5),
+            "conv2.weight": self.c2_weights(features).view(
+                2 * self.n_kernels, self.n_kernels, 5, 5
+            ),
             "conv2.bias": self.c2_bias(features).view(-1),
-            "fc1.weight": self.l1_weights(features).view(120, 2 * self.n_kernels * 5 * 5),
+            "fc1.weight": self.l1_weights(features).view(
+                120, 2 * self.n_kernels * 5 * 5
+            ),
             "fc1.bias": self.l1_bias(features).view(-1),
             "fc2.weight": self.l2_weights(features).view(84, 120),
             "fc2.bias": self.l2_bias(features).view(-1),

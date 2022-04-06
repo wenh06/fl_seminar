@@ -4,11 +4,9 @@ abstract base classes of federated dataset provided by FedML, and more
 
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import NoReturn, Optional, Union, List, Callable, Tuple, Dict, Sequence
+from typing import NoReturn, Optional, Union, List, Tuple, Dict
 
-import h5py
-import numpy as np
-import torch
+import torch  # noqa: F401
 import torch.utils.data as data
 import torchvision.transforms as transforms
 from PIL import Image
@@ -307,7 +305,7 @@ class FedNLPDataset(FedDataset, ABC):
             local_data_num = 0
         else:
             # get local dataset
-            train_data_local, test_data_local = get_dataloader(
+            train_data_local, test_data_local = self.get_dataloader(
                 batch_size, batch_size, process_id - 1
             )
             train_data_num = local_data_num = len(train_data_local.dataset)

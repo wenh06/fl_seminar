@@ -59,9 +59,7 @@ def compute_posterior_average(
     Returns:
       A tuple of posterior mean and covariance arrays.
     """
-    state_cov_invs = [
-        w * jnp.linalg.pinv(c) for c, w in zip(state_covs, weights)
-    ]
+    state_cov_invs = [w * jnp.linalg.pinv(c) for c, w in zip(state_covs, weights)]
     posterior_means_sum = sum(
         [jnp.dot(c, m) for m, c in zip(state_means, state_cov_invs)]
     )

@@ -5,7 +5,7 @@ from typing import Union, Optional, Dict
 
 import numpy as np
 import einops
-import torch
+import torch  # noqa: F401
 from torch import Tensor
 from torch import nn
 
@@ -137,7 +137,7 @@ class CLFMixin(object):
         indices = np.where(proba > thr)
         if len(indices) > 2:
             raise ValueError(
-                f"multi-label classification is not supported for output of 3 dimensions or more"
+                "multi-label classification is not supported for output of 3 dimensions or more"
             )
         for i, j in zip(*indices):
             output[i].append(j)
@@ -145,7 +145,7 @@ class CLFMixin(object):
             if len(output[idx]) == 0:
                 output[idx] = [proba[idx].argmax()]
         if class_map is not None:
-            output = [[class_map[i] for i in l] for l in output]
+            output = [[class_map[i] for i in item] for item in output]
         return output
 
 

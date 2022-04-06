@@ -6,16 +6,16 @@ from typing import Iterable, Union, Any
 
 from torch.nn.parameter import Parameter
 from torch.optim import Optimizer
-import torch.optim as opt
-import torch_optimizer as topt
+import torch.optim as opt  # noqa: F401
+import torch_optimizer as topt  # noqa: F401
 from easydict import EasyDict as ED
 
 from misc import isclass
-from .base import ProxSGD
-from .fedpd import FedPD_SGD, FedPD_VR, PSGD, PSVRG
-from .pfedme import pFedMeOptimizer as pFedMe
-from .fedprox import FedProxOptimizer as FedProx
-from .feddr import FedDROptimizer as FedDR
+from .base import ProxSGD  # noqa: F401
+from .fedpd import FedPD_SGD, FedPD_VR, PSGD, PSVRG  # noqa: F401
+from .pfedme import pFedMeOptimizer as pFedMe  # noqa: F401
+from .fedprox import FedProxOptimizer as FedProx  # noqa: F401
+from .feddr import FedDROptimizer as FedDR  # noqa: F401
 
 
 __all__ = [
@@ -55,14 +55,14 @@ def get_optimizer(
         optimizer = eval(f"opt.{optimizer_name}(params, **_config)")
         # print(f"PyTorch built-in optimizer {optimizer_name} is used.")
         return optimizer
-    except:
+    except Exception:
         try:
             optimizer = topt.get(optimizer_name)(
                 params, **_get_args(topt.get(optimizer_name), config)
             )
             # print(f"Optimizer {optimizer_name} from torch_optimizer is used.")
             return optimizer
-        except:
+        except Exception:
             pass
 
     if isinstance(config, dict):
@@ -110,6 +110,6 @@ def _get_args(cls: type, config: Any) -> ED:
     for k in args:
         try:
             kwargs[k] = eval(f"config.{k}")
-        except:
+        except Exception:
             pass
     return kwargs

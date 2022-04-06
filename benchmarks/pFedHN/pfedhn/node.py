@@ -3,12 +3,7 @@ from experiments.dataset import gen_random_loaders
 
 class BaseNodes:
     def __init__(
-            self,
-            data_name,
-            data_path,
-            n_nodes,
-            batch_size=128,
-            classes_per_node=2
+        self, data_name, data_path, n_nodes, batch_size=128, classes_per_node=2
     ):
 
         self.data_name = data_name
@@ -27,7 +22,7 @@ class BaseNodes:
             self.data_path,
             self.n_nodes,
             self.batch_size,
-            self.classes_per_node
+            self.classes_per_node,
         )
 
     def __len__(self):

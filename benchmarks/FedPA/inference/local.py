@@ -155,9 +155,7 @@ def compute_post_avg_delta(
         The computed client delta.
     """
     # Produce (approximate) samples from the posterior.
-    samples = sampler.sample(
-        objective, prng_key, num_samples, init_state=init_state
-    )
+    samples = sampler.sample(objective, prng_key, num_samples, init_state=init_state)
 
     # Estimate posterior moments.
     posterior_mean_est = moment_estimator.estimate_mean(samples)
@@ -195,9 +193,7 @@ def compute_post_avg_delta_dp(
         The computed client delta.
     """
     # Produce (approximate) samples from the posterior.
-    samples = sampler.sample(
-        objective, prng_key, num_samples, init_state=init_state
-    )
+    samples = sampler.sample(objective, prng_key, num_samples, init_state=init_state)
 
     # Compute delta from the samples using dynamic programming.
     rho = rho_fn(samples)

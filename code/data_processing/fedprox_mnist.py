@@ -8,13 +8,12 @@ References
 """
 
 from pathlib import Path
-from typing import NoReturn, Optional, Union, List, Callable, Tuple, Dict, Sequence
+from typing import NoReturn, Optional, Union, List, Tuple, Dict
 
 import numpy as np
 from scipy.io import loadmat
-import torch
+import torch  # noqa: F401
 import torch.utils.data as data
-import torchvision.transforms as transforms
 
 from misc import CACHED_DATA_DIR
 from models import nn as mnn
@@ -29,7 +28,7 @@ __all__ = [
 
 FEDPROX_FEMNIST_DATA_DIR = CACHED_DATA_DIR / "fedprox_mnist"
 FEDPROX_FEMNIST_DATA_DIR.mkdir(exist_ok=True)
-# _label_mapping = {i:c for i,c in enumerate("abcdefghijklmnopqrstuvwxyz"[:10])}
+_label_mapping = {i: c for i, c in enumerate("abcdefghijklmnopqrstuvwxyz"[:10])}
 
 
 class FedProxMNIST(FedVisionDataset):
@@ -122,7 +121,7 @@ class FedProxMNIST(FedVisionDataset):
         return _label_mapping[label.item()]
 
     def get_classes(self, labels: torch.Tensor) -> List[str]:
-        return [_label_mapping[l] for l in labels.cpu().numpy()]
+        return [_label_mapping[lb] for lb in labels.cpu().numpy()]
 
     def evaluate(self, probs: torch.Tensor, truths: torch.Tensor) -> Dict[str, float]:
         """ """

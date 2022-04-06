@@ -93,9 +93,7 @@ class ComputeAverageTests(absltest.TestCase):
         local_objectives = create_random_least_squares(
             num_objectives=5, batch_size=10, lam=1e-3
         )
-        local_quadratics = [
-            Quadratic.from_least_squares(o) for o in local_objectives
-        ]
+        local_quadratics = [Quadratic.from_least_squares(o) for o in local_objectives]
         weights = jnp.asarray([o.num_points for o in local_objectives])
 
         global_objective = create_global_least_squares(local_objectives)

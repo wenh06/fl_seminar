@@ -2,14 +2,15 @@
 Modified from `generate_synthetic.py` in `FedProx`
 
 ref. https://github.com/litian96/FedProx/blob/master/data/
+
 """
 
-import random, itertools
+import itertools
 from pathlib import Path
-from typing import List, Tuple, Dict
+from typing import List, Dict
 
 import numpy as np
-import torch
+import torch  # noqa: F401
 from scipy.io import loadmat, savemat
 
 from misc import CACHED_DATA_DIR
@@ -164,7 +165,7 @@ def _get_path(
         / _NAME_PATTERN.format(
             alpha=alpha,
             beta=beta,
-            iid=f"iid" if iid else "noniid",
+            iid="iid" if iid else "noniid",
             num_clients=num_clients,
             num_classes=num_classes,
             dimension=dimension,

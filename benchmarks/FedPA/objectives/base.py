@@ -36,17 +36,13 @@ class Objective(abc.ABC):
 
     @classmethod
     @functools.partial(jit, static_argnums=(0,))
-    def _veval(
-        cls, params: ObjectiveParams, x: jnp.ndarray, **kwargs
-    ) -> jnp.ndarray:
+    def _veval(cls, params: ObjectiveParams, x: jnp.ndarray, **kwargs) -> jnp.ndarray:
         _eval = functools.partial(cls.eval, params, **kwargs)
         return vmap(_eval)(x)
 
     @classmethod
     @functools.partial(jit, static_argnums=(0,))
-    def _vgrad(
-        cls, params: ObjectiveParams, x: jnp.ndarray, **kwargs
-    ) -> jnp.ndarray:
+    def _vgrad(cls, params: ObjectiveParams, x: jnp.ndarray, **kwargs) -> jnp.ndarray:
         _eval = functools.partial(cls.eval, params, **kwargs)
         return vmap(grad(_eval))(x)
 
@@ -117,9 +113,7 @@ class StochasticObjective(abc.ABC):
 
     @staticmethod
     @functools.partial(jit, static_argnums=(0,))
-    def _sample_batch(
-        batch_size: int, data: Dataset, prng_key: jnp.ndarray
-    ) -> Dataset:
+    def _sample_batch(batch_size: int, data: Dataset, prng_key: jnp.ndarray) -> Dataset:
         x, y = data
         num_points = x.shape[0]
         batch_indices = random.choice(
@@ -165,9 +159,7 @@ class StochasticObjective(abc.ABC):
         x: jnp.ndarray,
         **kwargs,
     ) -> jnp.ndarray:
-        _eval = functools.partial(
-            cls._eval, batch_size, data, prng_key, **kwargs
-        )
+        _eval = functools.partial(cls._eval, batch_size, data, prng_key, **kwargs)
         return grad(_eval)(x)
 
     @classmethod

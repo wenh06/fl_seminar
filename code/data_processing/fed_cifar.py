@@ -7,7 +7,7 @@ from typing import NoReturn, Optional, Union, List, Callable, Tuple, Dict, Seque
 
 import h5py
 import numpy as np
-import torch
+import torch  # noqa: F401
 import torch.utils.data as data
 import torchvision.transforms as transforms
 

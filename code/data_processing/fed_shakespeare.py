@@ -4,13 +4,12 @@
 from pathlib import Path
 from collections import OrderedDict
 from itertools import repeat
-from typing import NoReturn, Optional, Union, List, Callable, Tuple, Dict, Sequence
+from typing import NoReturn, Optional, Union, List, Tuple, Dict, Sequence
 
 import h5py
 import numpy as np
-import torch
+import torch  # noqa: F401
 import torch.utils.data as data
-import torchvision.transforms as transforms
 
 from misc import CACHED_DATA_DIR
 from models import nn as mnn

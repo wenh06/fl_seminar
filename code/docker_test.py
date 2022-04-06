@@ -5,28 +5,28 @@ from typing import NoReturn
 
 from misc import experiment_indicator
 
-from data_processing.fed_synthetic import FedSynthetic
-from data_processing.fedprox_femnist import FedProxFEMNIST
+from data_processing.fed_synthetic import FedSynthetic  # noqa: F401
+from data_processing.fedprox_femnist import FedProxFEMNIST  # noqa: F401
 
-from algorithms.pfedme import (
+from algorithms.pfedme import (  # noqa: F401
     pFedMeClient,
     pFedMeServer,
     pFedMeClientConfig,
     pFedMeServerConfig,
 )
-from algorithms.fedopt import (
+from algorithms.fedopt import (  # noqa: F401
     FedOptClient,
     FedOptServer,
     FedOptClientConfig,
     FedOptServerConfig,
 )
-from algorithms._experiments.fedprox import (
+from algorithms._experiments.fedprox import (  # noqa: F401
     FedProxClient,
     FedProxServer,
     FedProxClientConfig,
     FedProxServerConfig,
 )
-from algorithms._experiments.feddr import (
+from algorithms._experiments.feddr import (  # noqa: F401
     FedDRClient,
     FedDRServer,
     FedDRClientConfig,

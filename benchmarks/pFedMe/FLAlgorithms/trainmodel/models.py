@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Net(nn.Module):
     def __init__(self):
         super(Net, self).__init__()
@@ -28,8 +29,9 @@ class Net(nn.Module):
         output = F.log_softmax(x, dim=1)
         return output
 
+
 class Mclr_Logistic(nn.Module):
-    def __init__(self, input_dim = 784, output_dim = 10):
+    def __init__(self, input_dim=784, output_dim=10):
         super(Mclr_Logistic, self).__init__()
         self.fc1 = nn.Linear(input_dim, output_dim)
 
@@ -39,8 +41,9 @@ class Mclr_Logistic(nn.Module):
         output = F.log_softmax(x, dim=1)
         return output
 
+
 class Mclr_CrossEntropy(nn.Module):
-    def __init__(self, input_dim = 784, output_dim = 10):
+    def __init__(self, input_dim=784, output_dim=10):
         super(Mclr_CrossEntropy, self).__init__()
         self.linear = torch.nn.Linear(input_dim, output_dim)
 
@@ -49,13 +52,14 @@ class Mclr_CrossEntropy(nn.Module):
         outputs = self.linear(x)
         return outputs
 
+
 class DNN(nn.Module):
-    def __init__(self, input_dim = 784, mid_dim = 100, output_dim = 10):
+    def __init__(self, input_dim=784, mid_dim=100, output_dim=10):
         super(DNN, self).__init__()
         # define network layers
         self.fc1 = nn.Linear(input_dim, mid_dim)
         self.fc2 = nn.Linear(mid_dim, output_dim)
-        
+
     def forward(self, x):
         # define forward pass
         x = torch.flatten(x, 1)
@@ -63,6 +67,7 @@ class DNN(nn.Module):
         x = self.fc2(x)
         x = F.log_softmax(x, dim=1)
         return x
+
 
 class CifarNet(nn.Module):
     def __init__(self):
@@ -83,16 +88,59 @@ class CifarNet(nn.Module):
         x = self.fc3(x)
         return F.log_softmax(x, dim=1)
 
+
 #################################
 ##### Neural Network model #####
 #################################
 
 cfg = {
-    'VGG11': [64, 'M', 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'],
-    'VGG13': [64, 64, 'M', 128, 128, 'M', 256, 256, 'M', 512, 512, 'M', 512, 512, 'M'],
-    'VGG16': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 'M', 512, 512, 512, 'M', 512, 512, 512, 'M'],
-    'VGG19': [64, 64, 'M', 128, 128, 'M', 256, 256, 256, 256, 'M', 512, 512, 512, 512, 'M', 512, 512, 512, 512, 'M'],
+    "VGG11": [64, "M", 128, "M", 256, 256, "M", 512, 512, "M", 512, 512, "M"],
+    "VGG13": [64, 64, "M", 128, 128, "M", 256, 256, "M", 512, 512, "M", 512, 512, "M"],
+    "VGG16": [
+        64,
+        64,
+        "M",
+        128,
+        128,
+        "M",
+        256,
+        256,
+        256,
+        "M",
+        512,
+        512,
+        512,
+        "M",
+        512,
+        512,
+        512,
+        "M",
+    ],
+    "VGG19": [
+        64,
+        64,
+        "M",
+        128,
+        128,
+        "M",
+        256,
+        256,
+        256,
+        256,
+        "M",
+        512,
+        512,
+        512,
+        512,
+        "M",
+        512,
+        512,
+        512,
+        512,
+        "M",
+    ],
 }
+
 
 class VGG(nn.Module):
     def __init__(self, vgg_name):
@@ -103,7 +151,7 @@ class VGG(nn.Module):
             nn.ReLU(True),
             nn.Linear(512, 512),
             nn.ReLU(True),
-            nn.Linear(512, 10)
+            nn.Linear(512, 10),
         )
 
     def forward(self, x):
@@ -117,12 +165,14 @@ class VGG(nn.Module):
         layers = []
         in_channels = 3
         for x in cfg:
-            if x == 'M':
+            if x == "M":
                 layers += [nn.MaxPool2d(kernel_size=2, stride=2)]
             else:
-                layers += [nn.Conv2d(in_channels, x, kernel_size=3, padding=1),
-                           nn.BatchNorm2d(x),
-                           nn.ReLU(inplace=True)]
+                layers += [
+                    nn.Conv2d(in_channels, x, kernel_size=3, padding=1),
+                    nn.BatchNorm2d(x),
+                    nn.ReLU(inplace=True),
+                ]
                 in_channels = x
         layers += [nn.AvgPool2d(kernel_size=1, stride=1)]
         return nn.Sequential(*layers)
@@ -138,13 +188,14 @@ class CNNCifar(nn.Module):
         self.fc2 = nn.Linear(120, 100)
         self.fc3 = nn.Linear(100, num_classes)
 
-        self.weight_keys = [['fc1.weight', 'fc1.bias'],
-                            ['fc2.weight', 'fc2.bias'],
-                            ['fc3.weight', 'fc3.bias'],
-                            ['conv2.weight', 'conv2.bias'],
-                            ['conv1.weight', 'conv1.bias'],
-                            ]
-                            
+        self.weight_keys = [
+            ["fc1.weight", "fc1.bias"],
+            ["fc2.weight", "fc2.bias"],
+            ["fc3.weight", "fc3.bias"],
+            ["conv2.weight", "conv2.bias"],
+            ["conv1.weight", "conv1.bias"],
+        ]
+
     def forward(self, x):
         x = self.pool(F.relu(self.conv1(x)))
         x = self.pool(F.relu(self.conv2(x)))

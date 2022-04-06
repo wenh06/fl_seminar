@@ -125,9 +125,7 @@ def fed_opt(
         # Select clients.
         prng_key, subkey = random.split(prng_key)
         with Timer("select_clients_time") as t:
-            client_ids = sample_clients_fn(
-                subkey, num_clients, num_clients_per_round
-            )
+            client_ids = sample_clients_fn(subkey, num_clients, num_clients_per_round)
             client_objectives_round = [client_objectives[i] for i in client_ids]
             client_weights_round = jnp.asarray(
                 [float(o.num_points) for o in client_objectives_round]

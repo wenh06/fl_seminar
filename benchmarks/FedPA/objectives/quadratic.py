@@ -45,9 +45,7 @@ class LeastSquares(StochasticObjective):
 
     @staticmethod
     @jit
-    def eval(
-        x: jnp.ndarray, data_batch: Dataset, lam: float = 0.0
-    ) -> jnp.ndarray:
+    def eval(x: jnp.ndarray, data_batch: Dataset, lam: float = 0.0) -> jnp.ndarray:
         """Computes the mean squared error loss for `x` on the `data_batch`."""
         x_batch, y_batch = data_batch
         loss = jnp.mean(jnp.square(jnp.dot(x, x_batch.T) - y_batch))
@@ -128,9 +126,7 @@ def create_random_quadratics(
             A = np.random.randn(dim, dim)
             A = 0.5 * (A + A.T)
             w, V = np.linalg.eigh(A)
-            w = (max_eig - min_eig) * (w - w.min()) / (
-                w.max() - w.min()
-            ) + min_eig
+            w = (max_eig - min_eig) * (w - w.min()) / (w.max() - w.min()) + min_eig
             A = V.T.dot(np.diag(w)).dot(V)
         b = b_scale * np.random.randn(dim)
         q = Quadratic(A=jnp.asarray(A), b=jnp.asarray(b))
@@ -151,9 +147,7 @@ def create_global_quadratic(
       A weighted sum of the provided quadratics with the specified weights.
     """
     if len(objectives) != len(weights):
-        raise ValueError(
-            "The number of quadratics their weights must be equal."
-        )
+        raise ValueError("The number of quadratics their weights must be equal.")
     if not np.all(weights >= 0):
         raise ValueError("Weights must be non-negative.")
     weights = jnp.asarray(weights) / jnp.sum(weights)
@@ -209,9 +203,7 @@ def create_random_least_squares(
         )
         X = np.hstack([X, np.ones((X.shape[0], 1))])
         objectives.append(
-            LeastSquares(
-                X=jnp.array(X), y=jnp.array(y), batch_size=batch_size, lam=lam
-            )
+            LeastSquares(X=jnp.array(X), y=jnp.array(y), batch_size=batch_size, lam=lam)
         )
     return objectives
 

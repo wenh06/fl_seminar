@@ -4,17 +4,17 @@ FedProx re-implemented in the experiment framework
 
 from copy import deepcopy
 import warnings
-from typing import List, NoReturn, Dict
+from typing import List, NoReturn
 
-import torch
+import torch  # noqa: F401
 
 try:
-    from tqdm.auto import tqdm
+    from tqdm.auto import tqdm  # noqa: F401
 except ImportError:
-    from tqdm import tqdm
+    from tqdm import tqdm  # noqa: F401
 
 from nodes import Server, Client, ServerConfig, ClientConfig, ClientMessage
-from ..optimizers import get_optimizer
+from ..optimizers import get_optimizer  # noqa: F401
 
 
 __all__ = [

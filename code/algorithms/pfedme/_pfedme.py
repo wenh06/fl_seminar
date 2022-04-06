@@ -4,17 +4,22 @@ pFedMe re-implemented in the new framework
 
 from copy import deepcopy
 import warnings
-from typing import List, NoReturn, Dict, Any
+from typing import List, NoReturn, Any
 
-import torch
+import torch  # noqa: F401
 
 try:
-    from tqdm.auto import tqdm
+    from tqdm.auto import tqdm  # noqa: F401
 except ImportError:
-    from tqdm import tqdm
+    from tqdm import tqdm  # noqa: F401
 
-from nodes import Server, Client, ServerConfig, ClientConfig, ClientMessage
-from ..optimizers import get_optimizer
+from nodes import (
+    Server,
+    Client,
+    ServerConfig,
+    ClientConfig,
+    ClientMessage,
+)  # noqa: F401
 
 
 __all__ = [
