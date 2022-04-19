@@ -7,6 +7,7 @@ from ._pfedme import (
     pFedMeClient,
     pFedMeClientConfig,
 )
+from .test_pfedme import test_pfedme
 
 
 __all__ = [
@@ -14,4 +15,5 @@ __all__ = [
     "pFedMeServerConfig",
     "pFedMeClient",
     "pFedMeClientConfig",
+    "test_pfedme",
 ]
