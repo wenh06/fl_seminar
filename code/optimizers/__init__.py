@@ -19,6 +19,7 @@ from .feddr import FedDROptimizer as FedDR  # noqa: F401
 
 
 __all__ = [
+    "ProxSGD",
     "FedPD_SGD",
     "FedPD_VR",
     "PSGD",
