@@ -15,8 +15,8 @@ except ImportError:
 
 from data_processing.fed_dataset import FedDataset
 from nodes import Server, Client, ServerConfig, ClientConfig, ClientMessage
-from ..optimizers import get_optimizer  # noqa: F401
-from ..regularizers import get_regularizer  # noqa: F401
+from optimizers import get_optimizer  # noqa: F401
+from regularizers import get_regularizer  # noqa: F401
 
 
 __all__ = [

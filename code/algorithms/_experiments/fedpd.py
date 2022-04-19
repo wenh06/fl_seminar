@@ -13,5 +13,5 @@
 #     from tqdm import tqdm  # noqa: F401
 
 # from nodes import Server, Client, ServerConfig, ClientConfig
-# from ..optimizers import get_optimizer
-# from ..regularizers import get_regularizer
+# from optimizers import get_optimizer
+# from regularizers import get_regularizer

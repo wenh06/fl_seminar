@@ -13,9 +13,9 @@ except ImportError:
     from tqdm import tqdm  # noqa: F401
 
 from nodes import Server, Client, ServerConfig, ClientConfig  # noqa: F401
-from ..optimizers import get_optimizer  # noqa: F401
-from ..regularizers import get_regularizer  # noqa: F401
-from ...data_processing.fed_dataset import FedDataset
+from optimizers import get_optimizer  # noqa: F401
+from regularizers import get_regularizer  # noqa: F401
+from data_processing.fed_dataset import FedDataset
 
 
 class pFedDRServerConfig(ServerConfig):

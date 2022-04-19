@@ -26,7 +26,7 @@ from easydict import EasyDict as ED
 from misc import ReprMixin
 from loggers import LoggerManager
 from data_processing.fed_dataset import FedDataset
-from algorithms.optimizers import get_optimizer
+from optimizers import get_optimizer
 
 
 __all__ = [

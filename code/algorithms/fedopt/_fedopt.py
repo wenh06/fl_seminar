@@ -19,7 +19,7 @@ from nodes import (
     ClientConfig,
     ClientMessage,
 )  # noqa: F401
-from ..optimizers import get_optimizer  # noqa: F401
+from optimizers import get_optimizer  # noqa: F401
 
 
 __all__ = [

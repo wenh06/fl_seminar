@@ -14,7 +14,7 @@ except ImportError:
     from tqdm import tqdm  # noqa: F401
 
 from nodes import Server, Client, ServerConfig, ClientConfig, ClientMessage
-from ..optimizers import get_optimizer  # noqa: F401
+from optimizers import get_optimizer  # noqa: F401
 
 
 __all__ = [
