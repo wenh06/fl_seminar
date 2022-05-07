@@ -38,6 +38,7 @@ class FedDRServerConfig(ServerConfig):
         num_clients: int,
         clients_sample_ratio: float,
         eta: float = 1.0,
+        alpha: float = 1.9,
         reg_type: str = "l1_norm",
     ) -> NoReturn:
         """ """
@@ -47,6 +48,7 @@ class FedDRServerConfig(ServerConfig):
             num_clients,
             clients_sample_ratio,
             eta=eta,
+            alpha=alpha,
             reg_type=reg_type,
         )
 
@@ -62,7 +64,7 @@ class FedDRClientConfig(ClientConfig):
         num_epochs: int,
         lr: float = 1e-3,
         eta: float = 1.0,
-        alpha: float = 1.9,
+        alpha: float = 1.9,  # in the FedDR paper, clients' alpha is equal to the server's alpha
     ) -> NoReturn:
         """ """
         super().__init__(
@@ -129,7 +131,7 @@ class FedDRServer(Server):
         for m in self._received_messages:
             for i, xtp in enumerate(self._x_til_parameters):
                 xtp.data.add_(
-                    m["x_hat_delta"][i].data, alpha=m["train_samples"] / total_samples
+                    m["x_hat_delta"][i].data.to(self.device), alpha=m["train_samples"] / total_samples
                 )
 
         # update server (global) model
@@ -178,13 +180,13 @@ class FedDRClient(Client):
         """ """
         if self._x_hat_buffer is None:
             # outter iteration step -1, no need to communicate
-            self._x_hat_buffer = deepcopy(self._x_hat_parameters)
-            return
-        x_hat_delta = [
-            p.data - hp.data
-            for p, hp in zip(self._x_hat_parameters, self._x_hat_buffer)
-        ]
-        self._x_hat_buffer = deepcopy(self._x_hat_parameters)
+            x_hat_delta = [torch.zeros_like(p) for p in self._x_hat_parameters]
+        else:
+            x_hat_delta = [
+                p.data - hp.data
+                for p, hp in zip(self._x_hat_parameters, self._x_hat_buffer)
+            ]
+        self._x_hat_buffer = [p.clone() for p in self._x_hat_parameters]
         target._received_messages.append(
             ClientMessage(
                 **{
@@ -211,7 +213,7 @@ class FedDRClient(Client):
         self._cached_parameters = [p.to(self.device) for p in self._cached_parameters]
         # update y
         if self._y_parameters is None:
-            self._y_parameters = deepcopy(self._cached_parameters)
+            self._y_parameters = [p.clone().to(self.device) for p in self._cached_parameters]
         else:
             for yp, cp, mp in zip(
                 self._y_parameters, self._cached_parameters, self.model.parameters()
@@ -221,9 +223,9 @@ class FedDRClient(Client):
         self.train()
         # update x_hat
         if self._x_hat_parameters is None:
-            self._x_hat_parameters = deepcopy(self._cached_parameters)
-        for hp, cp, mp in zip(
-            self._x_hat_parameters, self._cached_parameters, self.model.parameters()
+            self._x_hat_parameters = [p.clone().to(self.device) for p in self._cached_parameters]
+        for hp, yp, mp in zip(
+            self._x_hat_parameters, self._y_parameters, self.model.parameters()
         ):
             hp.data = 2 * mp.data - yp.data
 
