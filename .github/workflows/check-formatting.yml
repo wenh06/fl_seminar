@@ -30,5 +30,5 @@ jobs:
         python -m pip install -r code/requirements.txt
     - name: Check code format with black and flake8
       run: |
-        black . --check --extend-exclude .ipynb -v
-        flake8 . --count --ignore="E501 W503 E203 F841" --show-source --statistics --exclude=./.*,benchmarks,build,dist
+        black . --check --extend-exclude .ipynb -v --exclude="/build|dist|benchmarks|boyd\-admm/"
+        flake8 . --count --ignore="E501 W503 E203 F841" --show-source --statistics --exclude=./.*,benchmarks,build,dist,boyd-admm
