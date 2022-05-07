@@ -24,7 +24,7 @@ from ._fedopt import (
     FedAdamClientConfig,
 )
 
-# from .test_fedopt import test_fedopt
+from .test_fedopt import test_fedopt
 
 
 __all__ = [
@@ -48,5 +48,5 @@ __all__ = [
     "FedAdamClient",
     "FedAdamServerConfig",
     "FedAdamClientConfig",
-    # "test_fedopt",
+    "test_fedopt",
 ]
