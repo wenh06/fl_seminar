@@ -131,7 +131,8 @@ class FedDRServer(Server):
         for m in self._received_messages:
             for i, xtp in enumerate(self._x_til_parameters):
                 xtp.data.add_(
-                    m["x_hat_delta"][i].data.to(self.device), alpha=m["train_samples"] / total_samples
+                    m["x_hat_delta"][i].data.to(self.device),
+                    alpha=m["train_samples"] / total_samples,
                 )
 
         # update server (global) model
@@ -213,7 +214,9 @@ class FedDRClient(Client):
         self._cached_parameters = [p.to(self.device) for p in self._cached_parameters]
         # update y
         if self._y_parameters is None:
-            self._y_parameters = [p.clone().to(self.device) for p in self._cached_parameters]
+            self._y_parameters = [
+                p.clone().to(self.device) for p in self._cached_parameters
+            ]
         else:
             for yp, cp, mp in zip(
                 self._y_parameters, self._cached_parameters, self.model.parameters()
@@ -223,7 +226,9 @@ class FedDRClient(Client):
         self.train()
         # update x_hat
         if self._x_hat_parameters is None:
-            self._x_hat_parameters = [p.clone().to(self.device) for p in self._cached_parameters]
+            self._x_hat_parameters = [
+                p.clone().to(self.device) for p in self._cached_parameters
+            ]
         for hp, yp, mp in zip(
             self._x_hat_parameters, self._y_parameters, self.model.parameters()
         ):
