@@ -23,7 +23,7 @@ except ImportError:
     from tqdm import tqdm
 from easydict import EasyDict as ED
 
-from misc import ReprMixin
+from misc import ReprMixin, add_docstring
 from loggers import LoggerManager
 from data_processing.fed_dataset import FedDataset
 from optimizers import get_optimizer
@@ -39,7 +39,7 @@ __all__ = [
 
 
 class ServerConfig(ReprMixin):
-    """ """
+    """Configs for the Server"""
 
     __name__ = "ServerConfig"
 
@@ -54,7 +54,29 @@ class ServerConfig(ReprMixin):
         eval_every: int = 1,
         **kwargs: Any,
     ) -> NoReturn:
-        """ """
+        """
+
+        Parameters
+        ----------
+        algorithm : str,
+            The algorithm name.
+        num_iters : int,
+            The number of (outer) iterations.
+        num_clients : int,
+            The number of clients.
+        clients_sample_ratio : float,
+            The ratio of clients to sample for each iteration.
+        txt_logger : bool, default True,
+            Whether to use txt logger.
+        csv_logger : bool, default True,
+            Whether to use csv logger.
+        eval_every : int, default 1,
+            The number of iterations to evaluate the model.
+        **kwargs : Any,
+            The other arguments,
+            will be set as attributes of the class.
+
+        """
         self.algorithm = algorithm
         self.num_iters = num_iters
         self.num_clients = num_clients
@@ -71,7 +93,7 @@ class ServerConfig(ReprMixin):
 
 
 class ClientConfig(ReprMixin):
-    """ """
+    """Configs for the Client"""
 
     __name__ = "ClientConfig"
 
@@ -84,7 +106,25 @@ class ClientConfig(ReprMixin):
         lr: float,
         **kwargs: Any,
     ) -> NoReturn:
-        """ """
+        """
+
+        Parameters
+        ----------
+        algorithm : str,
+            The algorithm name.
+        optimizer : str,
+            The name of the optimizer to solve the local (inner) problem.
+        batch_size : int,
+            The batch size.
+        num_epochs : int,
+            The number of epochs.
+        lr : float,
+            The learning rate.
+        **kwargs : Any,
+            The other arguments,
+            will be set as attributes of the class.
+
+        """
         self.algorithm = algorithm
         self.optimizer = optimizer
         self.batch_size = batch_size
@@ -120,6 +160,7 @@ class Node(ReprMixin, ABC):
         ```python
         target._received_messages = {"parameters": deepcopy(list(self.model.parameters()))}
         ```python
+
         """
         raise NotImplementedError
 
@@ -128,13 +169,12 @@ class Node(ReprMixin, ABC):
         """
         update model parameters, gradients, etc.
         according to `self._reveived_messages`
+
         """
         raise NotImplementedError
 
     def _post_init(self) -> NoReturn:
-        """
-        check if all required field in the config are set
-        """
+        """check if all required field in the config are set"""
         return all([hasattr(self.config, k) for k in self.required_config_fields])
 
     @property
@@ -145,7 +185,13 @@ class Node(ReprMixin, ABC):
 
 
 class Server(Node):
-    """ """
+    """
+    The class to simulate the server node.
+    The server node is responsible for communicating with clients,
+    and perform the aggregation of the local model parameters (and/or gradients),
+    and update the global model parameters.
+
+    """
 
     __name__ = "Server"
 
@@ -156,7 +202,20 @@ class Server(Node):
         config: ServerConfig,
         client_config: ClientConfig,
     ) -> NoReturn:
-        """ """
+        """
+
+        Parameters
+        ----------
+        model : nn.Module,
+            The model to be trained (optimized).
+        dataset : FedDataset,
+            The dataset to be used for training.
+        config : ServerConfig,
+            The configs for the server.
+        client_config : ClientConfig,
+            The configs for the clients.
+
+        """
         self.model = model
         self.dataset = dataset
         self.criterion = deepcopy(dataset.criterion)
@@ -187,7 +246,20 @@ class Server(Node):
         self, dataset: FedDataset, client_config: ClientConfig
     ) -> List[Node]:
         """
-        setup clients
+        setup the clients
+
+        Parameters
+        ----------
+        dataset : FedDataset,
+            The dataset to be used for training the local models.
+        client_config : ClientConfig,
+            The configs for the clients.
+
+        Returns
+        -------
+        list of `Node`,
+            The list of clients.
+
         """
         print("setup clients...")
         return [
@@ -200,9 +272,7 @@ class Server(Node):
         ]
 
     def _allocate_devices(self) -> List[torch.device]:
-        """
-        allocate devices for clients, can be used in `_setup_clients`
-        """
+        """allocate devices for clients, can be used in `_setup_clients`"""
         print("allocate devices...")
         num_gpus = torch.cuda.device_count()
         if num_gpus == 0:
@@ -212,9 +282,7 @@ class Server(Node):
         ]
 
     def _sample_clients(self) -> List[int]:
-        """
-        sample clients for each iteration
-        """
+        """sample clients for each iteration"""
         k = int(self.config.num_clients * self.config.clients_sample_ratio)
         return random.sample(range(self.config.num_clients), k)
 
@@ -241,16 +309,34 @@ class Server(Node):
     def train(
         self, mode: str = "federated", extra_configs: Optional[dict] = None
     ) -> NoReturn:
-        """ """
-        if mode == "federated":
+        """
+
+        Parameters
+        ----------
+        mode : str, default "federated",
+            The mode of training,
+            can be "federated" or "centralized", case-insensitive.
+        extra_configs : dict, optional,
+            The extra configs for the training `mode`.
+
+        """
+        if mode.lower() == "federated":
             self.train_federated(extra_configs)
-        elif mode == "centralized":
+        elif mode.lower() == "centralized":
             self.train_centralized(extra_configs)
         else:
             raise ValueError(f"mode {mode} is not supported")
 
     def train_centralized(self, extra_configs: Optional[dict] = None) -> NoReturn:
-        """ """
+        """
+        centralized training, conducted only on the server node.
+
+        Parameters
+        ----------
+        extra_configs : dict, optional,
+            The extra configs for centralized training.
+
+        """
         self._logger_manager.log_message("Training centralized...")
         extra_configs = ED(extra_configs or {})
 
@@ -321,7 +407,15 @@ class Server(Node):
 
     def train_federated(self, extra_configs: Optional[dict] = None) -> NoReturn:
         """
+        federated (distributed) training, conducted on the clients and the server.
+
+        Parameters
+        ----------
+        extra_configs : dict, optional,
+            The extra configs for federated training.
+
         TODO: run clients in parallel
+
         """
         self._logger_manager.log_message("Training federated...")
         self.n_iter = 0
@@ -357,7 +451,20 @@ class Server(Node):
         self._logger_manager.log_message("Federated training finished...")
 
     def evaluate_centralized(self, dataloader: DataLoader) -> Dict[str, float]:
-        """ """
+        """
+        Evaluate the model on the given dataloader on the server node.
+
+        Parameters
+        ----------
+        dataloader : DataLoader,
+            The dataloader for evaluation.
+
+        Returns
+        -------
+        metrics : dict,
+            The metrics of the model on the given dataloader.
+
+        """
         metrics = []
         for (X, y) in dataloader:
             X, y = X.to(self.model.device), y.to(self.model.device)
@@ -373,7 +480,7 @@ class Server(Node):
         return metrics
 
     def aggregate_client_metrics(self) -> NoReturn:
-        """ """
+        """aggregate the metrics transmitted from the clients"""
         if not any(["metrics" in m for m in self._received_messages]):
             raise ValueError("no metrics received from clients")
         for part in self.dataset.data_parts:
@@ -400,7 +507,17 @@ class Server(Node):
             )
 
     def add_parameters(self, params: Iterable[Parameter], ratio: float) -> NoReturn:
-        """ """
+        """
+        update the server's parameters with the given parameters
+
+        Parameters
+        ----------
+        params : `Iterable[Parameter]`,
+            The parameters to be added.
+        ratio : float,
+            The ratio of the parameters to be added.
+
+        """
         for server_param, param in zip(self.model.parameters(), params):
             server_param.data.add_(
                 param.data.detach().clone().to(self.device), alpha=ratio
@@ -421,7 +538,12 @@ class Server(Node):
 
 
 class Client(Node):
-    """ """
+    """
+    The class to simulate the client node.
+    The client node is responsible for training the local models,
+    and communicating with the server node.
+
+    """
 
     __name__ = "Client"
 
@@ -433,7 +555,22 @@ class Client(Node):
         dataset: FedDataset,
         config: ClientConfig,
     ) -> NoReturn:
-        """ """
+        """
+
+        Parameters
+        ----------
+        client_id : int,
+            The id of the client.
+        device : torch.device,
+            The device to train the model on.
+        model : nn.Module,
+            The model to train.
+        dataset : FedDataset,
+            The dataset to train on.
+        config : ClientConfig,
+            The config for the client.
+
+        """
         self.client_id = client_id
         self.device = device
         self.model = model
@@ -471,6 +608,7 @@ class Client(Node):
     @abstractmethod
     def train(self) -> NoReturn:
         """
+
         main part of inner loop solver, using the data from dataloaders
 
         basic example:
@@ -489,24 +627,36 @@ class Client(Node):
                 batch_losses.append(loss.item())
             epoch_losses.append(sum(batch_losses) / len(batch_losses))
         ```
+
         """
         raise NotImplementedError
 
+    @add_docstring(train.__doc__)
     def solve_inner(self) -> NoReturn:
-        """
-        alias of `train`
-        """
+        """alias of `train`"""
         self.train()
 
     def sample_data(self) -> Tuple[Tensor, Tensor]:
-        """
-        sample data for training
-        """
+        """sample data for training"""
         return next(iter(self.train_loader))
 
     @torch.no_grad()
     def evaluate(self, part: str) -> Dict[str, float]:
-        """ """
+        """
+        evaluate the model on the given part of the dataset.
+
+        Parameters
+        ----------
+        part : str,
+            The part of the dataset to evaluate on,
+            can be either "train" or "val".
+
+        Returns
+        -------
+        `Dict[str, float]`,
+            The metrics of the evaluation.
+
+        """
         assert part in self.dataset.data_parts, "Invalid part name"
         self.model.eval()
         _metrics = []
@@ -527,16 +677,25 @@ class Client(Node):
         return self._metrics[part]
 
     def get_parameters(self) -> Iterable[Parameter]:
-        """ """
+        """get the parameters of the (local) model on the client"""
         return self.model.parameters()
 
     def set_parameters(self, params: Iterable[Parameter]) -> NoReturn:
-        """ """
+        """
+
+        set the parameters of the (local) model on the client
+
+        Parameters
+        ----------
+        params : `Iterable[Parameter]`,
+            The parameters to set.
+
+        """
         for client_param, param in zip(self.model.parameters(), params):
             client_param.data = param.data.detach().clone().to(self.device)
 
     def get_gradients(self) -> List[Tensor]:
-        """ """
+        """get the gradients of the (local) model on the client"""
         grads = []
         for param in self.model.parameters():
             if param.grad is None:
@@ -563,7 +722,20 @@ class ClientMessage(dict):
     def __init__(
         self, client_id: int, train_samples: int, metrics: dict, **kwargs
     ) -> NoReturn:
-        """ """
+        """
+
+        Parameters
+        ----------
+        client_id : int,
+            The id of the client.
+        train_samples : int,
+            The number of samples used for training on the client.
+        metrics : dict,
+            The metrics evaluated on the client.
+        **kwargs : dict,
+            extra message to be sent to the server.
+
+        """
         super().__init__(
             client_id=client_id, train_samples=train_samples, metrics=metrics, **kwargs
         )
