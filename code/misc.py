@@ -72,6 +72,7 @@ def default_class_repr(c: object, align: str = "center", depth: int = 1) -> str:
     -------
     str,
         the representation of the class
+
     """
     indent = 4 * depth * " "
     closing_indent = 4 * (depth - 1) * " "
@@ -111,7 +112,7 @@ class ReprMixin(object):
 
 
 def isclass(obj: Any) -> bool:
-    """finished, checked,
+    """
 
     Parameters
     ----------
@@ -122,6 +123,7 @@ def isclass(obj: Any) -> bool:
     -------
     bool:
         True if `obj` is a class, False otherwise
+
     """
     try:
         return issubclass(obj, object)

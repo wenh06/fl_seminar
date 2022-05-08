@@ -2,23 +2,30 @@
 """
 
 import warnings
-from typing import Iterable, Union, NoReturn, Optional, List
+from typing import Iterable, Union, NoReturn, Optional
 
 import torch  # noqa: F401
 from torch import Tensor
 from torch.nn import Parameter
 from torch.optim.optimizer import Optimizer
 
+from . import functional as F
+
 
 __all__ = [
     "ProxSGD",
-    "prox_sgd",
 ]
 
 
 class ProxSGD(Optimizer):
-    """
-    Proximal Stochastic Gradient Descent
+    r"""
+    Proximal Stochastic Gradient Descent.
+    Using SGD to solve the proximal problem:
+        .. math::
+            \DeclareMathOperator*{\argmin}{arg\,min}
+            \operatorname{prox}_{\rho f}(v) = \argmin_x \{f(x) + \dfrac{\rho}{2} \lVert x-v \rVert_2^2\}
+    when it does not have a closed form solution.
+
     """
 
     __name__ = "ProxSGD"
@@ -33,7 +40,7 @@ class ProxSGD(Optimizer):
         nesterov=False,
         prox: float = 0.1,
     ) -> NoReturn:
-        """
+        r"""
 
         Parameters
         ----------
@@ -45,12 +52,16 @@ class ProxSGD(Optimizer):
             momentum factor
         dampening: float, default 0,
             dampening for momentum
-        weight_decay: float, default 0
+        weight_decay: float, default 0,
             weight decay (L2 penalty)
         nesterov: bool, default False,
             if True, enables Nesterov momentum
         prox: float, default 0.1,
-            coeff. of the proximal term
+            the (penalty) coeff. of the proximal term,
+            i.e. the term `\rho` in
+            .. math::
+                \argmin_x \{f(x) + \dfrac{\rho}{2} \lVert x-v \rVert_2^2\}
+
         """
         if lr < 0.0:
             raise ValueError(f"Invalid learning rate: {lr}")
@@ -87,13 +98,16 @@ class ProxSGD(Optimizer):
         local_weight_updated: Iterable[Parameter],
         closure: Optional[callable] = None,
     ) -> Optional[Tensor]:
-        """
+        r"""
 
         Parameters
         ----------
         local_weight_updated: iterable of Parameter,
             the local weights updated by the local optimizer,
-            or of the previous iteration
+            or of the previous iteration,
+            i.e. the term `v` in
+            .. math::
+                \argmin_x \{f(x) + \dfrac{\rho}{2} \lVert x-v \rVert_2^2\}
         closure: callable, optional,
             a closure that reevaluates the model and returns the loss.
 
@@ -101,6 +115,7 @@ class ProxSGD(Optimizer):
         -------
         loss: Tensor, optional,
             the loss after the step
+
         """
         loss = None
         if closure is not None:
@@ -128,7 +143,7 @@ class ProxSGD(Optimizer):
                     else:
                         momentum_buffer_list.append(state["momentum_buffer"])
 
-            prox_sgd(
+            F.prox_sgd(
                 params_with_grad,
                 local_weight_updated,
                 d_p_list,
@@ -147,44 +162,3 @@ class ProxSGD(Optimizer):
                 state["momentum_buffer"] = momentum_buffer
 
         return loss
-
-
-def prox_sgd(
-    params: List[Tensor],
-    local_weight_updated: Iterable[Parameter],
-    d_p_list: List[Tensor],
-    momentum_buffer_list: List[Optional[Tensor]],
-    weight_decay: float,
-    momentum: float,
-    lr: float,
-    dampening: float,
-    nesterov: bool,
-    prox: float,
-) -> NoReturn:
-    """ """
-    for i, (param, localweight) in enumerate(zip(params, local_weight_updated)):
-
-        d_p = d_p_list[i]
-        if weight_decay != 0:
-            d_p = d_p.add(param, alpha=weight_decay)  # L2 regularization
-
-        if prox != 0:
-            d_p = d_p.add(
-                param - localweight.detach().clone(), alpha=prox
-            )  # proximal regularization
-
-        if momentum != 0:
-            buf = momentum_buffer_list[i]
-
-            if buf is None:
-                buf = torch.clone(d_p).detach()
-                momentum_buffer_list[i] = buf
-            else:
-                buf.mul_(momentum).add_(d_p, alpha=1 - dampening)
-
-            if nesterov:
-                d_p = d_p.add(buf, alpha=momentum)
-            else:
-                d_p = buf
-
-        param.add_(d_p, alpha=-lr)
