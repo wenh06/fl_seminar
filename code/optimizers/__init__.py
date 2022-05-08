@@ -11,7 +11,7 @@ import torch_optimizer as topt  # noqa: F401
 from easydict import EasyDict as ED
 
 from misc import isclass
-from .base import ProxSGD  # noqa: F401
+from .base import ProxSGD, AL_SGD  # noqa: F401
 from .fedpd import FedPD_SGD, FedPD_VR, PSGD, PSVRG  # noqa: F401
 from .pfedme import pFedMeOptimizer as pFedMe  # noqa: F401
 from .fedprox import FedProxOptimizer as FedProx  # noqa: F401
@@ -20,6 +20,7 @@ from .feddr import FedDROptimizer as FedDR  # noqa: F401
 
 __all__ = [
     "ProxSGD",
+    "AL_SGD",
     "FedPD_SGD",
     "FedPD_VR",
     "PSGD",
