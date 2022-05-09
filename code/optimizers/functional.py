@@ -42,7 +42,7 @@ def prox_sgd(
     d_p_list: list of Tensor,
         the list of gradients of the parameters
     momentum_buffer_list: list of Tensor or list of None,
-        the list of momentum buffers if `nesterov` is True
+        the list of momentum buffers
     weight_decay: float,
         weight decay (L2 penalty)
     momentum: float,
@@ -90,8 +90,8 @@ def prox_sgd(
 
 def al_sgd(
     params: List[Tensor],
-    local_weight: Iterable[Parameter],
-    dual_weight: Iterable[Parameter],
+    local_weights: List[Tensor],
+    dual_weights: List[Tensor],
     d_p_list: List[Tensor],
     momentum_buffer_list: List[Optional[Tensor]],
     weight_decay: float,
@@ -99,32 +99,36 @@ def al_sgd(
     lr: float,
     dampening: float,
     nesterov: bool,
-    rho: float,
+    mu: float,
 ) -> NoReturn:
     r"""
     The function that executes the augmented Lagrangian SGD:
         .. math::
             \DeclareMathOperator*{\argmin}{arg\,min}
-            \argmin_x \mathcal{L}_{\rho}(x, x_0, \lambda) = \argmin_x \{f(x) + \langle \lambda, x-x_0 \rangle + \dfrac{\rho}{2} \lVert x-x_0 \rVert_2^2\}
+            \argmin_x \mathcal{L}_{\mu}(x, x_0, \lambda) = \argmin_x \{f(x) + \langle \lambda, x-x_0 \rangle + \dfrac{1}{2\mu} \lVert x-x_0 \rVert_2^2\}
 
     Parameters
     ----------
     params: list of dict or Parameter,
         the parameters to optimize
-    local_weight: iterable of Parameter,
+    local_weights: iterable of Parameter,
         the (init) local weights,
         i.e. the term `x_0` in
         .. math::
-            \mathcal{L}(x, x_0, \lambda)
-    dual_weight: iterable of Parameter,
+            \mathcal{L}_{\mu}(x, x_0, \lambda)
+    dual_weights: iterable of Parameter,
         the weights of dual variables,
         i.e. the term `\lambda` in
         .. math::
-            \mathcal{L}(x, x_0, \lambda)
+            \mathcal{L}_{\mu}(x, x_0, \lambda)
     d_p_list: list of Tensor,
         the list of gradients of the parameters
     momentum_buffer_list: list of Tensor or list of None,
-        the list of momentum buffers if `nesterov` is True
+        the list of momentum buffers,
+        works only if `momentum` > 0
+    gradient_variance_buffer_list: list of Tensor or list of None,
+        the list of gradient variance buffers,
+        works only is `vr` is True
     weight_decay: float,
         weight decay (L2 penalty)
     momentum: float,
@@ -135,21 +139,20 @@ def al_sgd(
         dampening for momentum
     nesterov: bool,
         if True, enables Nesterov momentum
-    rho: float,
+    mu: float,
         the (penalty) coeff. of the augmented Lagrangian term,
-        i.e. the term `\rho` in
+        i.e. the term `\mu` in
         .. math::
-            \mathcal{L}_{\rho}(x, x_0, \lambda)
+            \mathcal{L}_{\mu}(x, x_0, \lambda)
 
     """
-    for idx, (param, lw, dw) in enumerate(zip(params, local_weight, dual_weight)):
+    for idx, (param, lw, dw) in enumerate(zip(params, local_weights, dual_weights)):
 
         d_p = d_p_list[idx]
 
         d_p = d_p.add(dw.detach().clone())
 
-        if rho != 0:
-            d_p = d_p.add(param - lw.detach().clone(), alpha=1 / rho)
+        d_p = d_p.add(param - lw.detach().clone(), alpha=1 / mu)
 
         if weight_decay != 0:
             d_p = d_p.add(param, alpha=weight_decay)  # L2 regularization

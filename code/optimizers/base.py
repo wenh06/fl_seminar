@@ -35,10 +35,10 @@ class ProxSGD(Optimizer):
         self,
         params: Iterable[Union[dict, Parameter]],
         lr: float = 1e-3,
-        momentum=1e-3,
-        dampening=0,
-        weight_decay=0,
-        nesterov=False,
+        momentum: float = 1e-3,
+        dampening: float = 0,
+        weight_decay: float = 0,
+        nesterov: bool = False,
         prox: float = 0.1,
     ) -> NoReturn:
         r"""
@@ -130,8 +130,8 @@ class ProxSGD(Optimizer):
             momentum = group["momentum"]
             dampening = group["dampening"]
             nesterov = group["nesterov"]
-            lr = group["lr"]
             prox = group["prox"]
+            lr = group["lr"]
 
             for p in group["params"]:
                 if p.grad is not None:
@@ -172,7 +172,7 @@ class AL_SGD(Optimizer):
     Using SGD to solve the augmented Lagrangian problem:
         .. math::
             \DeclareMathOperator*{\argmin}{arg\,min}
-            \argmin_x \mathcal{L}_{\rho}(x, x_0, \lambda) = \argmin_x \{f(x) + \langle \lambda, x-x_0 \rangle + \dfrac{\rho}{2} \lVert x-x_0 \rVert_2^2\}
+            \argmin_x \mathcal{L}_{\mu}(x, x_0, \lambda) = \argmin_x \{f(x) + \langle \lambda, x-x_0 \rangle + \dfrac{1}{2\mu} \lVert x-x_0 \rVert_2^2\}
     when it does not have a closed form solution.
 
     """
@@ -183,11 +183,11 @@ class AL_SGD(Optimizer):
         self,
         params: Iterable[Union[dict, Parameter]],
         lr: float = 1e-3,
-        momentum=0,
-        dampening=0,
-        weight_decay=0,
-        nesterov=False,
-        rho: float = 0.1,
+        momentum: float = 0,
+        dampening: float = 0,
+        weight_decay: float = 0,
+        nesterov: float = False,
+        mu: float = 1,
     ) -> NoReturn:
         r"""
 
@@ -205,11 +205,11 @@ class AL_SGD(Optimizer):
             weight decay (L2 penalty)
         nesterov: bool, default False,
             if True, enables Nesterov momentum
-        rho: float, default 0.1,
+        mu: float, default 0.1,
             the (penalty) coeff. of the augmented Lagrangian term,
-            i.e. the term `\rho` in
+            i.e. the term `\mu` in
             .. math::
-                \mathcal{L}_{\rho}(x, x_0, \lambda)
+                \mathcal{L}_{\mu}(x, x_0, \lambda)
 
         """
         if lr < 0.0:
@@ -220,15 +220,15 @@ class AL_SGD(Optimizer):
             raise ValueError(f"Invalid weight_decay value: {weight_decay}")
         if nesterov and (momentum <= 0 or dampening != 0):
             raise ValueError("Nesterov momentum requires a momentum and zero dampening")
-        if rho < 0.0:
-            raise ValueError(f"Invalid rho value: {rho}")
+        if mu < 0.0:
+            raise ValueError(f"Invalid mu value: {mu}")
         defaults = dict(
             lr=lr,
             momentum=momentum,
             dampening=dampening,
             weight_decay=weight_decay,
             nesterov=nesterov,
-            rho=rho,
+            mu=mu,
         )
         super().__init__(params, defaults)
 
@@ -240,26 +240,24 @@ class AL_SGD(Optimizer):
     @torch.no_grad()
     def step(
         self,
-        local_weight: Iterable[Parameter],
-        dual_weight: Iterable[Parameter],
+        local_weights: Iterable[Parameter],
+        dual_weights: Iterable[Parameter],
         closure: Optional[callable] = None,
     ) -> Optional[Tensor]:
         r"""
 
         Parameters
         ----------
-        local_weight: iterable of Parameter,
+        local_weights: iterable of Parameter,
             the (init) local weights,
             i.e. the term `x_0` in
             .. math::
-                \mathcal{L}(x, x_0, \lambda)
-        dual_weight: iterable of Parameter,
+                \mathcal{L}_{\mu}(x, x_0, \lambda)
+        dual_weights: iterable of Parameter,
             the weights of dual variables,
             i.e. the term `\lambda` in
             .. math::
-                \mathcal{L}(x, x_0, \lambda)
-        closure: callable, optional,
-            a closure that reevaluates the model and returns the loss.
+                \mathcal{L}_{\mu}(x, x_0, \lambda)
 
         Returns
         -------
@@ -279,7 +277,7 @@ class AL_SGD(Optimizer):
             momentum = group["momentum"]
             dampening = group["dampening"]
             nesterov = group["nesterov"]
-            rho = group["rho"]
+            mu = group["mu"]
             lr = group["lr"]
 
             for p in group["params"]:
@@ -295,8 +293,8 @@ class AL_SGD(Optimizer):
 
             F.al_sgd(
                 params_with_grad,
-                local_weight,
-                dual_weight,
+                local_weights,
+                dual_weights,
                 d_p_list,
                 momentum_buffer_list,
                 weight_decay,
@@ -304,10 +302,10 @@ class AL_SGD(Optimizer):
                 lr,
                 dampening,
                 nesterov,
-                rho,
+                mu,
             )
 
-            # update momentum_buffers in state
+            # update momentum_buffers, gradient_variance_buffers in state
             for p, momentum_buffer in zip(params_with_grad, momentum_buffer_list):
                 state = self.state[p]
                 state["momentum_buffer"] = momentum_buffer
