@@ -175,7 +175,7 @@ class Node(ReprMixin, ABC):
 
     def _post_init(self) -> NoReturn:
         """check if all required field in the config are set"""
-        return all([hasattr(self.config, k) for k in self.required_config_fields])
+        assert all([hasattr(self.config, k) for k in self.required_config_fields])
 
     @property
     @abstractmethod
@@ -221,6 +221,7 @@ class Server(Node):
         self.criterion = deepcopy(dataset.criterion)
         self.config = config
         self.device = torch.device("cpu")
+        self._client_config = client_config
 
         self._clients = self._setup_clients(dataset, client_config)
         logger_config = dict(
@@ -522,6 +523,24 @@ class Server(Node):
             server_param.data.add_(
                 param.data.detach().clone().to(self.device), alpha=ratio
             )
+
+    def update_gradients(self) -> NoReturn:
+        """update the server's gradients"""
+        if len(self._received_messages) == 0:
+            return
+        assert all(["gradients" in m for m in self._received_messages])
+        # self.model.zero_grad()
+        for mp, gd in zip(
+            self.model.parameters(), self._received_messages[0]["gradients"]
+        ):
+            mp.grad = torch.zeros_like(gd).to(self.device)
+        total_samples = sum([m["train_samples"] for m in self._received_messages])
+        for rm in self._received_messages:
+            for mp, gd in zip(self.model.parameters(), rm["gradients"]):
+                mp.grad.add_(
+                    gd.detach().clone().to(self.device),
+                    alpha=rm["train_samples"] / total_samples,
+                )
 
     def extra_repr_keys(self) -> List[str]:
         """ """
