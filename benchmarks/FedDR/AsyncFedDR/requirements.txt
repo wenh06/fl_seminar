@@ -1,4 +1,4 @@
-numpy==1.19.2
+numpy==1.21.0
 six==1.15.0
 torch==1.7.1
 torchvision==0.8.2
