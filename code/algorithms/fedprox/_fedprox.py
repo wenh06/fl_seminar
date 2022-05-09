@@ -35,6 +35,7 @@ class FedProxServerConfig(ServerConfig):
         num_iters: int,
         num_clients: int,
         clients_sample_ratio: float,
+        vr: bool = False,
     ) -> NoReturn:
         """ """
         super().__init__(
@@ -42,6 +43,7 @@ class FedProxServerConfig(ServerConfig):
             num_iters,
             num_clients,
             clients_sample_ratio,
+            vr=vr,
         )
 
 
@@ -56,6 +58,7 @@ class FedProxClientConfig(ClientConfig):
         num_epochs: int,
         lr: float = 1e-3,
         mu: float = 0.01,
+        vr: bool = False,
     ) -> NoReturn:
         """ """
         super().__init__(
@@ -65,6 +68,7 @@ class FedProxClientConfig(ClientConfig):
             num_epochs,
             lr,
             mu=mu,
+            vr=vr,
         )
 
 
@@ -72,6 +76,15 @@ class FedProxServer(Server):
     """ """
 
     __name__ = "FedProxServer"
+
+    def _post_init(self) -> NoReturn:
+        """
+        check if all required field in the config are set,
+        and compatibility of server and client configs
+
+        """
+        super()._post_init()
+        assert self.config.vr == self._client_config.vr
 
     @property
     def client_cls(self) -> "Client":
@@ -87,6 +100,11 @@ class FedProxServer(Server):
         target._received_messages = {
             "parameters": deepcopy(list(self.model.parameters()))
         }
+        if target.config.vr:
+            target._received_messages["gradients"] = [
+                p.grad.detach().clone() if p.grad is not None else torch.zeros_like(p)
+                for p in target.model.parameters()
+            ]
 
     def update(self) -> NoReturn:
         """ """
@@ -96,6 +114,8 @@ class FedProxServer(Server):
         total_samples = sum([m["train_samples"] for m in self._received_messages])
         for m in self._received_messages:
             self.add_parameters(m["parameters"], m["train_samples"] / total_samples)
+        if self.config.vr:
+            self.update_gradients()
 
 
 class FedProxClient(Client):
@@ -112,16 +132,17 @@ class FedProxClient(Client):
 
     def communicate(self, target: "FedProxServer") -> NoReturn:
         """ """
-        target._received_messages.append(
-            ClientMessage(
-                **{
-                    "client_id": self.client_id,
-                    "parameters": deepcopy(list(self.model.parameters())),
-                    "train_samples": len(self.train_loader.dataset),
-                    "metrics": self._metrics,
-                }
-            )
-        )
+        message = {
+            "client_id": self.client_id,
+            "parameters": deepcopy(list(self.model.parameters())),
+            "train_samples": len(self.train_loader.dataset),
+            "metrics": self._metrics,
+        }
+        if self.config.vr:
+            message["gradients"] = [
+                p.grad.detach().clone() for p in self.model.parameters()
+            ]
+        target._received_messages.append(ClientMessage(**message))
 
     def update(self) -> NoReturn:
         """ """
@@ -134,6 +155,11 @@ class FedProxClient(Client):
         except Exception as err:
             raise err
         self._cached_parameters = [p.to(self.device) for p in self._cached_parameters]
+        if self.config.vr:
+            self._gradient_buffer = [
+                gd.clone().to(self.device)
+                for gd in self._received_messages["gradients"]
+            ]
         self.train()
 
     def train(self) -> NoReturn:
@@ -148,4 +174,5 @@ class FedProxClient(Client):
                     output = self.model(X)
                     loss = self.criterion(output, y)
                     loss.backward()
+                    # TODO: add the function of variance reduction
                     self.optimizer.step(self._cached_parameters)
