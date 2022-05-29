@@ -132,7 +132,9 @@ class pFedDRClient(Client):
     ) -> NoReturn:
         """ """
         super().__init__(client_id, device, model, dataset, config)
-        raise NotImplementedError
+        self._y_parameters = None  # y
+        self._x_hat_parameters = None  # x_hat
+        self._x_hat_buffer = None  # x_hat_buffer
 
     @property
     def required_config_fields(self) -> List[str]:

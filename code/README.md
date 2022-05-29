@@ -4,6 +4,8 @@ This folder includes code for studying problems of federated learning, under con
 
 The main part of this code repository is a standalone simulation framework of federated training.
 
+**This folder temporarily suspends updating. Code are currently developed in a private repository and would be released public after some time.**
+
 <!-- toc -->
 
 - [Optimizers](#optimizers)

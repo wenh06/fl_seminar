@@ -12,6 +12,7 @@ federated seminar held at BUAA
   - [Venue](#venue)
   - [Programme (planned)](#programme-planned)
   - [Compilation](#compilation)
+  - [Code]
 - [More resources](#more-resources)
 
 <!-- tocstop -->
@@ -90,6 +91,10 @@ python compile.py
 ```
 
 with `texlive-full` and `latexmk` etc. installed.
+
+## Code
+
+[Code](/code) folder contains codes for research purpose, as well as codes that re-implement some published FL algorithms.
 
 
 # More resources
