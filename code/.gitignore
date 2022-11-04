@@ -1,2 +1,3 @@
 *.ipynb
 !compression/compressors_test.ipynb
+!fedprox-and-fedsplit.ipynb
