@@ -6,7 +6,6 @@
 
 \title[]{Talk 9: Operator Splitting and Federated Learning}
 \date{2021-10-28}
-\author[]{WEN Hao}
 
 % \institute[北京航空航天大学] % Your institution as it will appear on the bottom of every slide, may be shorthand to save space
 % {
@@ -272,7 +271,7 @@ E & = \{x \ |\ x_1 = \cdots = x_m\}
 Indeed for $x\in E$,
 \begin{align*}
 \mathcal{N}_E(x) & = \left\{ y \ \middle|\ \langle y, \widetilde{x} - x \rangle \leqslant 0 \ \forall \widetilde{x} \in E \right\} \\
-& = \left\{ y \ \middle|\ \langle \sum\nolimits_{j=1}^m y_j, \widetilde{x}_1 - x_1 \rangle \leqslant 0 \ \forall \widetilde{x}_1 \in \mathbb{R}^d \right\} \\
+& = \left\{ y \ \middle|\ \left\langle \sum\nolimits_{j=1}^m y_j, ~ \widetilde{x}_1 - x_1 \right\rangle \leqslant 0, \ \forall \widetilde{x}_1 \in \mathbb{R}^d \right\} \\
 & = \left\{ y \ \middle|\ \sum\nolimits_{j=1}^m y_j = 0 \right\} = E^{\perp}
 \end{align*}
 
@@ -369,6 +368,8 @@ z^{(t+1)} & = z^{(t)} + x^{(t+1)} \\
 \end{block}
 \end{column}
 \end{columns}
+
+\vspace{1em}
 
 More generally, $z^{(t+1)} = z^{(t)} + \alpha (x^{(t+1)} - x^{(t+1/2)})$
 
