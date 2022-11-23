@@ -4,7 +4,7 @@
 import pathlib
 import re
 from functools import wraps
-from typing import List, Any, Callable, NoReturn
+from typing import List, Any, Callable
 
 import numpy as np
 
@@ -42,7 +42,7 @@ SEED = 42
 RNG = np.random.default_rng(seed=SEED)
 
 
-def set_seed(seed: int) -> NoReturn:
+def set_seed(seed: int) -> None:
     """
     set the seed of the random number generator
 

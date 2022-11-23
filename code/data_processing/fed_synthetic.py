@@ -1,7 +1,7 @@
 """
 """
 
-from typing import NoReturn, Optional, List, Tuple, Dict
+from typing import Optional, List, Tuple, Dict
 
 import numpy as np
 import torch  # noqa: F401
@@ -31,7 +31,7 @@ class FedSynthetic(FedDataset):
         num_clients: int,
         num_classes: int = 10,
         dimension: int = 60,
-    ) -> NoReturn:
+    ) -> None:
         """ """
         super().__init__()
         self.alpha = alpha
@@ -43,7 +43,7 @@ class FedSynthetic(FedDataset):
 
         self._preload()
 
-    def _preload(self) -> NoReturn:
+    def _preload(self) -> None:
         """ """
         self.criterion = torch.nn.CrossEntropyLoss()
         self._data = generate_synthetic(

@@ -10,7 +10,7 @@ import tempfile
 import tarfile
 import zipfile
 from pathlib import Path
-from typing import NoReturn, Union, List, Tuple, Optional
+from typing import Union, List, Tuple, Optional
 
 import requests
 import tqdm
@@ -33,7 +33,7 @@ DECOMPRESS_CMD = {
 
 def download_if_needed(
     url: str, dst_dir: Union[str, Path] = CACHED_DATA_DIR, extract: bool = True
-) -> NoReturn:
+) -> None:
     """ """
     dst_dir = Path(dst_dir)
     dst_dir.mkdir(parents=True, exist_ok=True)
@@ -47,7 +47,7 @@ def http_get(
     dst_dir: Union[str, Path],
     proxies: Optional[dict] = None,
     extract: bool = True,
-) -> NoReturn:
+) -> None:
     """Get contents of a URL and save to a file.
 
     https://github.com/huggingface/transformers/blob/master/src/transformers/file_utils.py
@@ -140,18 +140,14 @@ def _suffix(path: Union[str, Path]) -> str:
     return "".join(Path(path).suffixes)
 
 
-def _unzip_file(
-    path_to_zip_file: Union[str, Path], dst_dir: Union[str, Path]
-) -> NoReturn:
+def _unzip_file(path_to_zip_file: Union[str, Path], dst_dir: Union[str, Path]) -> None:
     """Unzips a .zip file to folder path."""
     print(f"Extracting file {path_to_zip_file} to {dst_dir}.")
     with zipfile.ZipFile(str(path_to_zip_file)) as zip_ref:
         zip_ref.extractall(str(dst_dir))
 
 
-def _untar_file(
-    path_to_tar_file: Union[str, Path], dst_dir: Union[str, Path]
-) -> NoReturn:
+def _untar_file(path_to_tar_file: Union[str, Path], dst_dir: Union[str, Path]) -> None:
     """decompress a .tar.xx file to folder path."""
     print(f"Extracting file {path_to_tar_file} to {dst_dir}.")
     mode = Path(path_to_tar_file).suffix.replace(".", "r:").replace("tar", "")

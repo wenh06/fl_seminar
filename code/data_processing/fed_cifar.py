@@ -3,7 +3,7 @@ federated Cifar10, Cifar100
 """
 
 from pathlib import Path
-from typing import NoReturn, Optional, Union, List, Callable, Tuple, Dict, Sequence
+from typing import Optional, Union, List, Callable, Tuple, Dict, Sequence
 
 import h5py
 import numpy as np
@@ -46,7 +46,7 @@ class FedCIFAR(FedVisionDataset):
 
     def __init__(
         self, n_class: int = 100, datadir: Optional[Union[str, Path]] = None
-    ) -> NoReturn:
+    ) -> None:
         """ """
         self._n_class = n_class
         assert self.n_class in [
@@ -54,7 +54,7 @@ class FedCIFAR(FedVisionDataset):
         ]
         super().__init__(datadir=Path(datadir or FED_CIFAR_DATA_DIRS[n_class]))
 
-    def _preload(self, datadir: Optional[Union[str, Path]] = None) -> NoReturn:
+    def _preload(self, datadir: Optional[Union[str, Path]] = None) -> None:
         """ """
         self.DEFAULT_TRAIN_CLIENTS_NUM = 500
         self.DEFAULT_TEST_CLIENTS_NUM = 100
@@ -204,7 +204,7 @@ class FedCIFAR100(FedCIFAR):
 
     __name__ = "FedCIFAR100"
 
-    def __init__(self, datadir: Optional[Union[str, Path]] = None) -> NoReturn:
+    def __init__(self, datadir: Optional[Union[str, Path]] = None) -> None:
         """ """
         super().__init__(100, datadir)
 

@@ -3,7 +3,7 @@ simple neural network models
 """
 
 import re
-from typing import NoReturn, Optional, Union, Sequence
+from typing import Optional, Union, Sequence
 
 import torch  # noqa: F401
 from torch import nn, Tensor
@@ -47,7 +47,7 @@ class MLP(CLFMixin, SizeMixin, nn.Sequential):
         dim_in: int,
         dim_out: int,
         dim_hidden: Optional[Union[int, Sequence[int]]] = None,
-    ) -> NoReturn:
+    ) -> None:
         """ """
         super().__init__()
         self.add_module("flatten", Rearrange("b c h w -> b (c h w)"))
@@ -81,7 +81,7 @@ class FedPDMLP(CLFMixin, SizeMixin, nn.Sequential):
 
     __name__ = "FedPDMLP"
 
-    def __init__(self, dim_in: int, dim_hidden: int, dim_out: int) -> NoReturn:
+    def __init__(self, dim_in: int, dim_hidden: int, dim_out: int) -> None:
         """ """
         super().__init__()
         self.add_module("flatten", Rearrange("b c h w -> b (c h w)"))
@@ -107,7 +107,7 @@ class CNNMnist(CLFMixin, SizeMixin, nn.Sequential):
 
     __name__ = "CNNMnist"
 
-    def __init__(self, num_classes: int) -> NoReturn:
+    def __init__(self, num_classes: int) -> None:
         """ """
         super().__init__()
         self.add_module("conv1", nn.Conv2d(1, 10, kernel_size=5))
@@ -133,7 +133,7 @@ class CNNFEMnist(CLFMixin, SizeMixin, nn.Sequential):
 
     __name__ = "CNNFEMnist"
 
-    def __init__(self) -> NoReturn:
+    def __init__(self) -> None:
         """ """
         super().__init__()
         in_channels = 1
@@ -167,7 +167,7 @@ class CNNFEMnist_Tiny(CLFMixin, SizeMixin, nn.Sequential):
 
     __name__ = "CNNFEMnist_Tiny"
 
-    def __init__(self) -> NoReturn:
+    def __init__(self) -> None:
         """ """
         super().__init__()
         in_channels = 1
@@ -201,7 +201,7 @@ class CNNCifar(CLFMixin, SizeMixin, nn.Sequential):
 
     __name__ = "CNNCifar"
 
-    def __init__(self, num_classes: int) -> NoReturn:
+    def __init__(self, num_classes: int) -> None:
         """ """
         super().__init__()
         self.add_module(
@@ -248,7 +248,7 @@ class RNN_OriginalFedAvg(CLFMixin, SizeMixin, nn.Module):
 
     def __init__(
         self, embedding_dim: int = 8, vocab_size: int = 90, hidden_size: int = 256
-    ) -> NoReturn:
+    ) -> None:
         """ """
         super().__init__()
         self.embeddings = nn.Embedding(
@@ -297,7 +297,7 @@ class RNN_StackOverFlow(CLFMixin, SizeMixin, nn.Module):
         embedding_size: int = 96,
         latent_size: int = 670,
         num_layers: int = 1,
-    ) -> NoReturn:
+    ) -> None:
         """ """
         super().__init__()
         extended_vocab_size = vocab_size + 3 + num_oov_buckets  # For pad/bos/eos/oov.
@@ -330,7 +330,7 @@ class ResNet18(CLFMixin, SizeMixin, ResNet):
 
     __name__ = "ResNet18"
 
-    def __init__(self, num_classes: int, pretrained: bool = False) -> NoReturn:
+    def __init__(self, num_classes: int, pretrained: bool = False) -> None:
         """ """
         super().__init__(
             BasicBlock,
@@ -355,7 +355,7 @@ class ResNet10(CLFMixin, SizeMixin, ResNet):
 
     __name__ = "ResNet10"
 
-    def __init__(self, num_classes: int, pretrained: bool = False) -> NoReturn:
+    def __init__(self, num_classes: int, pretrained: bool = False) -> None:
         """ """
         super().__init__(
             BasicBlock,

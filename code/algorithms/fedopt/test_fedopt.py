@@ -1,8 +1,6 @@
 """
 """
 
-from typing import NoReturn
-
 from misc import experiment_indicator
 from data_processing.fed_synthetic import FedSynthetic
 from data_processing.fedprox_femnist import FedProxFEMNIST
@@ -29,7 +27,7 @@ __all__ = [
 
 
 @experiment_indicator("FedOpt")
-def test_fedopt(algorithm: str) -> NoReturn:
+def test_fedopt(algorithm: str) -> None:
     """ """
     assert algorithm.lower() in [
         "avg",

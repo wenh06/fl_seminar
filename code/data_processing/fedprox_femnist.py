@@ -10,7 +10,7 @@ References
 
 import json
 from pathlib import Path
-from typing import NoReturn, Optional, Union, List, Tuple, Dict
+from typing import Optional, Union, List, Tuple, Dict
 
 import numpy as np
 import torch  # noqa: F401
@@ -37,7 +37,7 @@ class FedProxFEMNIST(FedVisionDataset):
 
     __name__ = "FedProxFEMNIST"
 
-    def _preload(self, datadir: Optional[Union[str, Path]] = None) -> NoReturn:
+    def _preload(self, datadir: Optional[Union[str, Path]] = None) -> None:
         """ """
         self.datadir = Path(datadir or FEDPROX_FEMNIST_DATA_DIR)
 

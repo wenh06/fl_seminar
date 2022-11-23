@@ -1,7 +1,7 @@
 """
 """
 
-from typing import Union, Iterable, NoReturn
+from typing import Union, Iterable
 
 from torch.nn.parameter import Parameter
 
@@ -30,7 +30,7 @@ class FedProxOptimizer(ProxSGD):
         params: Iterable[Union[dict, Parameter]],
         lr: float = 1e-3,
         mu: float = 1e-2,
-    ) -> NoReturn:
+    ) -> None:
         """
 
         Parameters

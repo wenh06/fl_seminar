@@ -4,7 +4,7 @@ pFedMe re-implemented in the new framework
 
 from copy import deepcopy
 import warnings
-from typing import List, NoReturn, Any
+from typing import List, Any
 
 import torch  # noqa: F401
 
@@ -42,7 +42,7 @@ class pFedMeServerConfig(ServerConfig):
         clients_sample_ratio: float,
         beta: float = 1.0,
         **kwargs: Any,
-    ) -> NoReturn:
+    ) -> None:
         """ """
         super().__init__(
             "pFedMe", num_iters, num_clients, clients_sample_ratio, beta=beta, **kwargs
@@ -73,7 +73,7 @@ class pFedMeClientConfig(ClientConfig):
         eta: float = 1e-3,
         mu: float = 1e-3,
         **kwargs: Any,
-    ) -> NoReturn:
+    ) -> None:
         """ """
         super().__init__(
             "pFedMe",
@@ -105,13 +105,13 @@ class pFedMeServer(Server):
             "beta",
         ]
 
-    def communicate(self, target: "pFedMeClient") -> NoReturn:
+    def communicate(self, target: "pFedMeClient") -> None:
         """ """
         target._received_messages = {
             "parameters": deepcopy(list(self.model.parameters()))
         }
 
-    def update(self) -> NoReturn:
+    def update(self) -> None:
         """ """
         # store previous parameters
         previous_param = deepcopy(list(self.model.parameters()))
@@ -150,7 +150,7 @@ class pFedMeClient(Client):
             "mu",
         ]
 
-    def communicate(self, target: "pFedMeServer") -> NoReturn:
+    def communicate(self, target: "pFedMeServer") -> None:
         """ """
         target._received_messages.append(
             ClientMessage(
@@ -163,7 +163,7 @@ class pFedMeClient(Client):
             )
         )
 
-    def update(self) -> NoReturn:
+    def update(self) -> None:
         """ """
         # copy the parameters from the server
         # pFedMe paper Algorithm 1 line 5
@@ -180,7 +180,7 @@ class pFedMeClient(Client):
         # pFedMe paper Algorithm 1 line 6 - 8
         self.train()
 
-    def train(self) -> NoReturn:
+    def train(self) -> None:
         """ """
         self.model.train()
         with tqdm(range(self.config.num_epochs), total=self.config.num_epochs) as pbar:

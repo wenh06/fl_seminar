@@ -3,7 +3,7 @@
 
 from copy import deepcopy
 import warnings
-from typing import List, NoReturn
+from typing import List
 
 import torch  # noqa: F401
 import torch.nn as nn
@@ -40,7 +40,7 @@ class FedDRServerConfig(ServerConfig):
         eta: float = 1.0,
         alpha: float = 1.9,
         reg_type: str = "l1_norm",
-    ) -> NoReturn:
+    ) -> None:
         """ """
         super().__init__(
             "FedDR",
@@ -65,7 +65,7 @@ class FedDRClientConfig(ClientConfig):
         lr: float = 1e-3,
         eta: float = 1.0,
         alpha: float = 1.9,  # in the FedDR paper, clients' alpha is equal to the server's alpha
-    ) -> NoReturn:
+    ) -> None:
         """ """
         super().__init__(
             "FedDR",
@@ -89,7 +89,7 @@ class FedDRServer(Server):
         dataset: FedDataset,
         config: ServerConfig,
         client_config: ClientConfig,
-    ) -> NoReturn:
+    ) -> None:
         """ """
         super().__init__(model, dataset, config, client_config)
         self._regularizer = get_regularizer(
@@ -112,13 +112,13 @@ class FedDRServer(Server):
             "reg_type",
         ]
 
-    def communicate(self, target: "FedDRClient") -> NoReturn:
+    def communicate(self, target: "FedDRClient") -> None:
         """ """
         target._received_messages = {
             "parameters": deepcopy(list(self.model.parameters()))
         }
 
-    def update(self) -> NoReturn:
+    def update(self) -> None:
         """ """
         # update y
         # FedDR paper Algorithm 1 line 7, first equation
@@ -162,7 +162,7 @@ class FedDRClient(Client):
         model: nn.Module,
         dataset: FedDataset,
         config: ClientConfig,
-    ) -> NoReturn:
+    ) -> None:
         """ """
         super().__init__(client_id, device, model, dataset, config)
         self._y_parameters = None  # y
@@ -177,7 +177,7 @@ class FedDRClient(Client):
             "eta",
         ]
 
-    def communicate(self, target: "FedDRServer") -> NoReturn:
+    def communicate(self, target: "FedDRServer") -> None:
         """ """
         if self._x_hat_buffer is None:
             # outter iteration step -1, no need to communicate
@@ -199,7 +199,7 @@ class FedDRClient(Client):
             )
         )
 
-    def update(self) -> NoReturn:
+    def update(self) -> None:
         """ """
         # copy the parameters from the server
         # x_bar
@@ -234,7 +234,7 @@ class FedDRClient(Client):
         ):
             hp.data = 2 * mp.data - yp.data
 
-    def train(self) -> NoReturn:
+    def train(self) -> None:
         """ """
         self.model.train()
         with tqdm(range(self.config.num_epochs), total=self.config.num_epochs) as pbar:

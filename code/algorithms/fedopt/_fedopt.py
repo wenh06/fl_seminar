@@ -3,7 +3,7 @@
 
 from copy import deepcopy
 import warnings
-from typing import List, NoReturn, Sequence
+from typing import List, Sequence
 
 import torch  # noqa: F401
 
@@ -59,7 +59,7 @@ class FedOptServerConfig(ServerConfig):
         lr: float = 1e-3,
         betas: Sequence[float] = (0.9, 0.999),
         tau: float = 1e-5,
-    ) -> NoReturn:
+    ) -> None:
         """
         tau: controls the degree of adaptivity of the algorithm
         """
@@ -93,7 +93,7 @@ class FedOptClientConfig(ClientConfig):
         lr: float = 1e-3,
         optimizer: str = "SGD",
         **kwargs,
-    ) -> NoReturn:
+    ) -> None:
         """ """
         super().__init__(
             "FedOpt",
@@ -110,7 +110,7 @@ class FedOptServer(Server):
 
     __name__ = "FedOptServer"
 
-    def _post_init(self) -> NoReturn:
+    def _post_init(self) -> None:
         """ """
         super()._post_init()
         self.delta_parameters = deepcopy(list(self.model.parameters()))
@@ -147,13 +147,13 @@ class FedOptServer(Server):
             "tau",
         ]
 
-    def communicate(self, target: "FedOptClient") -> NoReturn:
+    def communicate(self, target: "FedOptClient") -> None:
         """ """
         target._received_messages = {
             "parameters": deepcopy(list(self.model.parameters()))
         }
 
-    def update(self) -> NoReturn:
+    def update(self) -> None:
         """ """
         # update delta_parameters, FedOpt paper Algorithm 2, line 10
         total_samples = sum([m["train_samples"] for m in self._received_messages])
@@ -188,16 +188,16 @@ class FedOptServer(Server):
                 value=-self.config.lr,
             )
 
-    def update_avg(self) -> NoReturn:
+    def update_avg(self) -> None:
         """ """
         pass
 
-    def update_adagrad(self) -> NoReturn:
+    def update_adagrad(self) -> None:
         """ """
         for vp, dp in zip(self.v_parameters, self.delta_parameters):
             vp.data.add_(dp.data.pow(2))
 
-    def update_yogi(self) -> NoReturn:
+    def update_yogi(self) -> None:
         """ """
         for vp, dp in zip(self.v_parameters, self.delta_parameters):
             vp.data.addcmul_(
@@ -206,7 +206,7 @@ class FedOptServer(Server):
                 value=-(1 - self.config.betas[1]),
             )
 
-    def update_adam(self) -> NoReturn:
+    def update_adam(self) -> None:
         """ """
         for vp, dp in zip(self.v_parameters, self.delta_parameters):
             vp.data.mul_(self.config.betas[1]).add_(
@@ -226,7 +226,7 @@ class FedOptClient(Client):
             "optimizer",
         ]
 
-    def communicate(self, target: "FedOptServer") -> NoReturn:
+    def communicate(self, target: "FedOptServer") -> None:
         """ """
         delta_parameters = deepcopy(list(self.model.parameters()))
         for dp, rp in zip(delta_parameters, self._cached_parameters):
@@ -242,7 +242,7 @@ class FedOptClient(Client):
             )
         )
 
-    def update(self) -> NoReturn:
+    def update(self) -> None:
         """ """
         try:
             self.set_parameters(self._received_messages["parameters"])
@@ -256,7 +256,7 @@ class FedOptClient(Client):
         self._cached_parameters = [p.to(self.device) for p in self._cached_parameters]
         self.train()
 
-    def train(self) -> NoReturn:
+    def train(self) -> None:
         """ """
         self.model.train()
         with tqdm(range(self.config.num_epochs), total=self.config.num_epochs) as pbar:
@@ -281,7 +281,7 @@ class FedAvgServerConfig(FedOptServerConfig):
         num_iters: int,
         num_clients: int,
         clients_sample_ratio: float,
-    ) -> NoReturn:
+    ) -> None:
         """ """
         super().__init__(
             num_iters,
@@ -333,7 +333,7 @@ class FedAdagradServerConfig(FedOptServerConfig):
         lr: float = 1e-3,
         betas: Sequence[float] = (0.9, 0.999),
         tau: float = 1e-5,
-    ) -> NoReturn:
+    ) -> None:
         """
         tau: controls the degree of adaptivity of the algorithm
         """
@@ -388,7 +388,7 @@ class FedYogiServerConfig(FedOptServerConfig):
         lr: float = 1e-3,
         betas: Sequence[float] = (0.9, 0.999),
         tau: float = 1e-5,
-    ) -> NoReturn:
+    ) -> None:
         """
         tau: controls the degree of adaptivity of the algorithm
         """
@@ -443,7 +443,7 @@ class FedAdamServerConfig(FedOptServerConfig):
         lr: float = 1e-3,
         betas: Sequence[float] = (0.9, 0.999),
         tau: float = 1e-5,
-    ) -> NoReturn:
+    ) -> None:
         """
         tau: controls the degree of adaptivity of the algorithm
         """

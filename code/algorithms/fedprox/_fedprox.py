@@ -4,7 +4,7 @@ FedProx re-implemented in the experiment framework
 
 from copy import deepcopy
 import warnings
-from typing import List, NoReturn
+from typing import List
 
 import torch  # noqa: F401
 
@@ -36,7 +36,7 @@ class FedProxServerConfig(ServerConfig):
         num_clients: int,
         clients_sample_ratio: float,
         vr: bool = False,
-    ) -> NoReturn:
+    ) -> None:
         """ """
         super().__init__(
             "FedProx",
@@ -59,7 +59,7 @@ class FedProxClientConfig(ClientConfig):
         lr: float = 1e-3,
         mu: float = 0.01,
         vr: bool = False,
-    ) -> NoReturn:
+    ) -> None:
         """ """
         super().__init__(
             "FedProx",
@@ -77,7 +77,7 @@ class FedProxServer(Server):
 
     __name__ = "FedProxServer"
 
-    def _post_init(self) -> NoReturn:
+    def _post_init(self) -> None:
         """
         check if all required field in the config are set,
         and compatibility of server and client configs
@@ -95,7 +95,7 @@ class FedProxServer(Server):
         """ """
         return []
 
-    def communicate(self, target: "FedProxClient") -> NoReturn:
+    def communicate(self, target: "FedProxClient") -> None:
         """ """
         target._received_messages = {
             "parameters": deepcopy(list(self.model.parameters()))
@@ -106,7 +106,7 @@ class FedProxServer(Server):
                 for p in target.model.parameters()
             ]
 
-    def update(self) -> NoReturn:
+    def update(self) -> None:
         """ """
         # sum of received parameters, with self.model.parameters() as its container
         for param in self.model.parameters():
@@ -130,7 +130,7 @@ class FedProxClient(Client):
             "mu",
         ]
 
-    def communicate(self, target: "FedProxServer") -> NoReturn:
+    def communicate(self, target: "FedProxServer") -> None:
         """ """
         message = {
             "client_id": self.client_id,
@@ -144,7 +144,7 @@ class FedProxClient(Client):
             ]
         target._received_messages.append(ClientMessage(**message))
 
-    def update(self) -> NoReturn:
+    def update(self) -> None:
         """ """
         try:
             self._cached_parameters = deepcopy(self._received_messages["parameters"])
@@ -162,7 +162,7 @@ class FedProxClient(Client):
             ]
         self.train()
 
-    def train(self) -> NoReturn:
+    def train(self) -> None:
         """ """
         self.model.train()
         with tqdm(range(self.config.num_epochs), total=self.config.num_epochs) as pbar:

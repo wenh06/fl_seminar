@@ -3,7 +3,7 @@ federeated EMNIST
 """
 
 from pathlib import Path
-from typing import NoReturn, Optional, Union, List, Tuple, Dict
+from typing import Optional, Union, List, Tuple, Dict
 
 import h5py
 import numpy as np
@@ -37,7 +37,7 @@ class FedEMNIST(FedVisionDataset):
 
     __name__ = "FedEMNIST"
 
-    def _preload(self, datadir: Optional[Union[str, Path]] = None) -> NoReturn:
+    def _preload(self, datadir: Optional[Union[str, Path]] = None) -> None:
         """ """
         self.datadir = Path(datadir or FED_EMNIST_DATA_DIR)
 

@@ -1,7 +1,7 @@
 """
 """
 
-from typing import Iterable, Union, NoReturn, Optional, Tuple
+from typing import Iterable, Union, Optional, Tuple
 
 import torch  # noqa: F401
 from torch import Tensor
@@ -27,13 +27,13 @@ class pFedMeOptimizer(ProxSGD):
         lr: float = 0.01,
         lamda: float = 0.1,
         mu: float = 1e-3,
-    ) -> NoReturn:
+    ) -> None:
         """ """
         self.lamda = lamda
         self.mu = mu
         super().__init__(params, lr=lr, prox=lamda, momentum=mu, nesterov=True)
 
-    def __setstate__(self, state: dict) -> NoReturn:
+    def __setstate__(self, state: dict) -> None:
         super().__setstate__(state)
         for group in self.param_groups:
             group.setdefault("nesterov", True)
@@ -50,7 +50,7 @@ class _pFedMeOptimizer(Optimizer):
         lr: float = 0.01,
         lamda: float = 0.1,
         mu: float = 1e-3,
-    ) -> NoReturn:
+    ) -> None:
         """
 
         Parameters
@@ -148,7 +148,7 @@ class FEDLOptimizer(Optimizer):
         server_grads: Optional[Tensor] = None,
         pre_grads: Optional[Tensor] = None,
         eta: float = 0.1,
-    ) -> NoReturn:
+    ) -> None:
         """
 
         Parameters
@@ -198,7 +198,7 @@ class APFLOptimizer(Optimizer):
 
     def __init__(
         self, params: Iterable[Union[dict, Parameter]], lr: float = 0.01
-    ) -> NoReturn:
+    ) -> None:
         """ """
         defaults = dict(lr=lr)
         super(APFLOptimizer, self).__init__(params, defaults)

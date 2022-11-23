@@ -1,7 +1,7 @@
 """
 """
 
-from typing import Iterable, Union, NoReturn, Optional
+from typing import Iterable, Union, Optional
 
 import torch  # noqa: F401
 from torch import Tensor
@@ -27,7 +27,7 @@ class FedPD_VR(Optimizer):
         mu: float = 1.0,
         freq_1: int = 10,
         freq_2: int = 10,
-    ) -> NoReturn:
+    ) -> None:
         """
 
         Parameters
@@ -131,7 +131,7 @@ class FedPD_SGD(Optimizer):
         lr: float = 1e-3,
         mu: float = 1.0,
         freq: int = 10,
-    ) -> NoReturn:
+    ) -> None:
         """
 
         Parameters
@@ -228,7 +228,7 @@ class PSVRG(Optimizer):
         lr: float = 1e-3,
         mu: float = 1.0,
         freq: int = 10,
-    ) -> NoReturn:
+    ) -> None:
         """
 
         Parameters
@@ -309,7 +309,7 @@ class PSGD(Optimizer):
         lr: float = 1e-3,
         mu: float = 1.0,
         freq: int = 2,
-    ) -> NoReturn:
+    ) -> None:
         """
 
         Parameters

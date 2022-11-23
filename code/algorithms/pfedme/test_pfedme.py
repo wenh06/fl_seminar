@@ -1,8 +1,6 @@
 """
 """
 
-from typing import NoReturn
-
 from misc import experiment_indicator
 from data_processing.fed_synthetic import FedSynthetic
 from data_processing.fedprox_femnist import FedProxFEMNIST
@@ -20,7 +18,7 @@ __all__ = [
 
 
 @experiment_indicator("pFedMe")
-def test_pfedme() -> NoReturn:
+def test_pfedme() -> None:
     """ """
     print("Using dataset FedSynthetic")
     dataset = FedSynthetic(1, 1, False, 30)

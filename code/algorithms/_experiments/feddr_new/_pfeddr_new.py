@@ -3,7 +3,7 @@
 
 from copy import deepcopy
 import warnings
-from typing import List, NoReturn, Dict
+from typing import List, Dict
 
 import torch  # noqa: F401
 
@@ -30,7 +30,7 @@ class pFedDRServerConfig(ServerConfig):
         clients_sample_ratio: float,
         eta: float = 1.0,
         reg_type: str = "l1_norm",
-    ) -> NoReturn:
+    ) -> None:
         """ """
         super().__init__(
             "pFedDR",
@@ -54,7 +54,7 @@ class pFedDRClientConfig(ClientConfig):
         lr: float = 1e-3,
         eta: float = 1.0,
         alpha: float = 1.9,
-    ) -> NoReturn:
+    ) -> None:
         """ """
         super().__init__(
             "pFedDR",
@@ -78,7 +78,7 @@ class pFedDRServer(Server):
         dataset: FedDataset,
         config: ServerConfig,
         client_config: ClientConfig,
-    ) -> NoReturn:
+    ) -> None:
         """ """
         super().__init__(model, dataset, config, client_config)
         raise NotImplementedError
@@ -96,14 +96,14 @@ class pFedDRServer(Server):
             "reg_type",
         ]
 
-    def communicate(self, target: "pFedDRClient") -> NoReturn:
+    def communicate(self, target: "pFedDRClient") -> None:
         """ """
         target._received_messages = {
             "parameters": deepcopy(list(self.model.parameters()))
         }
         self._num_communications += 1
 
-    def update(self) -> NoReturn:
+    def update(self) -> None:
         """ """
         if len(self._received_messages) == 0:
             warnings.warn(
@@ -129,7 +129,7 @@ class pFedDRClient(Client):
         model: torch.nn.Module,
         dataset: FedDataset,
         config: ClientConfig,
-    ) -> NoReturn:
+    ) -> None:
         """ """
         super().__init__(client_id, device, model, dataset, config)
         self._y_parameters = None  # y
@@ -144,16 +144,16 @@ class pFedDRClient(Client):
             "eta",
         ]
 
-    def communicate(self, target: "pFedDRServer") -> NoReturn:
+    def communicate(self, target: "pFedDRServer") -> None:
         """ """
         raise NotImplementedError
         self._received_messages = {}
 
-    def update(self) -> NoReturn:
+    def update(self) -> None:
         """ """
         raise NotImplementedError
 
-    def train(self) -> NoReturn:
+    def train(self) -> None:
         """ """
         self.model.train()
         raise NotImplementedError

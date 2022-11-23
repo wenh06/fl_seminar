@@ -11,7 +11,7 @@ import sys
 from pathlib import Path
 from datetime import datetime
 from abc import ABC, abstractmethod
-from typing import NoReturn, Optional, Union, List, Any, Dict
+from typing import Optional, Union, List, Any, Dict
 from numbers import Real
 
 import torch  # noqa: F401
@@ -43,7 +43,7 @@ class BaseLogger(ReprMixin, ABC):
         step: Optional[int] = None,
         epoch: Optional[int] = None,
         part: str = "val",
-    ) -> NoReturn:
+    ) -> None:
         """
 
         Parameters
@@ -63,7 +63,7 @@ class BaseLogger(ReprMixin, ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def log_message(self, msg: str, level: int = logging.INFO) -> NoReturn:
+    def log_message(self, msg: str, level: int = logging.INFO) -> None:
         """
         log a message
 
@@ -78,12 +78,12 @@ class BaseLogger(ReprMixin, ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def flush(self) -> NoReturn:
+    def flush(self) -> None:
         """ """
         raise NotImplementedError
 
     @abstractmethod
-    def close(self) -> NoReturn:
+    def close(self) -> None:
         """ """
         raise NotImplementedError
 
@@ -93,7 +93,7 @@ class BaseLogger(ReprMixin, ABC):
         """ """
         raise NotImplementedError
 
-    def epoch_start(self, epoch: int) -> NoReturn:
+    def epoch_start(self, epoch: int) -> None:
         """
         actions to be performed at the start of each epoch
 
@@ -104,7 +104,7 @@ class BaseLogger(ReprMixin, ABC):
         """
         pass
 
-    def epoch_end(self, epoch: int) -> NoReturn:
+    def epoch_end(self, epoch: int) -> None:
         """
         actions to be performed at the end of each epoch
 
@@ -147,7 +147,7 @@ class TxtLogger(BaseLogger):
         model: str,
         log_dir: Optional[Union[str, Path]] = None,
         log_suffix: Optional[str] = None,
-    ) -> NoReturn:
+    ) -> None:
         """
 
         Parameters
@@ -179,7 +179,7 @@ class TxtLogger(BaseLogger):
         step: Optional[int] = None,
         epoch: Optional[int] = None,
         part: str = "val",
-    ) -> NoReturn:
+    ) -> None:
         """
 
         Parameters
@@ -221,7 +221,7 @@ class TxtLogger(BaseLogger):
         )
         self.log_message(msg)
 
-    def log_message(self, msg: str, level: int = logging.INFO) -> NoReturn:
+    def log_message(self, msg: str, level: int = logging.INFO) -> None:
         """
         log a message
 
@@ -245,7 +245,7 @@ class TxtLogger(BaseLogger):
         """ """
         return "-" * 50
 
-    def epoch_start(self, epoch: int) -> NoReturn:
+    def epoch_start(self, epoch: int) -> None:
         """
         message logged at the start of each epoch
 
@@ -256,7 +256,7 @@ class TxtLogger(BaseLogger):
         """
         self.logger.info(f"Train epoch_{epoch}:\n{self.long_sep}")
 
-    def epoch_end(self, epoch: int) -> NoReturn:
+    def epoch_end(self, epoch: int) -> None:
         """
         message logged at the end of each epoch
 
@@ -267,13 +267,13 @@ class TxtLogger(BaseLogger):
         """
         self.logger.info(f"{self.long_sep}\n")
 
-    def flush(self) -> NoReturn:
+    def flush(self) -> None:
         """ """
         for h in self.logger.handlers:
             if hasattr(h, "flush"):
                 h.flush()
 
-    def close(self) -> NoReturn:
+    def close(self) -> None:
         """ """
         for h in self.logger.handlers:
             h.close()
@@ -303,7 +303,7 @@ class CSVLogger(BaseLogger):
         model: str,
         log_dir: Optional[Union[str, Path]] = None,
         log_suffix: Optional[str] = None,
-    ) -> NoReturn:
+    ) -> None:
         """
 
         Parameters
@@ -336,7 +336,7 @@ class CSVLogger(BaseLogger):
         step: Optional[int] = None,
         epoch: Optional[int] = None,
         part: str = "val",
-    ) -> NoReturn:
+    ) -> None:
         """
 
         Parameters
@@ -371,17 +371,17 @@ class CSVLogger(BaseLogger):
         self.logger = pd.concat([self.logger, pd.DataFrame([row])], ignore_index=True)
         self._flushed = False
 
-    def log_message(self, msg: str, level: int = logging.INFO) -> NoReturn:
+    def log_message(self, msg: str, level: int = logging.INFO) -> None:
         pass
 
-    def flush(self) -> NoReturn:
+    def flush(self) -> None:
         """ """
         if not self._flushed:
             self.logger.to_csv(self.filename, quoting=csv.QUOTE_NONNUMERIC, index=False)
             print(f"CSV log file saved to {self.filename}")
             self._flushed = True
 
-    def close(self) -> NoReturn:
+    def close(self) -> None:
         """ """
         self.flush()
 
@@ -413,7 +413,7 @@ class LoggerManager(ReprMixin):
         model: str,
         log_dir: Optional[Union[str, Path]] = None,
         log_suffix: Optional[str] = None,
-    ) -> NoReturn:
+    ) -> None:
         """
 
         Parameters
@@ -432,7 +432,7 @@ class LoggerManager(ReprMixin):
         self._log_suffix = log_suffix
         self._loggers = []
 
-    def _add_txt_logger(self) -> NoReturn:
+    def _add_txt_logger(self) -> None:
         """ """
         self.loggers.append(
             TxtLogger(
@@ -444,7 +444,7 @@ class LoggerManager(ReprMixin):
             )
         )
 
-    def _add_csv_logger(self) -> NoReturn:
+    def _add_csv_logger(self) -> None:
         """ """
         self.loggers.append(
             CSVLogger(
@@ -463,7 +463,7 @@ class LoggerManager(ReprMixin):
         step: Optional[int] = None,
         epoch: Optional[int] = None,
         part: str = "val",
-    ) -> NoReturn:
+    ) -> None:
         """
 
         Parameters
@@ -483,7 +483,7 @@ class LoggerManager(ReprMixin):
         for lgs in self.loggers:
             lgs.log_metrics(client_id, metrics, step, epoch, part)
 
-    def log_message(self, msg: str, level: int = logging.INFO) -> NoReturn:
+    def log_message(self, msg: str, level: int = logging.INFO) -> None:
         """
         log a message
 
@@ -498,7 +498,7 @@ class LoggerManager(ReprMixin):
         for lgs in self.loggers:
             lgs.log_message(msg, level)
 
-    def epoch_start(self, epoch: int) -> NoReturn:
+    def epoch_start(self, epoch: int) -> None:
         """
         action at the start of an epoch
 
@@ -510,7 +510,7 @@ class LoggerManager(ReprMixin):
         for lgs in self.loggers:
             lgs.epoch_start(epoch)
 
-    def epoch_end(self, epoch: int) -> NoReturn:
+    def epoch_end(self, epoch: int) -> None:
         """
         action at the end of an epoch
 
@@ -522,12 +522,12 @@ class LoggerManager(ReprMixin):
         for lgs in self.loggers:
             lgs.epoch_end(epoch)
 
-    def flush(self) -> NoReturn:
+    def flush(self) -> None:
         """ """
         for lgs in self.loggers:
             lgs.flush()
 
-    def close(self) -> NoReturn:
+    def close(self) -> None:
         """ """
         for lgs in self.loggers:
             lgs.close()

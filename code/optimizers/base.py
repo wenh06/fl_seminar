@@ -2,7 +2,7 @@
 """
 
 import warnings
-from typing import Iterable, Union, NoReturn, Optional
+from typing import Iterable, Union, Optional
 
 import torch  # noqa: F401
 from torch import Tensor
@@ -40,7 +40,7 @@ class ProxSGD(Optimizer):
         weight_decay: float = 0,
         nesterov: bool = False,
         prox: float = 0.1,
-    ) -> NoReturn:
+    ) -> None:
         r"""
 
         Parameters
@@ -88,7 +88,7 @@ class ProxSGD(Optimizer):
         )
         super().__init__(params, defaults)
 
-    def __setstate__(self, state: dict) -> NoReturn:
+    def __setstate__(self, state: dict) -> None:
         super().__setstate__(state)
         for group in self.param_groups:
             group.setdefault("nesterov", False)
@@ -188,7 +188,7 @@ class AL_SGD(Optimizer):
         weight_decay: float = 0,
         nesterov: float = False,
         mu: float = 1,
-    ) -> NoReturn:
+    ) -> None:
         r"""
 
         Parameters
@@ -232,7 +232,7 @@ class AL_SGD(Optimizer):
         )
         super().__init__(params, defaults)
 
-    def __setstate__(self, state: dict) -> NoReturn:
+    def __setstate__(self, state: dict) -> None:
         super().__setstate__(state)
         for group in self.param_groups:
             group.setdefault("nesterov", False)

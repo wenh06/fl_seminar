@@ -1,7 +1,7 @@
 """
 """
 
-from typing import List, Iterable, NoReturn, Optional
+from typing import List, Iterable, Optional
 
 import torch
 from torch import Tensor
@@ -25,7 +25,7 @@ def prox_sgd(
     dampening: float,
     nesterov: bool,
     prox: float,
-) -> NoReturn:
+) -> None:
     r"""
     The function that executes the proximal SGD:
         .. math::
@@ -100,7 +100,7 @@ def al_sgd(
     dampening: float,
     nesterov: bool,
     mu: float,
-) -> NoReturn:
+) -> None:
     r"""
     The function that executes the augmented Lagrangian SGD:
         .. math::

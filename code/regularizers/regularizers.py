@@ -5,7 +5,7 @@ this file is forked from https://github.com/unc-optimization/FedDR/tree/main/Fed
 import re
 from abc import ABC, abstractmethod
 from math import sqrt
-from typing import Iterable, List, NoReturn, Optional
+from typing import Iterable, List, Optional
 
 import torch  # noqa: F401
 from torch.nn.parameter import Parameter
@@ -29,7 +29,7 @@ class Regularizer(ReprMixin, ABC):
 
     __name__ = "Regularizer"
 
-    def __init__(self, coeff: float = 1.0) -> NoReturn:
+    def __init__(self, coeff: float = 1.0) -> None:
         """ """
         self.coeff = coeff
 

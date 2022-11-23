@@ -7,7 +7,7 @@ from abc import ABC, abstractmethod
 from itertools import repeat
 from copy import deepcopy
 from collections import defaultdict
-from typing import Any, Optional, NoReturn, Iterable, List, Tuple, Dict
+from typing import Any, Optional, Iterable, List, Tuple, Dict
 
 import torch  # noqa: F401
 import torch.nn as nn
@@ -53,7 +53,7 @@ class ServerConfig(ReprMixin):
         csv_logger: bool = True,
         eval_every: int = 1,
         **kwargs: Any,
-    ) -> NoReturn:
+    ) -> None:
         """
 
         Parameters
@@ -105,7 +105,7 @@ class ClientConfig(ReprMixin):
         num_epochs: int,
         lr: float,
         **kwargs: Any,
-    ) -> NoReturn:
+    ) -> None:
         """
 
         Parameters
@@ -144,7 +144,7 @@ class Node(ReprMixin, ABC):
     __name__ = "Node"
 
     @abstractmethod
-    def communicate(self, target: "Node") -> NoReturn:
+    def communicate(self, target: "Node") -> None:
         """
         communicate model parameters, gradients, etc. to `target` node
         for example, for a client node, communicate model parameters to server node via
@@ -165,7 +165,7 @@ class Node(ReprMixin, ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def update(self) -> NoReturn:
+    def update(self) -> None:
         """
         update model parameters, gradients, etc.
         according to `self._reveived_messages`
@@ -173,7 +173,7 @@ class Node(ReprMixin, ABC):
         """
         raise NotImplementedError
 
-    def _post_init(self) -> NoReturn:
+    def _post_init(self) -> None:
         """check if all required field in the config are set"""
         assert all([hasattr(self.config, k) for k in self.required_config_fields])
 
@@ -201,7 +201,7 @@ class Server(Node):
         dataset: FedDataset,
         config: ServerConfig,
         client_config: ClientConfig,
-    ) -> NoReturn:
+    ) -> None:
         """
 
         Parameters
@@ -287,12 +287,12 @@ class Server(Node):
         k = int(self.config.num_clients * self.config.clients_sample_ratio)
         return random.sample(range(self.config.num_clients), k)
 
-    def _communicate(self, target: "Client") -> NoReturn:
+    def _communicate(self, target: "Client") -> None:
         """broadcast to target client, and maintain state variables"""
         self.communicate(target)
         self._num_communications += 1
 
-    def _update(self) -> NoReturn:
+    def _update(self) -> None:
         """server update, and clear cached messages from clients of the previous iteration"""
         self._logger_manager.log_message("Server update...")
         if len(self._received_messages) == 0:
@@ -309,7 +309,7 @@ class Server(Node):
 
     def train(
         self, mode: str = "federated", extra_configs: Optional[dict] = None
-    ) -> NoReturn:
+    ) -> None:
         """
 
         Parameters
@@ -328,7 +328,7 @@ class Server(Node):
         else:
             raise ValueError(f"mode {mode} is not supported")
 
-    def train_centralized(self, extra_configs: Optional[dict] = None) -> NoReturn:
+    def train_centralized(self, extra_configs: Optional[dict] = None) -> None:
         """
         centralized training, conducted only on the server node.
 
@@ -406,7 +406,7 @@ class Server(Node):
         self.model.to(self.device)  # move to the original device
         self._logger_manager.log_message("Centralized training finished...")
 
-    def train_federated(self, extra_configs: Optional[dict] = None) -> NoReturn:
+    def train_federated(self, extra_configs: Optional[dict] = None) -> None:
         """
         federated (distributed) training, conducted on the clients and the server.
 
@@ -480,7 +480,7 @@ class Server(Node):
         metrics["num_samples"] = num_samples
         return metrics
 
-    def aggregate_client_metrics(self) -> NoReturn:
+    def aggregate_client_metrics(self) -> None:
         """aggregate the metrics transmitted from the clients"""
         if not any(["metrics" in m for m in self._received_messages]):
             raise ValueError("no metrics received from clients")
@@ -507,7 +507,7 @@ class Server(Node):
                 part=part,
             )
 
-    def add_parameters(self, params: Iterable[Parameter], ratio: float) -> NoReturn:
+    def add_parameters(self, params: Iterable[Parameter], ratio: float) -> None:
         """
         update the server's parameters with the given parameters
 
@@ -524,7 +524,7 @@ class Server(Node):
                 param.data.detach().clone().to(self.device), alpha=ratio
             )
 
-    def update_gradients(self) -> NoReturn:
+    def update_gradients(self) -> None:
         """update the server's gradients"""
         if len(self._received_messages) == 0:
             return
@@ -573,7 +573,7 @@ class Client(Node):
         model: nn.Module,
         dataset: FedDataset,
         config: ClientConfig,
-    ) -> NoReturn:
+    ) -> None:
         """
 
         Parameters
@@ -613,19 +613,19 @@ class Client(Node):
 
         self._post_init()
 
-    def _communicate(self, target: "Server") -> NoReturn:
+    def _communicate(self, target: "Server") -> None:
         """send messages to the server, and maintain state variables"""
         self.communicate(target)
         target._num_communications += 1
         self._metrics = {}
 
-    def _update(self) -> NoReturn:
+    def _update(self) -> None:
         """client update, and clear cached messages from the server of the previous iteration"""
         self.update()
         self._received_messages = {}
 
     @abstractmethod
-    def train(self) -> NoReturn:
+    def train(self) -> None:
         """
 
         main part of inner loop solver, using the data from dataloaders
@@ -651,7 +651,7 @@ class Client(Node):
         raise NotImplementedError
 
     @add_docstring(train.__doc__)
-    def solve_inner(self) -> NoReturn:
+    def solve_inner(self) -> None:
         """alias of `train`"""
         self.train()
 
@@ -699,7 +699,7 @@ class Client(Node):
         """get the parameters of the (local) model on the client"""
         return self.model.parameters()
 
-    def set_parameters(self, params: Iterable[Parameter]) -> NoReturn:
+    def set_parameters(self, params: Iterable[Parameter]) -> None:
         """
 
         set the parameters of the (local) model on the client
@@ -740,7 +740,7 @@ class ClientMessage(dict):
 
     def __init__(
         self, client_id: int, train_samples: int, metrics: dict, **kwargs
-    ) -> NoReturn:
+    ) -> None:
         """
 
         Parameters

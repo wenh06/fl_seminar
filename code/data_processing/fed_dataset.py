@@ -4,7 +4,7 @@ abstract base classes of federated dataset provided by FedML, and more
 
 from abc import ABC, abstractmethod
 from pathlib import Path
-from typing import NoReturn, Optional, Union, List, Tuple, Dict
+from typing import Optional, Union, List, Tuple, Dict
 
 import torch  # noqa: F401
 import torch.utils.data as data
@@ -38,7 +38,7 @@ class FedDataset(ReprMixin, ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def _preload(self, datadir: Optional[str] = None) -> NoReturn:
+    def _preload(self, datadir: Optional[str] = None) -> None:
         """ """
         raise NotImplementedError
 
@@ -70,7 +70,7 @@ class FedDataset(ReprMixin, ABC):
     def url(self) -> str:
         raise NotImplementedError
 
-    def download_if_needed(self) -> NoReturn:
+    def download_if_needed(self) -> None:
         """ """
         if self.url:
             if self.datadir is None:
@@ -106,7 +106,7 @@ class FedVisionDataset(FedDataset, ABC):
 
     __name__ = "FedVisionDataset"
 
-    def __init__(self, datadir: Optional[Union[Path, str]] = None) -> NoReturn:
+    def __init__(self, datadir: Optional[Union[Path, str]] = None) -> None:
         """ """
         self.datadir = Path(datadir) if datadir is not None else None
 
@@ -146,7 +146,7 @@ class FedVisionDataset(FedDataset, ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def _preload(self, datadir: Optional[str] = None) -> NoReturn:
+    def _preload(self, datadir: Optional[str] = None) -> None:
         """ """
         raise NotImplementedError
 
@@ -254,7 +254,7 @@ class FedNLPDataset(FedDataset, ABC):
 
     __name__ = "FedNLPDataset"
 
-    def __init__(self, datadir: Optional[Union[str, Path]] = None) -> NoReturn:
+    def __init__(self, datadir: Optional[Union[str, Path]] = None) -> None:
         """ """
         self.datadir = Path(datadir) if datadir is not None else None
 

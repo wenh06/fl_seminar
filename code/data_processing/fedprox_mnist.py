@@ -8,7 +8,7 @@ References
 """
 
 from pathlib import Path
-from typing import NoReturn, Optional, Union, List, Tuple, Dict
+from typing import Optional, Union, List, Tuple, Dict
 
 import numpy as np
 from scipy.io import loadmat
@@ -36,7 +36,7 @@ class FedProxMNIST(FedVisionDataset):
 
     __name__ = "FedProxMNIST"
 
-    def _preload(self, datadir: Optional[Union[str, Path]] = None) -> NoReturn:
+    def _preload(self, datadir: Optional[Union[str, Path]] = None) -> None:
         """ """
         self.datadir = Path(datadir or FEDPROX_FEMNIST_DATA_DIR)
 

@@ -4,7 +4,7 @@
 from pathlib import Path
 from collections import OrderedDict
 from itertools import repeat
-from typing import NoReturn, Optional, Union, List, Tuple, Dict, Sequence
+from typing import Optional, Union, List, Tuple, Dict, Sequence
 
 import h5py
 import numpy as np
@@ -31,7 +31,7 @@ class FedShakespeare(FedNLPDataset):
 
     __name__ = "FedShakespeare"
 
-    def _preload(self, datadir: Optional[Union[str, Path]] = None) -> NoReturn:
+    def _preload(self, datadir: Optional[Union[str, Path]] = None) -> None:
         """ """
         self.datadir = Path(datadir or FED_SHAKESPEARE_DATA_DIR)
 

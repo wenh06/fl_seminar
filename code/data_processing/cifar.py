@@ -4,7 +4,7 @@ dataset readers, including Cifar10, Cifar100
 
 import json
 from pathlib import Path
-from typing import NoReturn, Optional, Union, List, Callable, Tuple, Dict
+from typing import Optional, Union, List, Callable, Tuple, Dict
 
 import numpy as np
 import torch  # noqa: F401
@@ -61,7 +61,7 @@ class CIFAR_truncated(ReprMixin, data.Dataset):
         transform: Optional[Callable] = None,
         target_transform: Optional[Callable] = None,
         download: bool = False,
-    ) -> NoReturn:
+    ) -> None:
         """ """
         self.n_class = n_class
         self.root = Path(root or CIFAR_DATA_DIRS[n_class])
@@ -90,7 +90,7 @@ class CIFAR_truncated(ReprMixin, data.Dataset):
 
         return data, target
 
-    def truncate_channel(self, index: np.ndarray) -> NoReturn:
+    def truncate_channel(self, index: np.ndarray) -> None:
         """ """
         for i in range(index.shape[0]):
             gs_index = index[i]
@@ -139,7 +139,7 @@ class CIFAR10_truncated(CIFAR_truncated):
         transform: Optional[Callable] = None,
         target_transform: Optional[Callable] = None,
         download: bool = False,
-    ) -> NoReturn:
+    ) -> None:
         """ """
         super().__init__(
             10, root, dataidxs, train, transform, target_transform, download
@@ -159,7 +159,7 @@ class CIFAR100_truncated(CIFAR_truncated):
         transform: Optional[Callable] = None,
         target_transform: Optional[Callable] = None,
         download: bool = False,
-    ) -> NoReturn:
+    ) -> None:
         """ """
         super().__init__(
             100, root, dataidxs, train, transform, target_transform, download
@@ -169,7 +169,7 @@ class CIFAR100_truncated(CIFAR_truncated):
 class Cutout(object):
     """ """
 
-    def __init__(self, length: int) -> NoReturn:
+    def __init__(self, length: int) -> None:
         self.length = length
 
     def __call__(self, img: torch.Tensor) -> torch.Tensor:
