@@ -29,6 +29,10 @@
 *.fdb_latexmk
 *.fls
 *.tmppart
+*.auxlock
+*.nav
+*.snm
+*.xdv
 
 tensorboard_data
 .ipynb_checkpoints
@@ -175,3 +179,5 @@ dmypy.json
 .logs/
 .tmp/
 .temp/
+
+tikz/*
