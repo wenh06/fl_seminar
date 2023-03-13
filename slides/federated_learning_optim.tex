@@ -440,7 +440,7 @@ Google研究人员McMahan等人在文章\cite{mcmahan2017fed_avg}(2016)中考察
 \SetAlgoNoLine
 \DontPrintSemicolon
 {\bfseries Server executes:}\;
-\Indp initialize parameters $x_0$, learning rate $\eta$, batch size $B$;
+\Indp initialize parameters $x_0$, learning rate $\eta$, batch size $B$\;
 \For{each round $t = 0, 1, \cdots, T-1$}{
     $S_t \gets$ (random set of clients)\;
     \For{each client $i \in \mathcal{S}_t$ {\bfseries in parallel}}{
@@ -452,7 +452,7 @@ Google研究人员McMahan等人在文章\cite{mcmahan2017fed_avg}(2016)中考察
 \vspace{0.2em}
 {\bfseries ClientUpdate}$(i, x)$: // on client $i$\;
 \Indp $\mathcal{B} \gets$ (split $\mathcal{P}_i$ into batches of size $B$)\;
-\For{local step $k=0,1\cdots,K-1$}{
+\For{local step $k = 0, 1, \cdots, K-1$}{
     \For{batch $b \in \mathcal{B}$}{
         $x \gets x-\eta\nabla \ell_i(x;b)$\;
     }
