@@ -10,7 +10,6 @@ this folder contains federated learning algorithm (FLA) benchmarks
 6. [FedGen](https://github.com/zhuangdizhu/FedGen)
 7. [FedDR](https://github.com/unc-optimization/FedDR)
 
-
 More details about the above FLA
 
 |    algorithm    |                     highlights                     |   dataset used    |
@@ -22,7 +21,6 @@ More details about the above FLA
 |  HeteroFL       |  TO add                                            | TO add            |
 |  FedGen         |  TO add                                            | MNIST, EMNIST     |
 |  FedDR          |  TO add                                            | MNIST, EMNIST     |
-
 
 Algorithms that lack official implementation
 

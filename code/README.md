@@ -1,10 +1,12 @@
 # <a name="top"></a> The Code for Studying Problems of Federated Learning
 
-This folder includes code for studying problems of federated learning, under construction....
+This folder includes code for studying problems of federated learning, ~~under construction....~~ migrated to [this repo](https://github.com/wenh06/fl-sim).
 
 The main part of this code repository is a standalone simulation framework of federated training.
 
-**This folder temporarily suspends updating. Code are currently developed in a private repository and would be released public after some time.**
+**~~This folder temporarily suspends updating. Code are currently developed in a private repository and would be released public after some time.~~**
+
+**This folder permanently suspends updating. Codes are migrated to [this repo](https://github.com/wenh06/fl-sim), and are actively updating.**
 
 <!-- toc -->
 
@@ -18,6 +20,7 @@ The main part of this code repository is a standalone simulation framework of fe
 <!-- tocstop -->
 
 ## [Optimizers](optimizers/)
+
 The module (folder) [optimizers](optimizers/) contains optimizers for solving inner (local) optimization problems. Despite optimizers from `torch` and `torch_optimizers`, this module implements
 
 1. `ProxSGD`
@@ -86,11 +89,13 @@ One can call the `module_size` or `module_size_` properties to check the size (i
 :point_right: [Back to TOC](#top)
 
 ## [Algorithms Implemented](algorithms/)
+
 to write
 
 :point_right: [Back to TOC](#top)
 
 ## [Benchmarks](/benchmarks)
+
 to write
 
 :point_right: [Back to TOC](#top)
